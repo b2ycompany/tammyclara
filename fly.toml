@@ -9,17 +9,11 @@ primary_region = "gru"
   PORT = "8000"
   PYTHON_VERSION = "3.11"
 
-# 🚨 CORREÇÃO CRÍTICA: [[mounts]] para múltiplos volumes 🚨
-
+# 🚨 CORREÇÃO CRÍTICA: UNIFICAÇÃO DE VOLUMES (Limite de 1 Volume) 🚨
 [[mounts]]
-  # 1. VOLUME PARA O BANCO DE DADOS SQLITE
-  source="tammyclara_db" 
-  destination="/app/db"   # Ponto de montagem para o banco de dados
-
-[[mounts]]
-  # 2. VOLUME PARA ARQUIVOS DE MÍDIA
-  source="tammyclara_media" 
-  destination="/app/media"  # Ponto de montagem para as imagens de produtos
+  # O único volume que o Fly.io permite na máquina básica
+  source="tammyclara_data" 
+  destination="/app/data"   # Monta o volume na pasta /app/data
 
 # Configuração para servir a aplicação Web
 [[services]]

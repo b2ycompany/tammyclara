@@ -14,10 +14,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # 1. CONFIGURAÇÕES DE SEGURANÇA E AMBIENTE
+# Busca a chave secreta da variável de ambiente (Fly.io) ou usa um valor padrão local.
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-y%k5@3=z&d-@&n79(4i^r)229*^x$@+g+21$v_c(p1q4+c+r6g')
 
+# DEBUG: 'False' em produção (Fly.io) e 'True' em desenvolvimento local (.env)
 DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
 
+# ALLOWED_HOSTS: Aceita o domínio do Fly.io e outros hosts.
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',') 
 if DEBUG:
     ALLOWED_HOSTS = ['*'] # Permite tudo em desenvolvimento
@@ -90,12 +93,11 @@ if DATABASE_URL:
         'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
     }
 else:
-    # 🚨 CRÍTICO: Configuração para Fly.io/SQLite com volume persistente 🚨
-    # A pasta 'db' existe na raiz do projeto e será montada no Fly.io.
+    # 🚨 CRÍTICO: Configuração para Fly.io/SQLite com volume persistente (dentro da pasta 'data') 🚨
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db' / 'db.sqlite3', 
+            'NAME': BASE_DIR / 'data' / 'db.sqlite3', 
         }
     }
 
@@ -148,7 +150,8 @@ STORAGES = {
 
 # Media files (Imagens de produtos, etc., enviadas pelos usuários)
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# 🚨 CRÍTICO: MEDIA_ROOT APONTA PARA A PASTA DE DADOS (para persistência no volume) 🚨
+MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
 
 # 8. CONFIGURAÇÕES ADICIONAIS DE SEGURANÇA E CORS
