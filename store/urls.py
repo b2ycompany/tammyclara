@@ -1,13 +1,13 @@
 from django.urls import path
-from . import views
+from .views import ProductList, SaleCreate 
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
-    # API para listagem de produtos no frontend
-    path('products/', views.ProductList.as_view(), name='product-list'),
+    # API para listar produtos (products.html) - Mapeia para /api/products/
+    path('products/', ProductList.as_view(), name='product-list'),
     
-    # API para a cliente submeter o pedido/carrinho
-    path('checkout/', views.SaleCreate.as_view(), name='sale-create'),
-    
-    # API para registo de clientes (ex: newsletter ou novo cadastro)
-    path('customers/', views.CustomerCreate.as_view(), name='customer-create'),
+    # API para submeter o carrinho e checkout - Mapeia para /api/checkout/
+    path('checkout/', SaleCreate.as_view(), name='checkout-create'),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,7 +1,18 @@
+# store/views.py
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db import transaction
-from .models import Product, Customer, Sale, SaleItem
+from django.utils import timezone
+import urllib.parse 
+from django.shortcuts import get_object_or_404
+from decimal import Decimal
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta # 🚨 CORREÇÃO CRÍTICA: IMPORTAÇÃO DO TIMEDELTA 🚨
+
+# Importamos os modelos necessários para o processo
+from .models import Product, Customer, Sale, SaleItem, Invoice 
 from .serializers import ProductSerializer, CustomerSerializer, SaleSerializer, SaleItemSerializer
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
@@ -22,122 +33,107 @@ class CustomerCreate(generics.CreateAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
-# --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO (A Lógica Central) ---
+# --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO (CRM/LEAD) ---
 
+@method_decorator(csrf_exempt, name='dispatch')
 class SaleCreate(generics.CreateAPIView):
     """
     Endpoint para a cliente submeter o carrinho de compras.
-    Isto regista o pedido no backend ANTES do contato via WhatsApp.
+    Registra a venda como um LEAD (Venda Pendente) no CRM/Admin.
     """
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
-
+    
     def create(self, request, *args, **kwargs):
-        data = request.data
-        customer_data = data.get('customer_info')
-        items_data = data.get('items')
-
-        # 1. VALIDAÇÃO BÁSICA
+        customer_data = request.data.get('customer_info')
+        items_data = request.data.get('items')
+        
         if not customer_data or not items_data:
-            return Response({"error": "Dados do cliente e itens são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({"error": "Dados do cliente e/ou itens do pedido estão faltando."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             with transaction.atomic():
                 
-                # 2. PROCURAR OU CRIAR CLIENTE (Usamos o telefone como identificador único)
-                phone = customer_data.get('phone_number')
+                # 2.1. CLIENTE: CRIA ou ATUALIZA
                 customer, created = Customer.objects.get_or_create(
-                    phone_number=phone,
+                    phone_number=customer_data.get('phone_number'),
                     defaults={
-                        'first_name': customer_data.get('first_name', 'Cliente'),
-                        'email': customer_data.get('email', None),
-                        'birth_date': customer_data.get('birth_date', None)
+                        'first_name': customer_data.get('first_name', 'Cliente Online'),
+                        'email': customer_data.get('email', ''),
                     }
                 )
-
-                # Se o cliente já existia, podemos atualizar o nome/email se necessário
                 if not created:
                     customer.first_name = customer_data.get('first_name', customer.first_name)
                     customer.email = customer_data.get('email', customer.email)
                     customer.save()
-
-                # 3. CRIAR A VENDA (Inicialmente marcada como NÃO CONCLUÍDA)
+                    
+                # 2.2. VENDA: CRIAÇÃO INICIAL (is_completed=False por padrão)
                 sale = Sale.objects.create(
                     customer=customer,
-                    total_amount=0, # Será recalculado
-                    is_completed=False # Pedido Pendente para WhatsApp
+                    sale_date=timezone.now(),
+                    total_amount=Decimal('0.00')
                 )
-
-                final_total = 0
-                sale_items = []
-
-                # 4. PROCESSAR CADA ITEM DO PEDIDO
+                
+                final_total = Decimal('0.00')
+                
+                # 2.3. ITENS DA VENDA E ATUALIZAÇÃO DE ESTOQUE/TOTAL
                 for item_data in items_data:
                     product_id = item_data.get('id')
                     quantity = item_data.get('quantity')
                     
-                    try:
-                        product = Product.objects.get(pk=product_id, is_active=True)
-                        if product.stock_quantity < quantity:
-                            # Se fosse um e-commerce tradicional, isto retornaria um erro.
-                            # Para Venda Personalizada, registamos, mas alertamos que o estoque é baixo.
-                            print(f"Alerta: Estoque baixo para {product.name}")
+                    product = get_object_or_404(Product, pk=product_id)
+                    
+                    if quantity <= 0:
+                        continue
                         
-                        item_total = product.price * quantity
-                        final_total += item_total
-
-                        # Criar o Item de Venda
-                        sale_item = SaleItem(
-                            sale=sale,
-                            product=product,
-                            quantity=quantity,
-                            price_at_sale=product.price # Preço atual do produto
+                    # 🚨 Validação de Estoque 🚨
+                    if product.stock_quantity < quantity:
+                        raise ValueError(
+                            f"Não temos {quantity} unidades de '{product.name}' em estoque. "
+                            f"Apenas {product.stock_quantity} unidades estão disponíveis."
                         )
-                        sale_items.append(sale_item)
                         
-                    except Product.DoesNotExist:
-                        # Se o produto não existir, cancelamos a transação
-                        raise Exception(f"Produto com ID {product_id} não encontrado ou inativo.")
-                
-                # Salvar todos os itens de venda de uma vez
-                SaleItem.objects.bulk_create(sale_items)
-                
-                # 5. ATUALIZAR O TOTAL DA VENDA
+                    # Baixa Provisória no Estoque:
+                    product.stock_quantity -= quantity
+                    product.save()
+
+                    # Cria o item na venda
+                    SaleItem.objects.create(
+                        sale=sale,
+                        product=product,
+                        quantity=quantity,
+                        price_at_sale=product.price 
+                    )
+                    
+                    final_total += product.price * quantity
+
+                # 2.4. VENDA: ATUALIZAÇÃO FINAL (TOTAL)
                 sale.total_amount = final_total
                 sale.save()
                 
-                # 6. RESPOSTA DA API (Sucesso)
-                # Retornamos os dados da venda criada e o link do WhatsApp
-                
-                # Base da mensagem WhatsApp para Venda Personalizada
-                whatsapp_msg = (
-                    f"Olá, LionRising! Novo Pedido (ID: {sale.id}) de {customer.first_name}."
-                    f"\n\nContato: {customer.phone_number}"
-                    f"\nValor Total: R$ {final_total:.2f}"
-                    f"\n\nItens:"
-                )
-                
-                for item in sale_items:
-                    whatsapp_msg += (
-                        f"\n- {item.product.name} (SKU: {item.product.sku}) "
-                        f"x{item.quantity} (R$ {item.price_at_sale:.2f} cada)"
-                    )
-                
-                whatsapp_msg += "\n\nPor favor, contacte o cliente para finalizar e dar baixa no estoque."
-
-                whatsapp_link = (
-                    f"https://api.whatsapp.com/send?phone=5542123456789&text={whatsapp_msg}" # MUDAR SEU NÚMERO
+                # 2.5. FATURA: CRIAÇÃO AUTOMÁTICA
+                # Cria a fatura/conta a receber
+                Invoice.objects.create(
+                    sale=sale,
+                    customer=customer, 
+                    amount_due=final_total,
+                    # Agora 'timedelta' está definido e funciona
+                    due_date=timezone.now().date() + timedelta(days=7), 
+                    payment_status='PENDING'
                 )
 
+
+                # 3. RESPOSTA PARA O FRONTEND (Redirecionamento CRM)
                 return Response({
-                    "message": "Pedido registado com sucesso. Use o WhatsApp para finalizar.",
+                    "message": "Pedido registrado com sucesso!",
                     "sale_id": sale.id,
-                    "customer_name": customer.first_name,
-                    "total": final_total,
-                    "whatsapp_link": whatsapp_link
                 }, status=status.HTTP_201_CREATED)
 
-
-        except Exception as e:
-            # Captura qualquer erro na transação (ex: produto inválido)
+        except ValueError as e:
+            # Captura o erro de Estoque ou Validação e devolve 400
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Qualquer outro erro de processamento
+            return Response({"error": f"Ocorreu um erro interno: {str(e)}"}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)

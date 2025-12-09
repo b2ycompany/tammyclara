@@ -1,0 +1,694 @@
+/* Importação das fontes já no HTML */
+
+/* Variáveis de Cores para Elegância e Fusão das Marcas */
+:root {
+    --primary-color: #333; /* Um cinza chumbo para elegância */
+    --secondary-color: #FDFDFD; /* Branco Suave */
+    --accent-color-clara: #E0BBE4; /* Rosa suave da Clara */
+    --accent-color-tammy: #B8860B; /* Dourado da Tammy's (Goldenrod) */
+    --text-font: 'Montserrat', sans-serif;
+    --heading-font: 'Playfair Display', serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--text-font);
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* 📌 CORREÇÃO DE TIMING (FOUC) 📌 */
+#main-body {
+    overflow-x: hidden; 
+}
+
+
+/* --- Cabeçalho (Header) --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5%;
+    position: fixed;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.98);
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.logo {
+    height: 80px; 
+    transition: height 0.3s ease; 
+}
+
+.logo img {
+    height: 100%; 
+    width: auto;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--primary-color);
+    margin-left: 30px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    transition: color 0.3s ease-in-out;
+}
+
+nav a:hover {
+    color: var(--accent-color-clara);
+}
+
+.icon-link {
+    font-size: 1.2em;
+}
+
+/* --- Secção de Apresentação (Hero Section) --- */
+.hero-section {
+    height: 85vh; 
+    min-height: 600px;
+    display: flex;
+    position: relative;
+    background-color: var(--secondary-color);
+    padding-top: 80px; 
+}
+
+.hero-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 5%;
+    background-color: var(--secondary-color);
+    z-index: 2;
+}
+
+/* NOVO LAYOUT GRID PARA CONTEÚDO DA FUSÃO */
+.fusion-highlight-row {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.fusion-branding, .fusion-story {
+    flex: 1;
+    min-width: 250px;
+}
+
+.fusion-branding {
+    border-right: 1px solid #ddd; 
+    padding-right: 40px;
+}
+
+.hero-logo {
+    margin-bottom: 20px;
+    max-width: 250px; 
+}
+
+.hero-logo img {
+    width: 100%;
+    height: auto;
+}
+
+.fusion-text {
+    font-family: var(--text-font);
+    font-size: 1em;
+    color: var(--accent-color-tammy); 
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.fusion-story h2 {
+    font-family: var(--heading-font);
+    font-size: 3em;
+    font-weight: 400;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    line-height: 1.1;
+}
+
+.hero-media {
+    flex: 1;
+    background-image: url("../img/placeholder-capa.e2e97e7c940a.png"); 
+    background-size: cover; 
+    background-position: top center; 
+    clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%); 
+}
+
+.mt-4 {
+    margin-top: 20px;
+}
+
+/* --- Botões Elegantes --- */
+.btn {
+    display: inline-block;
+    padding: 14px 35px;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.primary-btn:hover {
+    background-color: var(--accent-color-clara); 
+    border-color: var(--accent-color-clara);
+    color: var(--primary-color);
+}
+
+.secondary-btn {
+    background-color: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.secondary-btn:hover {
+    background-color: var(--accent-color-tammy); 
+    color: var(--secondary-color);
+    border-color: var(--accent-color-tammy);
+}
+
+/* --- Secção de Destaque (Feature Section) --- */
+.feature-section {
+    display: flex;
+    padding: 100px 5%;
+    gap: 50px;
+    background-color: var(--secondary-color);
+    flex-wrap: wrap; 
+}
+
+.feature-item {
+    flex: 1;
+    min-width: 300px; 
+    text-align: center;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+}
+
+.feature-item:hover {
+    transform: translateY(-10px);
+}
+
+.feature-image {
+    height: 450px; 
+    background-size: contain; 
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-bottom: 20px;
+}
+
+/* IMAGENS DE DESTAQUE NO CSS */
+.feature-item:nth-child(1) .feature-image {
+    background-image: url("../img/placeholder-destaque-1.8cbc5a9a48c1.png"); 
+}
+
+.feature-item:nth-child(2) .feature-image {
+    background-image: url("../img/placeholder-destaque-2.4e13dfa0ec77.png"); 
+}
+
+.feature-item h2 {
+    font-family: var(--heading-font);
+    margin-bottom: 10px;
+    font-size: 2em;
+    padding: 0 20px;
+    color: var(--primary-color);
+}
+
+.feature-item p {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    padding: 0 20px;
+    color: #666;
+}
+
+.feature-item .btn {
+    margin-bottom: 30px;
+}
+
+/* --- Call To Action (Newsletter) --- */
+.call-to-action {
+    background-color: var(--accent-color-clara); 
+    color: var(--primary-color);
+    padding: 80px 5%;
+    text-align: center;
+}
+
+.call-to-action h2 {
+    font-family: var(--heading-font);
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.call-to-action p {
+    font-size: 1.2em;
+    margin-bottom: 40px;
+}
+
+.newsletter-form {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.newsletter-form input[type="email"] {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 5px;
+    flex-grow: 1;
+    font-size: 1em;
+    outline: none;
+}
+
+.newsletter-form .btn {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border-radius: 5px;
+}
+
+.newsletter-form .btn:hover {
+    background-color: var(--accent-color-tammy); 
+    color: var(--secondary-color);
+}
+
+/* --- Rodapé (Footer) --- */
+.footer {
+    padding: 40px 5%;
+    text-align: center;
+    font-size: 0.9em;
+    background-color: var(--primary-color);
+    color: #aaa;
+}
+
+.footer a {
+    color: #ccc;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.footer a:hover {
+    color: var(--accent-color-clara);
+}
+
+/* --- Estilos específicos para a página de produtos --- */
+.products-page-main {
+    padding: 120px 5% 50px; 
+    min-height: calc(100vh - 150px);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.products-page-main h1 {
+    font-family: var(--heading-font);
+    font-size: 3.5em;
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--primary-color);
+}
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+.product-item {
+    text-align: center;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* 🚨 CORREÇÃO CRÍTICA 1: ISOLAR IMAGEM PRINCIPAL (400px altura) 🚨 */
+.product-image-container {
+    width: 100%;
+    height: 400px; /* Contêiner fixo para manter o layout */
+    margin-bottom: 15px;
+    background-color: #f0f0f0; 
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Apenas a imagem dentro do contêiner principal deve ser grande */
+.product-image-container img {
+    max-width: 100%;
+    max-height: 100%; 
+    object-fit: contain; 
+}
+
+/* Remove a regra que afetava todas as imagens */
+.product-item img {
+    margin-bottom: 0; 
+}
+
+
+.product-item h3 {
+    font-family: var(--heading-font);
+    font-size: 1.5em;
+    margin-bottom: 5px;
+    margin-top: 15px;
+}
+.product-item p {
+    font-weight: 600;
+    color: var(--accent-color-clara); 
+    margin-bottom: 15px;
+}
+
+/* --- Estilos específicos para a página do carrinho --- */
+.cart-page-main {
+    padding: 120px 5% 50px; 
+    min-height: calc(100vh - 150px);
+    max-width: 900px;
+    margin: 0 auto;
+}
+.cart-page-main h1 {
+    font-family: var(--heading-font);
+    font-size: 3em;
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--primary-color);
+}
+.cart-items {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+/* 🚨 CORREÇÃO UX/UI DO CARRINHO 🚨 */
+.cart-item {
+    display: flex; /* Alinha imagem e detalhes */
+    align-items: center; 
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+.cart-item:last-child {
+    border-bottom: none;
+}
+.cart-item-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin-right: 15px;
+    border-radius: 4px;
+}
+.cart-item-details {
+    flex-grow: 1; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cart-item-details h4 {
+    font-size: 1em;
+    font-weight: 600;
+    margin: 0;
+    width: 30%;
+}
+.cart-item-details p {
+    font-size: 0.9em;
+    color: #666;
+    margin: 0;
+    width: 20%;
+}
+
+/* Botões de Quantidade */
+.cart-quantity-controls {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    width: 120px;
+}
+.qty-btn {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 1.1em;
+    line-height: 1;
+}
+.qty-btn:hover {
+    background-color: #f0f0f0;
+}
+.qty-count {
+    padding: 0 10px;
+    font-weight: 600;
+    font-size: 1em;
+    line-height: 1;
+}
+.btn-remove {
+    /* Estilo para botão remover secundário */
+    background-color: transparent !important;
+    color: #f44336 !important;
+    border: 1px solid #f44336;
+    padding: 6px 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-remove:hover {
+    background-color: #f44336 !important;
+    color: white !important;
+}
+
+
+/* --- 📱 RESPONSIVIDADE (MEDIA QUERIES) APRIMORADA 📱 --- */
+@media (max-width: 768px) {
+    /* Ajustes Gerais */
+    body {
+        font-size: 14px; 
+    }
+
+    /* Cabeçalho */
+    .header {
+        flex-direction: column;
+        padding: 15px 5%;
+    }
+    .header nav {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: center;
+    }
+    nav a {
+        margin: 5px 8px;
+        font-size: 0.8em;
+    }
+    .logo {
+        height: 60px; 
+    }
+
+    /* Hero Section */
+    .hero-section {
+        flex-direction: column;
+        padding-top: 150px; 
+        height: auto;
+        min-height: 500px;
+    }
+    
+    .hero-content {
+        padding: 40px 5%;
+        text-align: center;
+        order: 2; 
+    }
+    
+    .hero-media {
+        order: 1; 
+        height: 300px; 
+        width: 100%;
+        clip-path: none; 
+    }
+
+    /* Conteúdo de Fusão (Fusion Highlight) */
+    .fusion-highlight-row {
+        flex-direction: column;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .fusion-branding {
+        border-right: none;
+        border-bottom: 1px solid #ddd; 
+        padding-right: 0;
+        padding-bottom: 30px;
+    }
+    
+    .fusion-story h2 {
+        font-size: 2.5em;
+    }
+
+    /* Destaques (Feature Section) */
+    .feature-section {
+        flex-direction: column;
+        padding: 60px 5%;
+    }
+
+    .feature-image {
+        height: 350px; 
+    }
+
+    /* Call to Action/Newsletter */
+    .call-to-action h2 {
+        font-size: 2.5em;
+    }
+    .newsletter-form {
+        flex-direction: column;
+    }
+    .newsletter-form input, .newsletter-form .btn {
+        width: 100%;
+    }
+    
+    /* Carrinho responsivo */
+    .cart-item-details {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .cart-item-details h4, .cart-item-details p, .cart-quantity-controls {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 5px;
+    }
+    .cart-quantity-controls {
+        margin-bottom: 10px;
+        justify-content: flex-start;
+    }
+}
+/* --- Estilos do Modal (Lightbox) para Galeria de Produtos --- */
+
+.modal {
+    display: none; /* Inicia escondido, o JS muda para flex */
+    position: fixed;
+    z-index: 2000; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.95); 
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    position: relative;
+    margin: auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 900px;
+    background-color: #fefefe;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    animation: zoom 0.3s;
+    text-align: center;
+}
+
+@keyframes zoom {
+    from {transform: scale(0.8)}
+    to {transform: scale(1)}
+}
+
+#modal-main-image {
+    width: 100%;
+    height: auto;
+    max-height: 70vh; 
+    object-fit: contain;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    z-index: 2001; 
+}
+.close-btn:hover, .close-btn:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* --- Miniaturas e Navegação --- */
+
+.product-gallery, .modal-thumbnails {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* Miniaturas na tela principal e no modal */
+.gallery-thumb, .modal-thumb {
+    width: 50px; 
+    height: 50px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s, border-color 0.3s;
+}
+
+.gallery-thumb:hover, .modal-thumb:hover, .modal-thumb.active {
+    opacity: 1;
+    border-color: var(--accent-color-clara); 
+}
+
+/* Botões de navegação no modal */
+.prev-btn, .next-btn {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -50px;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.prev-btn {
+    left: 10px;
+    border-radius: 3px 0 0 3px;
+}
+.next-btn {
+    right: 10px;
+    border-radius: 3px 0 0 3px;
+}
+.prev-btn:hover, .next-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}

@@ -1,0 +1,85 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+    /* Estilos UX/UI para a tabela de pipeline (Manter os estilos que você adicionou) */
+    .pipeline-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    /* ... (restante dos estilos de tabela) ... */
+    
+    /* Estilos de alerta para o tempo */
+    .status-alert.red { background-color: #ffdddd; color: #cc0000; font-weight: bold; }
+    .status-alert.yellow { background-color: #ffffcc; color: #8a6d3b; }
+    .status-alert.green { background-color: #ddffdd; color: #3c763d; }
+    
+    .status-alert { padding: 5px; border-radius: 4px; text-align: center; font-size: 0.8em; }
+    
+    /* Estilos para o botão Contatar */
+    .button.whatsapp-btn {
+        background-color: #25D366; /* Cor do WhatsApp */
+        color: white;
+        padding: 6px 12px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        display: inline-block;
+        transition: background-color 0.2s;
+    }
+    .button.whatsapp-btn:hover {
+        background-color: #1DA851;
+    }
+    /* Para quando não houver telefone */
+    .button.whatsapp-btn[href="#"] {
+        background-color: #aaa;
+        cursor: default;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Pipeline de Vendas Pendentes (CRM)</h2>
+
+<div id="content-main">
+    <table class="pipeline-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data da Ordem</th>
+                <th>Cliente (Nome)</th>
+                <th>WhatsApp</th>
+                <th>Valor Total</th>
+                <th>Tempo Pendente</th>
+                <th>Status Atendimento</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales_data %}
+            <tr>
+                <td><a href="{{ sale.change_url }}">{{ sale.id }}</a></td>
+                <td>{{ sale.sale_date }}</td> <td>{{ sale.customer_name }}</td> <td>{{ sale.customer_phone }}</td> <td>R$ {{ sale.amount }}</td>
+                <td>{{ sale.time_pending_str }}</td>
+                <td><span class="status-alert {{ sale.alert_status }}">
+                    {{ sale.time_pending_str }} ({{ sale.alert_status|upper }})
+                </span></td>
+                <td>
+                    <a href="{{ sale.whatsapp_url|default:'#' }}" 
+                       target="_blank" 
+                       class="button whatsapp-btn"
+                       title="Contatar via WhatsApp">
+                        Contatar Cliente
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">🎉 Nenhuma venda pendente no momento!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

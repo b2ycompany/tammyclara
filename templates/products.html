@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coleção | Tammy & Clara</title>
+    <title>Coleção | Tammy´s Store</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-<body>
+<body id="main-body"> 
 
     <header class="header">
         <div class="logo">
-            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy & Clara">
+            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy">
         </div>
         <nav>
             <a href="{% url 'home' %}">Home</a>
@@ -20,8 +21,8 @@
             <a href="{% url 'home' %}#novidades">Novidades</a>
             <a href="{% url 'home' %}#lojas">Lojas</a>
             <a href="{% url 'home' %}#contato">Contato</a>
-            <a href="{% url 'cart' %}" class="icon-link">🛍️</a> 
-            <a href="#" class="icon-link">👤</a>
+            <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">🛍️</a>
+            <a href="#" class="icon-link" aria-label="Minha Conta">👤</a>
         </nav>
     </header>
 
@@ -29,45 +30,28 @@
         <h1>Nossa Coleção</h1>
         
         <div class="products-grid">
-            
-            <div class="product-item">
-                <img src="{% static 'img/vestido1.png' %}" alt="Vestido de Seda Elegante">
-                <h3>Vestido de Seda Elegante</h3>
-                <p>R$ 299,90</p>
-                <button class="btn primary-btn add-to-cart-btn" data-id="1">Adicionar ao Carrinho</button>
             </div>
-            
-            <div class="product-item">
-                <img src="{% static 'img/calca1.png' %}" alt="Calça Alfaiataria Luxo">
-                <h3>Calça Alfaiataria Luxo</h3>
-                <p>R$ 189,50</p>
-                <button class="btn primary-btn add-to-cart-btn" data-id="2">Adicionar ao Carrinho</button>
-            </div>
-            
-            <div class="product-item">
-                <img src="{% static 'img/blusa1.png' %}" alt="Blusa Fluid Dourada">
-                <h3>Blusa Fluid Dourada</h3>
-                <p>R$ 129,00</p>
-                <button class="btn primary-btn add-to-cart-btn" data-id="3">Adicionar ao Carrinho</button>
-            </div>
-
-             <div class="product-item">
-                <img src="{% static 'img/placeholder-produto4.png' %}" alt="Saia Plissada Minimalista">
-                <h3>Saia Plissada Minimalista</h3>
-                <p>R$ 160,00</p>
-                <button class="btn primary-btn add-to-cart-btn" data-id="4">Adicionar ao Carrinho</button>
-            </div>
-        </div>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2024 Tammy & Clara. Todos os direitos reservados.</p>
+        <p>&copy; 2024 Tammy´s Store Todos os direitos reservados.</p>
         <div class="social-links">
-            <a href="#">Instagram</a> | 
-            <a href="#">Facebook</a> |
-            <a href="#">WhatsApp</a>
+            <a href="#" aria-label="Instagram">Instagram</a> | 
+            <a href="#" aria-label="Facebook">Facebook</a> |
+            <a href="#" aria-label="WhatsApp">WhatsApp</a>
         </div>
     </footer>
+    
+    <div id="image-modal" class="modal">
+        <span class="close-btn">&times;</span>
+        <div class="modal-content">
+            <img id="modal-main-image" src="" alt="Imagem Ampliada">
+            <div class="modal-thumbnails" id="modal-thumbnails-container">
+                </div>
+            <a class="prev-btn">&#10094;</a>
+            <a class="next-btn">&#10095;</a>
+        </div>
+    </div>
 
     <script src="{% static 'js/script.js' %}"></script>
 </body>

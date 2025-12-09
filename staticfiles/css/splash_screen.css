@@ -3,11 +3,6 @@
  * Estilos específicos para a animação inicial do site.
  */
 
-/* Esconde o scroll do corpo enquanto a animação carrega. */
-body.loading-splash {
-    overflow: hidden;
-}
-
 #splash-screen {
     position: fixed;
     top: 0;
@@ -21,6 +16,13 @@ body.loading-splash {
     align-items: center;
     transition: opacity 1s ease-out; 
     overflow: hidden;
+    /* GARANTIA DE VISIBILIDADE NO CSS */
+    opacity: 1; 
+}
+
+/* Quando a classe 'hidden' é adicionada pelo JS, a tela some: */
+#splash-screen.hidden {
+    opacity: 0;
 }
 
 .splash-door-container {

@@ -1,0 +1,46 @@
+# fly.toml
+app = "tammyclara-store-b2y" 
+primary_region = "gru"
+
+[build]
+  # Configurações de build (usando o Dockerfile)
+  
+[mounts]
+  # 🚨 NOVO: VOLUME PARA O BANCO DE DADOS SQLITE 🚨
+  source="tammyclara_db" 
+  destination="/app/db"   # Onde o arquivo db.sqlite3 será salvo
+
+  # VOLUME PARA ARQUIVOS DE MÍDIA
+  source="tammyclara_media" 
+  destination="/app/media"  
+
+[env]
+  PORT = "8000"
+  PYTHON_VERSION = "3.11"
+  # O BANCO DE DADOS AGORA É TRATADO PELO VOLUME LOCAL
+
+# Configuração para servir a aplicação Web
+[[services]]
+  protocol = "tcp"
+  internal_port = 8000
+  processes = ["app"]
+
+  [[services.ports]]
+    port = "80"
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = "443"
+    handlers = ["tls", "http"]
+
+  [[services.http_checks]]
+    interval = "10s"
+    grace_period = "5s"
+    path = "/admin/"
+    timeout = "2s"
+    tls_skip_verify = false
+
+[deploy]
+  # Comando que roda as migrações ANTES de iniciar a aplicação
+  release_command = "python manage.py migrate --noinput"
