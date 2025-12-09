@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tammy & Clara | A Elegância Renasce</title>
+    <link rel="stylesheet" href="{% static 'css/splash_screen.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body id="main-body" style="opacity: 0; overflow: hidden;"> 
+    <div id="splash-screen">
+        <div class="splash-door-container">
+            <div class="door-left"></div>
+            <div class="door-right"></div>
+            <div class="splash-text">
+                <h2>Seja Bem-vinda à Nova Era da Moda.</h2>
+                <p>A experiência Tammy & Clara começa agora...</p>
+            </div>
+        </div>
+    </div>
+    <header class="header">
+        <div class="logo">
+            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy & Clara">
+        </div>
+        <nav>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'products' %}">Coleção</a>
+            <a href="#novidades">Novidades</a>
+            <a href="#lojas">Lojas</a>
+            <a href="#contato">Contato</a>
+            <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">🛍️</a>
+            <a href="#" class="icon-link" aria-label="Minha Conta">👤</a>
+        </nav>
+    </header>
+
+    <section class="hero-section" id="home">
+        <div class="hero-content">
+            
+            <div class="fusion-highlight-row">
+                
+                <div class="fusion-branding">
+                    <div class="hero-logo">
+                         <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy & Clara">
+                    </div>
+                    <p class="fusion-text">Tammy's Store e Clara Modas se unem para você!</p>
+                </div>
+
+                <div class="fusion-story">
+                    <h2>A Elegância Renasce.</h2>
+                    <p class="story-intro">A sua moda favorita acaba de ganhar um novo capítulo. Unimos o **estilo atemporal** da Tammy's com a **feminilidade contemporânea** da Clara Modas para criar uma experiência única.</p>
+                    <p class="story-detail" style="display:none;">**O que muda?** Maior variedade, consultoria de moda aprimorada e a promessa de peças que celebram a sua força e beleza em qualquer ocasião. Clique e descubra o nosso novo catálogo.</p>
+                    <button id="toggle-story" class="btn secondary-btn">Leia Mais</button>
+                </div>
+                
+            </div>
+            
+            <a href="{% url 'products' %}" class="btn primary-btn mt-4">Ver a Coleção</a>
+        </div>
+        <div class="hero-media"></div>
+    </section>
+
+    <section class="feature-section" id="novidades">
+        <div class="feature-item">
+            <div class="feature-image"> 
+            </div>
+            <h2>Nova Coleção "Primavera"</h2>
+            <p>Cores leves, tecidos fluidos. A beleza da estação capturada em peças exclusivas.</p>
+            <a href="{% url 'products' %}" class="btn secondary-btn">Comprar Agora</a>
+        </div>
+        <div class="feature-item">
+            <div class="feature-image">
+            </div>
+            <h2>Agende a Sua Consultoria</h2>
+            <p>Serviço personalizado nas nossas lojas físicas. Estilistas prontas para a atender.</p>
+            <a href="#" class="btn secondary-btn">Agendar</a>
+        </div>
+    </section>
+
+    <section class="call-to-action">
+        <h2>Seja Parte da Nossa Comunidade</h2>
+        <p>Receba ofertas exclusivas, novidades e convites especiais diretamente no seu e-mail.</p>
+        <form class="newsletter-form">
+            <input type="email" placeholder="Seu e-mail aqui" required>
+            <button type="submit" class="btn primary-btn">Inscrever-se</button>
+        </form>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 Tammy & Clara. Todos os direitos reservados.</p>
+        <div class="social-links">
+            <a href="#" aria-label="Instagram">Instagram</a> | 
+            <a href="#" aria-label="Facebook">Facebook</a> |
+            <a href="#" aria-label="WhatsApp">WhatsApp</a>
+        </div>
+    </footer>
+    
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

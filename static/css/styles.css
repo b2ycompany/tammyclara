@@ -1,0 +1,523 @@
+/* Importação das fontes já no HTML */
+
+/* Variáveis de Cores para Elegância e Fusão das Marcas */
+:root {
+    --primary-color: #333; /* Um cinza chumbo para elegância */
+    --secondary-color: #FDFDFD; /* Branco Suave */
+    --accent-color-clara: #E0BBE4; /* Rosa suave da Clara */
+    --accent-color-tammy: #B8860B; /* Dourado da Tammy's (Goldenrod) */
+    --text-font: 'Montserrat', sans-serif;
+    --heading-font: 'Playfair Display', serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--text-font);
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+    /* REMOVEMOS A OPACIDADE 0 AQUI PARA EVITAR TELA BRANCA */
+    transition: opacity 1s ease-in-out; 
+}
+
+/* --- ESTILOS DA SPLASH SCREEN --- */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color); 
+    z-index: 9999; /* COBRE TUDO */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s ease-out; 
+    overflow: hidden;
+}
+
+.splash-door-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.door-left, .door-right {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    background-color: var(--primary-color);
+    transition: transform 1.5s ease-out;
+}
+
+.door-left {
+    left: 0;
+    transform-origin: left;
+}
+
+.door-right {
+    right: 0;
+    transform-origin: right;
+}
+
+/* Estado animado (aplicado por JS) */
+#splash-screen.hidden .door-left {
+    transform: translateX(-100%);
+}
+
+#splash-screen.hidden .door-right {
+    transform: translateX(100%);
+}
+
+.splash-text {
+    text-align: center;
+    color: var(--secondary-color);
+    opacity: 1;
+    transition: opacity 0.5s ease;
+    animation: fade-in-out 3s infinite;
+}
+
+.splash-text h2 {
+    font-family: var(--heading-font);
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.splash-text p {
+    font-size: 1.1em;
+}
+/* --- FIM ESTILOS SPLASH SCREEN --- */
+
+/* --- Cabeçalho (Header) --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5%;
+    position: fixed;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.98);
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.logo {
+    height: 80px; 
+    transition: height 0.3s ease; 
+}
+
+.logo img {
+    height: 100%; 
+    width: auto;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--primary-color);
+    margin-left: 30px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    transition: color 0.3s ease-in-out;
+}
+
+nav a:hover {
+    color: var(--accent-color-clara);
+}
+
+.icon-link {
+    font-size: 1.2em;
+}
+
+/* --- Secção de Apresentação (Hero Section) --- */
+.hero-section {
+    height: 85vh; 
+    min-height: 600px;
+    display: flex;
+    position: relative;
+    background-color: var(--secondary-color);
+    padding-top: 80px; 
+}
+
+.hero-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 5%;
+    background-color: var(--secondary-color);
+    z-index: 2;
+}
+
+.fusion-highlight-row {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.fusion-branding, .fusion-story {
+    flex: 1;
+    min-width: 250px;
+}
+
+.fusion-branding {
+    border-right: 1px solid #ddd; 
+    padding-right: 40px;
+}
+
+.hero-logo {
+    margin-bottom: 20px;
+    max-width: 250px;
+}
+
+.hero-logo img {
+    width: 100%;
+    height: auto;
+}
+
+.fusion-text {
+    font-family: var(--text-font);
+    font-size: 1em;
+    color: var(--accent-color-tammy); 
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.fusion-story h2 {
+    font-family: var(--heading-font);
+    font-size: 3em;
+    font-weight: 400;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    line-height: 1.1;
+}
+
+.fusion-story .story-intro {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+}
+
+.fusion-story .story-detail {
+    margin-bottom: 20px;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.hero-media {
+    flex: 1;
+    background-image: url('../img/placeholder-capa.png'); 
+    background-size: cover; 
+    background-position: top center; 
+    clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%); 
+}
+
+.mt-4 {
+    margin-top: 20px;
+}
+
+/* --- Botões Elegantes --- */
+.btn {
+    display: inline-block;
+    padding: 14px 35px;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.primary-btn:hover {
+    background-color: var(--accent-color-clara); 
+    border-color: var(--accent-color-clara);
+    color: var(--primary-color);
+}
+
+.secondary-btn {
+    background-color: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.secondary-btn:hover {
+    background-color: var(--accent-color-tammy); 
+    color: var(--secondary-color);
+    border-color: var(--accent-color-tammy);
+}
+
+/* --- Secção de Destaque (Feature Section) --- */
+.feature-section {
+    display: flex;
+    padding: 100px 5%;
+    gap: 50px;
+    background-color: var(--secondary-color);
+    flex-wrap: wrap; 
+}
+
+.feature-item {
+    flex: 1;
+    min-width: 300px; 
+    text-align: center;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+}
+
+.feature-item:hover {
+    transform: translateY(-10px);
+}
+
+.feature-image {
+    height: 450px; 
+    background-size: contain; 
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-bottom: 20px;
+}
+
+/* IMAGENS DE DESTAQUE NO CSS */
+.feature-item:nth-child(1) .feature-image {
+    background-image: url('../img/placeholder-destaque-1.png'); 
+}
+
+.feature-item:nth-child(2) .feature-image {
+    background-image: url('../img/placeholder-destaque-2.png'); 
+}
+
+.feature-item h2 {
+    font-family: var(--heading-font);
+    margin-bottom: 10px;
+    font-size: 2em;
+    padding: 0 20px;
+    color: var(--primary-color);
+}
+
+.feature-item p {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    padding: 0 20px;
+    color: #666;
+}
+
+.feature-item .btn {
+    margin-bottom: 30px;
+}
+
+/* --- Call To Action (Newsletter) --- */
+.call-to-action {
+    background-color: var(--accent-color-clara); 
+    color: var(--primary-color);
+    padding: 80px 5%;
+    text-align: center;
+}
+
+.call-to-action h2 {
+    font-family: var(--heading-font);
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.call-to-action p {
+    font-size: 1.2em;
+    margin-bottom: 40px;
+}
+
+.newsletter-form {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.newsletter-form input[type="email"] {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 5px;
+    flex-grow: 1;
+    font-size: 1em;
+    outline: none;
+}
+
+.newsletter-form .btn {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border-radius: 5px;
+}
+
+.newsletter-form .btn:hover {
+    background-color: var(--accent-color-tammy); 
+    color: var(--secondary-color);
+}
+
+/* --- Rodapé (Footer) --- */
+.footer {
+    padding: 40px 5%;
+    text-align: center;
+    font-size: 0.9em;
+    background-color: var(--primary-color);
+    color: #aaa;
+}
+
+.footer a {
+    color: #ccc;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.footer a:hover {
+    color: var(--accent-color-clara);
+}
+
+/* --- Estilos específicos para a página de produtos --- */
+.products-page-main {
+    padding: 120px 5% 50px; 
+    min-height: calc(100vh - 150px);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.products-page-main h1 {
+    font-family: var(--heading-font);
+    font-size: 3.5em;
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--primary-color);
+}
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+.product-item {
+    text-align: center;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+.product-item img {
+    width: 100%;
+    height: 400px; 
+    object-fit: contain; 
+    background-color: #f0f0f0; 
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.product-item h3 {
+    font-family: var(--heading-font);
+    font-size: 1.5em;
+    margin-bottom: 5px;
+}
+.product-item p {
+    font-weight: 600;
+    color: var(--accent-color-clara); 
+    margin-bottom: 15px;
+}
+
+/* --- Estilos específicos para a página do carrinho --- */
+.cart-page-main {
+    padding: 120px 5% 50px; 
+    min-height: calc(100vh - 150px);
+    max-width: 900px;
+    margin: 0 auto;
+}
+.cart-page-main h1 {
+    font-family: var(--heading-font);
+    font-size: 3em;
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--primary-color);
+}
+.cart-items {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+.cart-item:last-child {
+    border-bottom: none;
+}
+.cart-item span {
+    font-size: 1.1em;
+    color: var(--primary-color);
+}
+.cart-item .remove-from-cart {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* --- Responsividade Básica --- */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        padding: 15px 5%;
+    }
+    .header nav {
+        margin-top: 15px;
+    }
+    nav a {
+        margin: 0 10px;
+        font-size: 0.85em;
+    }
+    .hero-section {
+        flex-direction: column;
+        padding-top: 150px;
+        height: auto;
+    }
+    .hero-media {
+        height: 50vh;
+        width: 100%;
+        clip-path: none; 
+    }
+    .hero-content {
+        padding: 50px 5%;
+        text-align: center;
+    }
+    .hero-content h1 {
+        font-size: 3em;
+    }
+    .hero-content p {
+        max-width: 100%;
+    }
+    .feature-section {
+        flex-direction: column;
+        padding: 60px 5%;
+    }
+    .newsletter-form {
+        flex-direction: column;
+    }
+    .newsletter-form input, .newsletter-form .btn {
+        width: 100%;
+    }
+}
