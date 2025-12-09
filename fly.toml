@@ -5,19 +5,21 @@ primary_region = "gru"
 [build]
   # Configurações de build (usando o Dockerfile)
   
-[mounts]
-  # 🚨 NOVO: VOLUME PARA O BANCO DE DADOS SQLITE 🚨
-  source="tammyclara_db" 
-  destination="/app/db"   # Onde o arquivo db.sqlite3 será salvo
-
-  # VOLUME PARA ARQUIVOS DE MÍDIA
-  source="tammyclara_media" 
-  destination="/app/media"  
-
 [env]
   PORT = "8000"
   PYTHON_VERSION = "3.11"
-  # O BANCO DE DADOS AGORA É TRATADO PELO VOLUME LOCAL
+
+# 🚨 CORREÇÃO CRÍTICA: [[mounts]] para múltiplos volumes 🚨
+
+[[mounts]]
+  # 1. VOLUME PARA O BANCO DE DADOS SQLITE
+  source="tammyclara_db" 
+  destination="/app/db"   # Ponto de montagem para o banco de dados
+
+[[mounts]]
+  # 2. VOLUME PARA ARQUIVOS DE MÍDIA
+  source="tammyclara_media" 
+  destination="/app/media"  # Ponto de montagem para as imagens de produtos
 
 # Configuração para servir a aplicação Web
 [[services]]
