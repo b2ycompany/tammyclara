@@ -1,19 +1,22 @@
 # fly.toml
+# Nome do aplicativo registrado no Fly.io
 app = "tammyclara-store-b2y" 
+
+# Região primária para a máquina virtual
 primary_region = "gru"
 
 [build]
-  # Configurações de build (usando o Dockerfile)
-  
+  # Usa o Dockerfile na raiz
+
+# 🚨 CONFIGURAÇÃO DE VOLUMES: UNIFICADA PARA 1 VOLUME (LIMITE DO PLANO GRATUITO) 🚨
+[[mounts]]
+  # O volume único que armazena tanto o db.sqlite3 quanto a pasta /media
+  source="tammyclara_data" 
+  destination="/app/data"   # O ponto de montagem no contêiner
+
 [env]
   PORT = "8000"
   PYTHON_VERSION = "3.11"
-
-# 🚨 CORREÇÃO CRÍTICA: UNIFICAÇÃO DE VOLUMES (Limite de 1 Volume) 🚨
-[[mounts]]
-  # O único volume que o Fly.io permite na máquina básica
-  source="tammyclara_data" 
-  destination="/app/data"   # Monta o volume na pasta /app/data
 
 # Configuração para servir a aplicação Web
 [[services]]
@@ -33,10 +36,11 @@ primary_region = "gru"
   [[services.http_checks]]
     interval = "10s"
     grace_period = "5s"
-    path = "/admin/"
+    # 🚨 CORREÇÃO CRÍTICA: Verifica uma rota estável do Django 🚨
+    path = "/admin/login/" 
     timeout = "2s"
     tls_skip_verify = false
 
 [deploy]
-  # Comando que roda as migrações ANTES de iniciar a aplicação
+  # Comando de liberação: migra o banco de dados (SQLite no volume /app/data)
   release_command = "python manage.py migrate --noinput"
