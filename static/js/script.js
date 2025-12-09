@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // URL base do seu Backend Django para API calls
-    const API_BASE_URL = 'http://127.0.0.1:8000/api'; 
+    // 🚨 CORREÇÃO CRÍTICA: Removendo o localhost para usar o domínio atual (tammyclara-store-b2y.fly.dev)
+    const API_BASE_URL = '/api'; 
     
-    // URL base do seu servidor Django (http://127.0.0.1:8000)
+    // URL base do seu servidor Django (mantido para compatibilidade, mas agora usa o domínio atual)
     const DJANGO_BASE_URL = window.location.origin.replace(/\/$/, ''); 
     
     // Variáveis globais para o Modal
@@ -31,8 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Remove a barra inicial do relativePath para evitar http://...//media/...
         const cleanedPath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
         
-        // Concatena: http://127.0.0.1:8000 + / + media/products/arquivo.png
-        return DJANGO_BASE_URL + '/' + cleanedPath;
+        // CORRIGIDO: A URL base é o domínio atual, então apenas adicionamos a pasta de mídia e o caminho limpo
+        // O navegador irá converter para https://tammyclara-store-b2y.fly.dev/media/products/arquivo.png
+        return '/media/' + cleanedPath; 
     }
 
     // --- FUNÇÃO AUXILIAR PARA CSRF TOKEN (CRÍTICO PARA POST) ---
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         async function loadProducts() {
             try {
-                // Requisição para a API de listagem de produtos
+                // 🚨 CORRIGIDO: Usa a API_BASE_URL '/api' + '/products/' = '/api/products/'
                 const response = await fetch(API_BASE_URL + '/products/'); 
                 if (!response.ok) {
                     throw new Error('Erro ao carregar produtos do servidor.');
@@ -479,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
+                // 🚨 CORRIGIDO: Usa a API_BASE_URL (que agora é '/api') + '/checkout/' = '/api/checkout/'
                 const response = await fetch(`${API_BASE_URL}/checkout/`, {
                     method: 'POST',
                     headers: {
