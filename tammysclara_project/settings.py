@@ -14,29 +14,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # 1. CONFIGURAÇÕES DE SEGURANÇA E AMBIENTE
+
 # Busca a chave secreta da variável de ambiente (Fly.io) ou usa um valor padrão local.
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-y%k5@3=z&d-@&n79(4i^r)229*^x$@+g+21$v_c(p1q4+c+r6g')
 
 # DEBUG: 'False' em produção (Fly.io) e 'True' em desenvolvimento local (.env)
 DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
 
-# ALLOWED_HOSTS: Aceita o domínio do Fly.io e outros hosts.
-
+# 🚀 CORREÇÃO CRÍTICA DO TIMEOUT: Simplificando ALLOWED_HOSTS para o essencial
 if DEBUG:
-    # Permite tudo em desenvolvimento
     ALLOWED_HOSTS = ['*']
 else:
-    # 🚀 CORREÇÃO CRÍTICA: Definir explicitamente os hosts de produção para evitar timeout
-    # O Fly.io usa o domínio principal e o IP local do container.
+    # Apenas o domínio Fly.io e o IP local
     ALLOWED_HOSTS = [
         'tammyclara-store-b2y.fly.dev',
-        '.tammyclara-store-b2y.fly.dev', # Para subdomínios, se necessário
+        '.tammyclara-store-b2y.fly.dev',
     ]
-    # Adicionar hosts permitidos de variáveis de ambiente, se houver
-    env_hosts = os.environ.get('ALLOWED_HOSTS')
-    if env_hosts:
-        ALLOWED_HOSTS.extend(env_hosts.split(','))
-
 
 # 2. DEFINIÇÃO DE APLICATIVOS
 
@@ -170,11 +163,11 @@ MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 🌟 CORREÇÃO FINAL DE CORS 🌟
+# 🌟 CORREÇÃO FINAL DE CORS (Não muda, pois está correta, mas agora o servidor deve iniciar) 🌟
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000", 
     "http://localhost:8000",
-    "https://tammyclara-store-b2y.fly.dev", # Domínio HTTPS de produção
+    "https://tammyclara-store-b2y.fly.dev",
 ]
 
 # Permitir todos os subdomínios (máxima compatibilidade)
@@ -193,5 +186,7 @@ CORS_ALLOW_HEADERS = [
 
 # Redirecionamento forçado para HTTPS em produção (Fly.io)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# 🚀 CORREÇÃO CRÍTICA: GARANTIR HTTPS EM PRODUÇÃO
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
+# 🚀 CORREÇÃO CRÍTICA: Revertendo para a configuração padrão de produção segura
+SECURE_SSL_REDIRECT = True 
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
