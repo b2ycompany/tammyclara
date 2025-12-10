@@ -19,9 +19,10 @@
         <nav>
             <a href="{% url 'home' %}">Home</a>
             <a href="{% url 'products' %}">Coleção</a>
-            <a href="{% url 'home' %}#novidades">Novidades</a>
-            <a href="{% url 'home' %}#lojas">Lojas</a>
-            <a href="{% url 'home' %}#contato">Contato</a>
+            <a href="#novidades">Novidades</a>
+            <a href="#lojas">Lojas</a>
+            <a href="#contato">Contato</a>
+            
             <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">
                 <i class="fas fa-shopping-bag"></i>
             </a>
@@ -37,7 +38,35 @@
         <div class="products-grid">
             </div>
     </main>
+    
+    <section class="feature-section" id="novidades" style="text-align: center; padding: 50px;">
+        <h2>✨ Destaques e Novidades</h2>
+        <div class="feature-item">
+            <p>Cores leves, tecidos fluidos e estampas exclusivas. **Mais de 50 novas peças adicionadas** ao nosso catálogo online.</p>
+        </div>
+    </section>
+    
+    <section class="store-location" id="lojas" style="text-align: center; padding: 50px; background-color: #f8f8f8;">
+        <h2>🛍️ Visite-nos em Cotia!</h2>
+        <p class="address-line">
+            Endereço: **R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP, 06703-000**
+        </p>
+        <a href="http://googleusercontent.com/maps.google.com/9" target="_blank" class="btn primary-btn" style="margin-top: 15px;">
+            Abrir Localização no Mapa
+        </a>
+    </section>
 
+    <section class="call-to-action" id="contato" style="padding: 50px;">
+        <h2>Fale Conosco</h2>
+        <form class="newsletter-form">
+            <input type="email" placeholder="Seu melhor e-mail aqui" required>
+            <button type="submit" class="btn primary-btn">Inscrever-se</button>
+        </form>
+        <p class="mt-3 contact-info">
+            WhatsApp para agendamentos: **(11) 99876-5432**
+        </p>
+    </section>
+    
     <footer class="footer">
         <p>© 2024 Tammy´s Store Todos os direitos reservados.</p>
         <div class="social-links">
