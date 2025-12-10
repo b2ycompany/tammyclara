@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from django.db import transaction
 from django.utils import timezone
 import urllib.parse 
-from django.shortcuts import get_object_or_404, render # ⬅️ Importação de 'render' adicionada
+# ⬅️ Importação de 'render'
+from django.shortcuts import get_object_or_404, render 
 from decimal import Decimal
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -15,15 +16,26 @@ from datetime import timedelta
 from .models import Product, Customer, Sale, SaleItem, Invoice 
 from .serializers import ProductSerializer, CustomerSerializer, SaleSerializer, SaleItemSerializer
 
-# --- NOVO: FUNÇÃO PARA RENDERIZAR O TEMPLATE INICIAL (RESOLVE O ERRO 500) ---
+# --- VIEWS PARA RENDERIZAÇÃO DE TEMPLATES (RESOLVE O ERRO 500) ---
 def home_view(request):
     """
     Renderiza o template da página inicial, garantindo o contexto correto.
-    Substitui TemplateView para maior robustez em produção (DEBUG=False).
     """
-    # Usando render() em vez de TemplateView. Isso resolve problemas de carregamento de template
     return render(request, 'index.html', {})
-# --------------------------------------------------------------------------
+
+def products_view(request):
+    """
+    Renderiza o template da página de produtos.
+    """
+    return render(request, 'products.html', {})
+
+def cart_view(request):
+    """
+    Renderiza o template da página de carrinho.
+    """
+    return render(request, 'cart.html', {})
+# ------------------------------------------------------------------
+
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
 

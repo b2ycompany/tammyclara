@@ -8,8 +8,8 @@ from django.views.generic import TemplateView
 
 # Importe a instância do seu Admin Site customizado
 from store.admin import crm_admin_site 
-# ⬅️ IMPORTAÇÃO CRÍTICA: A nova view de função!
-from store.views import ProductList, SaleCreate, home_view 
+# ⬅️ IMPORTAÇÃO CRÍTICA: As novas views de função
+from store.views import home_view, products_view, cart_view
 
 
 urlpatterns = [
@@ -22,14 +22,12 @@ urlpatterns = [
     # Rotas de API
     path('api/', include('store.urls')),
     
-    # 🌟 CORREÇÃO CRÍTICA 500: Usando a função home_view para garantir o contexto.
+    # 🌟 CORREÇÃO FINAL: Rotas usando as views de função para máxima estabilidade
     path('', home_view, name='home'),
-    
-    # As demais rotas de TemplateView
-    path('products/', TemplateView.as_view(template_name='products.html'), name='products'),
-    path('cart/', TemplateView.as_view(template_name='cart.html'), name='cart'),
+    path('products/', products_view, name='products'),
+    path('cart/', cart_view, name='cart'),
 
-    # Rota para a Página de Sucesso (Redirecionamento do Checkout) 
+    # Mantendo a rota de sucesso com TemplateView, mas você pode convertê-la se houver erro
     path('order-success/', TemplateView.as_view(template_name='order_success.html'), name='order-success'),
 ]
 
