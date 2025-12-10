@@ -21,14 +21,21 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-y%k5@3=z&d-@&n79(4i^r
 DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
 
 # ALLOWED_HOSTS: Aceita o domínio do Fly.io e outros hosts.
-# 🚀 CORREÇÃO CRÍTICA: GARANTIR HOSTS DE PRODUÇÃO
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',') 
-if not DEBUG:
-    # Garantir que o domínio Fly.io esteja sempre aqui
-    ALLOWED_HOSTS.append('tammyclara-store-b2y.fly.dev') 
-    ALLOWED_HOSTS.append('*.tammyclara-store-b2y.fly.dev') 
+
 if DEBUG:
-    ALLOWED_HOSTS = ['*'] # Permite tudo em desenvolvimento
+    # Permite tudo em desenvolvimento
+    ALLOWED_HOSTS = ['*']
+else:
+    # 🚀 CORREÇÃO CRÍTICA: Definir explicitamente os hosts de produção para evitar timeout
+    # O Fly.io usa o domínio principal e o IP local do container.
+    ALLOWED_HOSTS = [
+        'tammyclara-store-b2y.fly.dev',
+        '.tammyclara-store-b2y.fly.dev', # Para subdomínios, se necessário
+    ]
+    # Adicionar hosts permitidos de variáveis de ambiente, se houver
+    env_hosts = os.environ.get('ALLOWED_HOSTS')
+    if env_hosts:
+        ALLOWED_HOSTS.extend(env_hosts.split(','))
 
 
 # 2. DEFINIÇÃO DE APLICATIVOS
@@ -186,5 +193,5 @@ CORS_ALLOW_HEADERS = [
 
 # Redirecionamento forçado para HTTPS em produção (Fly.io)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# 🚀 CORREÇÃO CRÍTICA: MUDAR SECURE_SSL_REDIRECT PARA TRUE NA PRODUÇÃO
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True' # Garantir HTTPS
+# 🚀 CORREÇÃO CRÍTICA: GARANTIR HTTPS EM PRODUÇÃO
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
