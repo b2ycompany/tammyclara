@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 🔥 CORREÇÃO FINAL: FORÇANDO A URL DE PRODUÇÃO HTTPS PARA ANULAR O CACHE 127.0.0.1
-    const API_BASE_URL = window.location.protocol + '//' + window.location.host + '/api'; 
+    // 🌟 CORREÇÃO APLICADA 🌟: USANDO CAMINHO RELATIVO /api
+    // Isso garante que funcionará tanto em http://127.0.0.1:8000/api quanto em https://seuapp.fly.dev/api
+    const API_BASE_URL = '/api'; 
     
     // URL base do seu servidor Django (mantido para compatibilidade, mas agora usa o domínio atual)
     const DJANGO_BASE_URL = window.location.origin.replace(/\/$/, ''); 
@@ -92,8 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         async function loadProducts() {
             try {
-                // 🚀 A URL JÁ É ABSOLUTA E SEGURA (https://tammyclara-store-b2y.fly.dev/api/products/)
-                const apiUrl = `${API_BASE_URL.replace(/\/$/, '')}/products/`;
+                // 🚀 CHAMADA CORRIGIDA: Usa o caminho relativo '/api/products/'
+                const apiUrl = `${API_BASE_URL}/products/`;
                 const response = await fetch(apiUrl); 
                 
                 if (!response.ok) {
@@ -175,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         '<h3>' + product.name + '</h3>' +
                         '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
                         '<button ' + 
-                            'class="btn primary-btn add-to-cart-btn" "' + // 🌟 CORREÇÃO DE SINTAXE AQUI 🌟
+                            'class="btn primary-btn add-to-cart-btn" ' + // Sintaxe de aspas corrigida
                             'data-id="' + product.id + '">' +
                             'Adicionar ao Carrinho' +
                         '</button>';
@@ -483,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                // 🚨 CORRIGIDO: Usa a API_BASE_URL (que agora é '/api') + '/checkout/' = '/api/checkout/'
+                // 🚨 CHAMADA CORRIGIDA: Usa o caminho relativo '/api/checkout/'
                 const response = await fetch(`${API_BASE_URL}/checkout/`, {
                     method: 'POST',
                     headers: {
