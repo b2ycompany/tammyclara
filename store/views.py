@@ -1,10 +1,10 @@
-# store/views.py
+# store/views.py (CÓDIGO COM CORREÇÃO DE IMPORTAÇÃO/ISOLAMENTO)
 
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db import transaction
 from django.utils import timezone
-import urllib.parse 
+# 🛑 REMOVIDO: import urllib.parse (desnecessário para views de template)
 from django.shortcuts import get_object_or_404, render 
 from decimal import Decimal
 from django.utils.decorators import method_decorator
@@ -43,7 +43,7 @@ def order_success_view(request):
 
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
-# ... (Restante do seu views.py é mantido inalterado) ...
+
 class ProductList(generics.ListAPIView):
 # ... (código ProductList) ...
     queryset = Product.objects.filter(is_active=True).order_by('name')
