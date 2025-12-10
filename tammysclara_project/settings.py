@@ -28,7 +28,7 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 
-# 🔥 CORREÇÃO CRÍTICA DO ERRO 500 (OBRIGATÓRIO NO DJANGO 4+)
+#CORREÇÃO CRÍTICA DO ERRO 500 (OBRIGATÓRIO NO DJANGO 4+)
 CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev',
 ]
