@@ -5,10 +5,10 @@ Configurações para o projeto Tammy & Clara, prontas para Fly.io (produção) e
 import os
 from pathlib import Path
 import dj_database_url 
-# from dotenv import load_dotenv # Não é necessário importar, pois não há arquivo .env
+from dotenv import load_dotenv 
 
 # Carrega variáveis de ambiente do arquivo .env (apenas no ambiente local)
-# load_dotenv() # Comentado, pois não há .env
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -18,18 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-y%k5@3=z&d-@&n79(4i^r)229*^x$@+g+21$v_c(p1q4+c+r6g')
 
 # DEBUG: 'False' em produção (Fly.io) e 'True' em desenvolvimento local (.env)
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
 
-# ALLOWED_HOSTS: Aceita o domínio do Fly.io.
-
+# ALLOWED_HOSTS: Aceita o domínio do Fly.io e outros hosts.
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',') 
 if DEBUG:
-    ALLOWED_HOSTS = ['*']
-else:
-    # Definir explicitamente os hosts de produção para estabilidade
-    ALLOWED_HOSTS = [
-        'tammyclara-store-b2y.fly.dev',
-        '.tammyclara-store-b2y.fly.dev',
-    ]
+    ALLOWED_HOSTS = ['*'] # Permite tudo em desenvolvimento
+
 
 # 2. DEFINIÇÃO DE APLICATIVOS
 
@@ -43,12 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Apps de Terceiros
-    'rest_framework',  
-    'corsheaders',     
+    'rest_framework',   
+    'corsheaders',      
     'django_cleanup.apps.CleanupConfig', 
 
     # Suas Apps Locais
-    'store',           
+    'store',            
 ]
 
 # 3. MIDDLEWARE
@@ -58,7 +53,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware', # Para servir Static Files em produção (Fly.io)
     'django.contrib.sessions.middleware.SessionMiddleware',
     
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware', 
     
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,7 +67,7 @@ ROOT_URLCONF = 'tammysclara_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,14 +134,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / 'static', 
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
 
 # 🚨 CORREÇÃO CRÍTICA: STORAGES para Mídia e Estáticos 🚨
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage", 
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -164,13 +159,8 @@ MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8000", 
     "http://localhost:8000",
-    "https://tammyclara-store-b2y.fly.dev",
-]
-
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://(\w+\.)?tammyclara-store-b2y\.fly\.dev$",
 ]
 
 CORS_ALLOW_METHODS = [
@@ -184,6 +174,4 @@ CORS_ALLOW_HEADERS = [
 
 # Redirecionamento forçado para HTTPS em produção (Fly.io)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# 🔥 CORREÇÃO CRÍTICA DO TIMEOUT: Desativar por padrão (False) para Health Check HTTP passar
-# A ativação (True) só ocorre se for explicitamente definida no ambiente do Fly.io.
-SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "False") == "True"
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
