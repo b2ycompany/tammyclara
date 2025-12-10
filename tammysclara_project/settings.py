@@ -187,3 +187,6 @@ CORS_ALLOW_HEADERS = [
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # 🛑 CORREÇÃO DE DEPLOY: VOLTA PARA FALSE POR PADRÃO (Para o Health Check funcionar)
 SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+CSRF_TRUSTED_ORIGINS = [
+    'https://tammyclara-store-b2y.fly.dev',
+]
