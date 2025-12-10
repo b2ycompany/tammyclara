@@ -1,5 +1,6 @@
 """
-Configurações para o projeto Tammy & Clara, preparadas para Fly.io e ambiente local.
+Configurações Django corrigidas e otimizadas para o projeto Tammy & Clara
+e para rodar perfeitamente no Fly.io.
 """
 
 import os
@@ -7,37 +8,39 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-# Carregar .env localmente
+# Carrega variáveis do .env no ambiente local
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ============================================================
+# ===========================================================
 # 1. SEGURANÇA E AMBIENTE
-# ============================================================
+# ===========================================================
 
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-y%k5@3=z&d-@&n79(4i^r)229*^x$@+g+21$v_c(p1q4+c+r6g'
-)
-
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Permitindo host do Fly.io
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
-if DEBUG:
-    ALLOWED_HOSTS = ['*']
-
-#CORREÇÃO CRÍTICA DO ERRO 500 (OBRIGATÓRIO NO DJANGO 4+)
-CSRF_TRUSTED_ORIGINS = [
-    'https://tammyclara-store-b2y.fly.dev',
+ALLOWED_HOSTS = [
+    "tammyclara-store-b2y.fly.dev",
+    "localhost",
+    "127.0.0.1",
 ]
 
-# ============================================================
-# 2. APLICATIVOS
-# ============================================================
+if DEBUG:
+    ALLOWED_HOSTS.append("*")
+
+# CSRF – extremamente importante no Fly.io
+CSRF_TRUSTED_ORIGINS = [
+    "https://tammyclara-store-b2y.fly.dev",
+    "https://*.fly.dev",
+]
+
+# ===========================================================
+# 2. APLICATIVOS INSTALADOS
+# ===========================================================
 
 INSTALLED_APPS = [
+    # Django default
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,47 +48,48 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Apps externos
+    # Terceiros
     'rest_framework',
     'corsheaders',
     'django_cleanup.apps.CleanupConfig',
 
-    # Apps locais
+    # Aplicações locais
     'store',
 ]
 
-# ============================================================
+# ===========================================================
 # 3. MIDDLEWARE
-# ============================================================
+# ===========================================================
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Estáticos em produção
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # STATIC em produção
 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
 
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'tammysclara_project.urls'
 
-# ============================================================
-# 4. TEMPLATE ENGINE
-# ============================================================
+# ===========================================================
+# 4. TEMPLATES — CORREÇÃO DEFINITIVA
+# ===========================================================
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
 
-        # Os templates ficam em /templates/
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        # USAR O DIRETÓRIO ONDE OS SEUS TEMPLATES REALMENTE ESTÃO:
+        'DIRS': [
+            BASE_DIR / 'templates',           # templates/ global
+            BASE_DIR / 'store' / 'templates'  # store/templates/
+        ],
 
         'APP_DIRS': True,
 
@@ -102,33 +106,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ============================================================
-# 5. BANCO DE DADOS (Fly.io usa SQLite persistido)
-# ============================================================
+# ===========================================================
+# 5. BANCO DE DADOS (Fly: SQLite persistente)
+# ===========================================================
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    # Caso você troque futuramente para PostgreSQL
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True
-        )
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
     }
 else:
-    # SQLite com volume persistido
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'data', 'db.sqlite3'),
+            'NAME': BASE_DIR / 'data' / 'db.sqlite3',
         }
     }
 
-# ============================================================
-# 6. SENHAS
-# ============================================================
+# ===========================================================
+# 6. VALIDAÇÃO DE SENHA
+# ===========================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -137,31 +135,27 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ============================================================
+# ===========================================================
 # 7. INTERNACIONALIZAÇÃO
-# ============================================================
+# ===========================================================
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
-
 USE_I18N = True
 USE_TZ = True
 
-# ============================================================
-# 8. STATICFILES / MEDIA (PRODUÇÃO + DESENVOLVIMENTO)
-# ============================================================
+# ===========================================================
+# 8. ARQUIVOS ESTÁTICOS E MÍDIA (Fly.io)
+# ===========================================================
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
-# Onde ficam seus arquivos estáticos do frontend
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    BASE_DIR / 'static',
 ]
 
-# Pasta onde o Whitenoise empacota os arquivos para produção
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Armazenamento otimizado do Whitenoise
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -171,42 +165,33 @@ STORAGES = {
     },
 }
 
-# Arquivos enviados pelo usuário (imagens de produto)
-MEDIA_URL = 'media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'data', 'media')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
-# ============================================================
-# 9. CORS
-# ============================================================
+# ===========================================================
+# 9. CORS (seguro e funcional)
+# ===========================================================
 
 CORS_ALLOWED_ORIGINS = [
+    "https://tammyclara-store-b2y.fly.dev",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://tammyclara-store-b2y.fly.dev",
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://(\w+\.)?tammyclara-store-b2y\.fly\.dev$",
 ]
 
-CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
-
-CORS_ALLOW_HEADERS = [
-    "accept", "accept-encoding", "authorization", "content-type",
-    "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with",
-]
-
-# ============================================================
-# 10. HTTPS (Fly.io)
-# ============================================================
+# ===========================================================
+# 10. HTTPS NO FLY.IO
+# ===========================================================
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# HEALTH CHECK DO FLY NÃO FUNCIONA SE ISSO ESTIVER TRUE
 SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
 
-# ============================================================
-# 11. PADRÃO
-# ============================================================
+# ===========================================================
+# 11. PADRÕES DJANGO
+# ===========================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
