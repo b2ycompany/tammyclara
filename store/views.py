@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from django.db import transaction
 from django.utils import timezone
 import urllib.parse 
-# ⬅️ Importação de 'render'
 from django.shortcuts import get_object_or_404, render 
 from decimal import Decimal
 from django.utils.decorators import method_decorator
@@ -16,10 +15,10 @@ from datetime import timedelta
 from .models import Product, Customer, Sale, SaleItem, Invoice 
 from .serializers import ProductSerializer, CustomerSerializer, SaleSerializer, SaleItemSerializer
 
-# --- VIEWS PARA RENDERIZAÇÃO DE TEMPLATES (RESOLVE O ERRO 500) ---
+# --- VIEWS PARA RENDERIZAÇÃO DE TEMPLATES (CORREÇÃO DE ESTABILIDADE) ---
 def home_view(request):
     """
-    Renderiza o template da página inicial, garantindo o contexto correto.
+    Renderiza o template da página inicial.
     """
     return render(request, 'index.html', {})
 
@@ -34,24 +33,24 @@ def cart_view(request):
     Renderiza o template da página de carrinho.
     """
     return render(request, 'cart.html', {})
-# ------------------------------------------------------------------
+    
+def order_success_view(request):
+    """
+    Renderiza a página de sucesso do pedido.
+    """
+    return render(request, 'order_success.html', {})
+# ----------------------------------------------------------------------
 
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
-
+# ... (Restante do seu views.py é mantido inalterado) ...
 class ProductList(generics.ListAPIView):
-    """
-    Endpoint para listar todos os produtos ativos. 
-    Usado para popular a página de catálogo (products.html).
-    """
+# ... (código ProductList) ...
     queryset = Product.objects.filter(is_active=True).order_by('name')
     serializer_class = ProductSerializer
 
 class CustomerCreate(generics.CreateAPIView):
-    """
-    Endpoint para criar um novo cliente. 
-    Usado no cadastro, newsletter ou no início do checkout.
-    """
+# ... (código CustomerCreate) ...
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
@@ -59,10 +58,7 @@ class CustomerCreate(generics.CreateAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SaleCreate(generics.CreateAPIView):
-    """
-    Endpoint para a cliente submeter o carrinho de compras.
-    Registra a venda como um LEAD (Venda Pendente) no CRM/Admin.
-    """
+# ... (código SaleCreate) ...
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     
