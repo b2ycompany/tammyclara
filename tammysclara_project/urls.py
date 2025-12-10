@@ -4,11 +4,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings 
 from django.conf.urls.static import static 
-from django.views.generic import TemplateView # Importa o TemplateView
+from django.views.generic import TemplateView 
 
 # Importe a instância do seu Admin Site customizado
 from store.admin import crm_admin_site 
-from store.views import SaleCreate # Importe sua view de checkout (ou qualquer outra view principal)
+# Não precisamos importar SaleCreate aqui, pois será carregada via include('store.urls')
+# from store.views import SaleCreate 
 
 urlpatterns = [
     # Rota para o Painel de Administração Padrão
@@ -18,14 +19,14 @@ urlpatterns = [
     # Acessível em http://127.0.0.1:8000/crm-dashboard/
     path('crm-dashboard/', crm_admin_site.urls), 
     
-    # Rota para a API do Checkout (POST)
-    path('api/checkout/', SaleCreate.as_view(), name='checkout-create'), 
+    # Rota para a API do Checkout (POST) - LINHA REMOVIDA DAQUI PARA EVITAR DUPLICAÇÃO! 
+    # path('api/checkout/', SaleCreate.as_view(), name='checkout-create'), 
     
-    # Outras rotas da API (produtos, etc.)
-    path('api/', include('store.urls')), 
+    # 🌟 CORREÇÃO 🌟: TODAS AS ROTAS DE API ESTÃO AGORA APENAS AQUI
+    path('api/', include('store.urls')),
     
     # Rotas do Frontend estático (Templates)
-    path('', TemplateView.as_view(template_name='index.html'), name='home'), 
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
     path('products/', TemplateView.as_view(template_name='products.html'), name='products'),
     path('cart/', TemplateView.as_view(template_name='cart.html'), name='cart'),
 
