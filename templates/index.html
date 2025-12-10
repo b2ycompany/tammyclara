@@ -19,9 +19,6 @@
         <nav>
             <a href="{% url 'home' %}">Home</a>
             <a href="{% url 'products' %}">Coleção</a>
-            <a href="#novidades">Novidades</a>
-            <a href="#lojas">Lojas</a>
-            <a href="#contato">Contato</a>
             <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">
                 <i class="fas fa-shopping-bag"></i>
             </a>
@@ -45,9 +42,7 @@
 
                 <div class="fusion-story">
                     <h2>A Elegância.</h2>
-                    <p class="story-intro">A sua moda favorita acaba de ganhar um novo capítulo. Agora podendo provar seu look e ver novidades em nosso loja fisica..</p>
-                    <p class="story-detail">O que muda? Maior variedade, consultoria de moda aprimorada e a promessa de peças que celebram a sua força e beleza em qualquer ocasião. Clique e descubra o nosso novo catálogo.</p>
-                    <button class="btn secondary-btn">Leia Mais</button>
+                    <p class="story-intro">Sua moda favorita. Clique e descubra o catálogo.</p>
                 </div>
                 
             </div>
@@ -57,71 +52,8 @@
         <div class="hero-media"></div>
     </section>
 
-    <section class="feature-section" id="novidades">
-        <h2 style="text-align: center; width: 100%; margin-bottom: 40px;">✨ Destaques da Semana</h2>
-        
-        <div class="feature-item">
-            <div class="feature-image"> 
-                 <img src="{% static 'img/placeholder-produto.png' %}" alt="Nova Coleção Primavera">
-            </div>
-            <h2>Nova Coleção "Primavera/Verão"</h2>
-            <p>Cores leves, tecidos fluidos e estampas exclusivas. **Mais de 50 novas peças adicionadas** ao nosso catálogo online.</p>
-            <a href="{% url 'products' %}" class="btn secondary-btn">Comprar Agora</a>
-        </div>
-        
-        <div class="feature-item">
-            <div class="feature-image">
-                <img src="{% static 'img/placeholder-produto.png' %}" alt="Agende sua consultoria">
-            </div>
-            <h2>Serviço de Consultoria Exclusiva</h2>
-            <p>**Atendimento personalizado na nossa loja física.** Estilistas prontas para montar o look perfeito para qualquer evento.</p>
-            <a href="#contato" class="btn secondary-btn">Agendar</a>
-        </div>
-    </section>
-
-    <section class="store-location" id="lojas">
-        <h2>🛍️ Visite-nos em Cotia!</h2>
-        <div class="location-details">
-            <div class="address-info">
-                <h3>Loja Física Tammy's Store</h3>
-                <p>Nossa loja em Cotia oferece um espaço confortável e exclusivo para você provar suas peças favoritas.</p>
-                <p class="address-line">
-                    <i class="fas fa-map-marker-alt"></i> 
-                    **Endereço:** R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP, 06703-000
-                </p>
-                <p class="schedule">Horário de Funcionamento: Segunda a Sábado, das 10h às 19h.</p>
-            </div>
-            
-            <div class="map-container">
-                <p style="text-align: center; padding: 20px; border: 1px solid #ddd; background-color: #f9f9f9;">
-                    Mapa Indisponível (Em Manutenção). Clique abaixo para abrir no Google Maps.
-                </p>
-                <a href="https://maps.app.goo.gl/Your-Map-Link-Here" target="_blank" class="btn primary-btn" style="width: 100%; margin-top: 10px;">
-                    Abrir Localização no Google Maps
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section class="call-to-action" id="contato">
-        <h2>Fale Conosco e Garanta Suas Peças!</h2>
-        <p>Receba ofertas exclusivas, novidades e convites especiais diretamente no seu e-mail e tenha acesso prioritário às nossas consultoras.</p>
-        <form class="newsletter-form">
-            <input type="email" placeholder="Seu melhor e-mail aqui" required>
-            <button type="submit" class="btn primary-btn">Inscrever-se</button>
-        </form>
-        <p class="mt-3 contact-info">
-            Ou ligue/WhatsApp para agendamentos: **(11) 99876-5432**
-        </p>
-    </section>
-
     <footer class="footer">
         <p>© 2024 Tammy´s Store Todos os direitos reservados.</p>
-        <div class="social-links">
-            <a href="#" aria-label="Instagram">Instagram</a> | 
-            <a href="#" aria-label="Facebook">Facebook</a> |
-            <a href="#" aria-label="WhatsApp">WhatsApp</a>
-        </div>
     </footer>
     
     <script src="{% static 'js/script.js' %}"></script>
