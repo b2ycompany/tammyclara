@@ -67,7 +67,7 @@ ROOT_URLCONF = 'tammysclara_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # 🎯 CORREÇÃO 1: Garante que o caminho para templates é robusto (solução para 500 por Template Not Found)
+        # ✅ CORREÇÃO 500 MANTIDA: Garante que o caminho para templates é robusto
         'DIRS': [os.path.join(BASE_DIR, 'templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
@@ -95,7 +95,7 @@ if DATABASE_URL:
     }
 else:
     # 🚨 CRÍTICO: Configuração para Fly.io/SQLite com volume persistente (dentro da pasta 'data') 🚨
-    # 🎯 CORREÇÃO 2: Garantindo os.path.join para o nome do banco de dados
+    # ✅ CORREÇÃO 500 MANTIDA: Garantindo os.path.join para o nome do banco de dados
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -136,10 +136,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    # 🎯 CORREÇÃO 3: Garantindo os.path.join para o STATICFILES_DIRS
+    # ✅ CORREÇÃO 500 MANTIDA: Garantindo os.path.join para o STATICFILES_DIRS
     os.path.join(BASE_DIR, 'static'), 
 ]
-# 🎯 CORREÇÃO 4: Garantindo os.path.join para o STATIC_ROOT
+# ✅ CORREÇÃO 500 MANTIDA: Garantindo os.path.join para o STATIC_ROOT
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
 # 🚨 CORREÇÃO CRÍTICA: STORAGES para Mídia e Estáticos 🚨
@@ -154,7 +154,7 @@ STORAGES = {
 
 # Media files (Imagens de produtos, etc., enviadas pelos usuários)
 MEDIA_URL = 'media/'
-# 🎯 CORREÇÃO 5: Garantindo os.path.join para o MEDIA_ROOT
+# ✅ CORREÇÃO 500 MANTIDA: Garantindo os.path.join para o MEDIA_ROOT
 MEDIA_ROOT = os.path.join(BASE_DIR, 'data', 'media')
 
 
@@ -165,11 +165,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
-    # 🌟 CORREÇÃO 1: ADICIONANDO O DOMÍNIO HTTPS DE PRODUÇÃO 🌟
+    # ✅ CORREÇÃO CORS MANTIDA: Domínio HTTPS
     "https://tammyclara-store-b2y.fly.dev",
 ]
 
-# 🌟 CORREÇÃO 2: Adicionando REGEX para subdomínios (máxima compatibilidade Fly.io) 🌟
+# ✅ CORREÇÃO CORS MANTIDA: REGEX para subdomínios 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://(\w+\.)?tammyclara-store-b2y\.fly\.dev$",
 ]
@@ -185,5 +185,5 @@ CORS_ALLOW_HEADERS = [
 
 # Redirecionamento forçado para HTTPS em produção (Fly.io)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# 🎯 CORREÇÃO 6: Forçar o redirecionamento SSL para evitar loops ou comportamento errático do Fly.io
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
+# 🛑 CORREÇÃO DE DEPLOY: VOLTA PARA FALSE POR PADRÃO (Para o Health Check funcionar)
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
