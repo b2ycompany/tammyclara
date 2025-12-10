@@ -76,20 +76,19 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'tammysclara_project.urls'
 
 # ===========================================================
-# 4. TEMPLATES — CORREÇÃO DEFINITIVA DO CAMINHO
+# 4. TEMPLATES — CORREÇÃO ESTRUTURAL
 # ===========================================================
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
 
-        # 🎯 CORREÇÃO ESTRUTURAL: Força o Django a procurar no caminho exato store/templates/
         'DIRS': [
-            BASE_DIR / 'templates',           # templates/ global (Se existir)
-            BASE_DIR / 'store' / 'templates'  # ⬅️ ESSENCIAL: Onde seus templates estão
+            BASE_DIR / 'templates',           
+            BASE_DIR / 'store' / 'templates'  # ⬅️ ESSENCIAL: Caminho para seus templates
         ],
 
-        'APP_DIRS': True, # Mantido para carregar templates padrão de apps (como admin)
+        'APP_DIRS': True, 
 
         'OPTIONS': {
             'context_processors': [
@@ -148,12 +147,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# STATICFILES_DIRS: Não é estritamente necessário em produção, mas mantemos para Dev/Collectstatic
+# STATICFILES_DIRS: Condicional para Dev, array vazio em Prod (garantido em código)
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Destino final do collectstatic para Whitenoise
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
 
 STORAGES = {
     "default": {
@@ -165,7 +164,7 @@ STORAGES = {
 }
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'data' / 'media' # Volume persistente para uploads
+MEDIA_ROOT = BASE_DIR / 'data' / 'media' 
 
 # ===========================================================
 # 9. CORS (seguro e funcional)
@@ -187,7 +186,6 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Mantido em 'False' por padrão para o health check do Fly.io (Evita timeouts)
 SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
 
 # ===========================================================

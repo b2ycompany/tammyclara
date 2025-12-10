@@ -4,15 +4,15 @@ FROM python:3.11-slim
 # Define o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-# Define a variável de ambiente para que o Python não armazene cache
+# Evita buffer
 ENV PYTHONUNBUFFERED 1
 
-# Copia e instala as dependências
+# Instala dependências
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia o código do projeto
+# Copia o projeto
 COPY . .
 
-# Comando que será executado quando o contêiner iniciar
+# Comando correto (SEM vírgula no final)
 CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000"]

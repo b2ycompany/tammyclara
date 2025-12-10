@@ -1,15 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 🌟 CORREÇÃO ESSENCIAL: Garante o uso do caminho relativo /api
+    // 🌟 CORREÇÃO ESSENCIAL: Garante o uso do caminho relativo /api para compatibilidade DEV/PROD
     const API_BASE_URL = '/api'; 
     
-    // URL base do seu servidor Django (mantido para compatibilidade, mas agora usa o domínio atual)
+    // URL base do seu servidor Django (usada para construção de URLs de mídia)
     const DJANGO_BASE_URL = window.location.origin.replace(/\/$/, ''); 
     
-    // Variáveis globais para o Modal
+    // Variáveis globais para o Modal e Produtos
     let currentGalleryImages = [];
     let currentImageIndex = 0;
-    
+    let availableProducts = {}; 
+
     // Garante que o corpo do site esteja visível por padrão
     const mainBody = document.getElementById('main-body');
     if (mainBody) {
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÃO AUXILIAR PARA LIMPAR E CONSTRUIR A URL DE MÍDIA ---
     function buildMediaUrl(relativePath) {
         if (!relativePath) {
+            // Caminho estático seguro para placeholder
             return '/static/img/placeholder-produto.png';
         }
         
@@ -28,10 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return relativePath;
         }
 
-        // Remove a barra inicial do relativePath para evitar http://...//media/...
+        // Remove a barra inicial do relativePath se existir, e prefixa com /media/
         const cleanedPath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
         
-        // A URL base é o domínio atual, então apenas adicionamos a pasta de mídia e o caminho limpo
         return '/media/' + cleanedPath; 
     }
 
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return csrfInput ? csrfInput.value : null;
     }
     
-    // --- FUNÇÕES AUXILIARES DE INTERATIVIDADE (DEFINIDAS ANTES DE loadProducts) ---
+    // --- FUNÇÕES AUXILIARES DE INTERATIVIDADE ---
 
     function attachAddToCartListeners() {
         document.querySelectorAll('.add-to-cart-btn').forEach(button => {
@@ -82,10 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- CÓDIGO PRINCIPAL loadProducts ---
+    // --- CÓDIGO PRINCIPAL loadProducts (Para products.html) ---
     
     const productsGrid = document.querySelector('.products-grid');
-    let availableProducts = {}; 
 
     if (productsGrid) {
         
@@ -96,13 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(apiUrl); 
                 
                 if (!response.ok) {
-                    // Se o status não for 200 (mas, por exemplo, 404), este erro será lançado.
-                    throw new Error('Erro ao carregar produtos do servidor.');
+                    // Se o status não for 200 (OK), lança um erro
+                    throw new Error(`Erro ao carregar produtos do servidor. Status: ${response.status}`);
                 }
                 const products = await response.json();
 
                 if (!products || products.length === 0) {
-                    productsGrid.innerHTML = '<p>Nenhum produto encontrado. Cadastre no Admin!</p>';
+                    productsGrid.innerHTML = '<p style="text-align:center;">Nenhum produto encontrado. Cadastre no Admin!</p>';
                     return;
                 }
 
@@ -136,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
 
+
                     if (allImages.length > 0) {
                         initialImageUrl = buildMediaUrl(allImages[0].url);
                     }
@@ -160,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                         galleryHtml += '</div>';
                     }
-
+                    
                     // --- 3. CONSTRUÇÃO DO ELEMENTO PRINCIPAL ---
                     
                     const productItem = document.createElement('div');
@@ -187,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } catch (error) {
                 console.error('Falha ao buscar produtos:', error);
-                productsGrid.innerHTML = `<p class="error-msg">Erro ao carregar produtos: ${error.message}</p>`;
+                productsGrid.innerHTML = `<p class="error-msg" style="text-align:center; color:red;">Erro ao carregar produtos: ${error.message}</p>`;
             }
         }
         
@@ -298,7 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- LÓGICA DO CARRINHO E INTERATIVIDADE (RESTANTE DO CÓDIGO) ---
-    // ... (restante do código de Carrinho e Checkout) ...
     
     // --- LÓGICA DA INTERATIVIDADE DE FUSÃO (Leia Mais) ---
     const toggleButton = document.getElementById('toggle-story');
@@ -441,7 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     // --- Lógica de CHECKOUT (CRM/Venda Pendente) ---
-    // 🚨 Removida menção ao WhatsApp no fluxo de checkout 🚨
     const checkoutBtn = document.getElementById('checkout-whatsapp-btn');
     if (checkoutBtn) {
         // Altera o texto do botão para melhor UX (Se o botão tiver o ID correto)
