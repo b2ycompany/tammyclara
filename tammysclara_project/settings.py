@@ -67,7 +67,9 @@ ROOT_URLCONF = 'tammysclara_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], 
+        # 🌟 CORREÇÃO CRÍTICA APLICADA: Forçando o uso de os.path.join para robustez em produção. 
+        # Isso garante que a pasta 'templates' na raiz do projeto seja encontrada.
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
