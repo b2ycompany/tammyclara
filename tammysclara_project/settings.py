@@ -21,7 +21,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-y%k5@3=z&d-@&n79(4i^r
 DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
 
 # ALLOWED_HOSTS: Aceita o domínio do Fly.io e outros hosts.
+# 🚀 CORREÇÃO CRÍTICA: GARANTIR HOSTS DE PRODUÇÃO
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',') 
+if not DEBUG:
+    # Garantir que o domínio Fly.io esteja sempre aqui
+    ALLOWED_HOSTS.append('tammyclara-store-b2y.fly.dev') 
+    ALLOWED_HOSTS.append('*.tammyclara-store-b2y.fly.dev') 
 if DEBUG:
     ALLOWED_HOSTS = ['*'] # Permite tudo em desenvolvimento
 
@@ -158,9 +163,16 @@ MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# 🌟 CORREÇÃO FINAL DE CORS 🌟
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000", 
     "http://localhost:8000",
+    "https://tammyclara-store-b2y.fly.dev", # Domínio HTTPS de produção
+]
+
+# Permitir todos os subdomínios (máxima compatibilidade)
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://(\w+\.)?tammyclara-store-b2y\.fly\.dev$",
 ]
 
 CORS_ALLOW_METHODS = [
@@ -174,4 +186,5 @@ CORS_ALLOW_HEADERS = [
 
 # Redirecionamento forçado para HTTPS em produção (Fly.io)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+# 🚀 CORREÇÃO CRÍTICA: MUDAR SECURE_SSL_REDIRECT PARA TRUE NA PRODUÇÃO
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True' # Garantir HTTPS
