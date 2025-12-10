@@ -58,90 +58,37 @@
         <div class="hero-media"></div>
     </section>
 
-    <section class="feature-section" id="novidades">
-        <h2 style="text-align: center; width: 100%; margin-bottom: 40px;">✨ Destaques da Semana</h2>
-        
-        <div class="feature-item">
-            <div class="feature-image"> 
-                 <img src="{% static 'img/placeholder-produto.png' %}" alt="Nova Coleção Primavera">
-            </div>
-            <h2>Nova Coleção "Primavera/Verão"</h2>
-            <p>Cores leves, tecidos fluidos e estampas exclusivas. **Mais de 50 novas peças adicionadas** ao nosso catálogo online.</p>
-            <a href="{% url 'products' %}" class="btn secondary-btn">Comprar Agora</a>
-        </div>
-        
-        <div class="feature-item">
-            <div class="feature-image">
-                <img src="{% static 'img/placeholder-produto.png' %}" alt="Agende sua consultoria">
-            </div>
-            <h2>Serviço de Consultoria Exclusiva</h2>
-            <p>**Atendimento personalizado na nossa loja física.** Estilistas prontas para montar o look perfeito para qualquer evento.</p>
-            <a href="#contato" class="btn secondary-btn">Agendar</a>
-        </div>
+    <section class="feature-section" id="novidades" style="text-align: center; padding: 50px;">
+        <h2>✨ Destaques e Novidades</h2>
+        <p>Mais de 50 novas peças adicionadas. Venha conferir as tendências da moda Primavera/Verão!</p>
+        <a href="{% url 'products' %}" class="btn secondary-btn" style="margin-top: 15px;">Comprar Agora</a>
     </section>
-
-    <section class="store-location" id="lojas">
+    
+    <section class="store-location" id="lojas" style="text-align: center; padding: 50px; background-color: #f8f8f8;">
         <h2>🛍️ Visite-nos em Cotia!</h2>
-        <div class="location-details">
-            <div class="address-info">
-                <h3>Loja Física Tammy's Store</h3>
-                <p>Nossa loja em Cotia oferece um espaço confortável e exclusivo para você provar suas peças favoritas.</p>
-                <p class="address-line">
-                    <i class="fas fa-map-marker-alt"></i> 
-                    **Endereço:** R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP, 06703-000
-                </p>
-                <p class="schedule">Horário de Funcionamento: Segunda a Sábado, das 10h às 19h.</p>
-            </div>
-            
-            <div class="map-container" style="text-align: center; padding: 20px;">
-                 <p style="margin-bottom: 15px; color: #555;">Clique abaixo para ver a localização exata no mapa:</p>
-                 <a href="http://googleusercontent.com/maps.google.com/8" target="_blank" class="btn primary-btn" style="width: 100%; max-width: 300px;">
-                    Abrir Localização no Mapa
-                </a>
-            </div>
-        </div>
+        <p class="address-line">
+            Endereço: **R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP, 06703-000**
+        </p>
+        <a href="http://googleusercontent.com/maps.google.com/9" target="_blank" class="btn primary-btn" style="margin-top: 15px;">
+            Abrir Localização no Mapa
+        </a>
     </section>
 
-    <section class="call-to-action" id="contato">
-        <h2>Fale Conosco e Garanta Suas Peças!</h2>
-        <p>Receba ofertas exclusivas, novidades e convites especiais diretamente no seu e-mail e tenha acesso prioritário às nossas consultoras.</p>
+    <section class="call-to-action" id="contato" style="padding: 50px;">
+        <h2>Fale Conosco</h2>
         <form class="newsletter-form">
             <input type="email" placeholder="Seu melhor e-mail aqui" required>
             <button type="submit" class="btn primary-btn">Inscrever-se</button>
         </form>
         <p class="mt-3 contact-info">
-            Ou ligue/WhatsApp para agendamentos: **(11) 99876-5432**
+            WhatsApp para agendamentos: **(11) 99876-5432**
         </p>
     </section>
 
     <footer class="footer">
         <p>© 2024 Tammy´s Store Todos os direitos reservados.</p>
-        <div class="social-links">
-            <a href="#" aria-label="Instagram">Instagram</a> | 
-            <a href="#" aria-label="Facebook">Facebook</a> |
-            <a href="#" aria-label="WhatsApp">WhatsApp</a>
-        </div>
     </footer>
     
     <script src="{% static 'js/script.js' %}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleButton = document.getElementById('toggle-story');
-            const storyDetail = document.querySelector('.story-detail');
-
-            if (toggleButton && storyDetail) {
-                toggleButton.addEventListener('click', () => {
-                    // Alterna entre block e none
-                    if (storyDetail.style.display === 'none' || storyDetail.style.display === '') {
-                        storyDetail.style.display = 'block';
-                        toggleButton.textContent = 'Leia Menos';
-                    } else {
-                        storyDetail.style.display = 'none';
-                        toggleButton.textContent = 'Leia Mais';
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 </html>
