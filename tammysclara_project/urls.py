@@ -4,11 +4,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings 
 from django.conf.urls.static import static 
-# 🚨 MANTENDO TemplateView, mas garantindo que nada mais está bagunçado
 from django.views.generic import TemplateView 
 
 # Importe a instância do seu Admin Site customizado
 from store.admin import crm_admin_site 
+# ⬅️ IMPORTAÇÃO CRÍTICA: A nova view de função!
+from store.views import ProductList, SaleCreate, home_view 
+
 
 urlpatterns = [
     # Rota para o Painel de Administração Padrão
@@ -17,12 +19,13 @@ urlpatterns = [
     # Rota para o Dashboard de Vendas (CRM) 
     path('crm-dashboard/', crm_admin_site.urls), 
     
-    # 🌟 Rotas de API
+    # Rotas de API
     path('api/', include('store.urls')),
     
-    # Rotas do Frontend estático (Templates)
-    # 🚨 PONTO CRÍTICO: Estas chamadas funcionam bem em DEBUG=True, mas falham em produção
-    path('', TemplateView.as_view(template_name='index.html'), name='home'),
+    # 🌟 CORREÇÃO CRÍTICA 500: Usando a função home_view para garantir o contexto.
+    path('', home_view, name='home'),
+    
+    # As demais rotas de TemplateView
     path('products/', TemplateView.as_view(template_name='products.html'), name='products'),
     path('cart/', TemplateView.as_view(template_name='cart.html'), name='cart'),
 

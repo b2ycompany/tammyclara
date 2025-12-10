@@ -5,15 +5,25 @@ from rest_framework.response import Response
 from django.db import transaction
 from django.utils import timezone
 import urllib.parse 
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render # ⬅️ Importação de 'render' adicionada
 from decimal import Decimal
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from datetime import timedelta # 🚨 CORREÇÃO CRÍTICA: IMPORTAÇÃO DO TIMEDELTA 🚨
+from datetime import timedelta 
 
 # Importamos os modelos necessários para o processo
 from .models import Product, Customer, Sale, SaleItem, Invoice 
 from .serializers import ProductSerializer, CustomerSerializer, SaleSerializer, SaleItemSerializer
+
+# --- NOVO: FUNÇÃO PARA RENDERIZAR O TEMPLATE INICIAL (RESOLVE O ERRO 500) ---
+def home_view(request):
+    """
+    Renderiza o template da página inicial, garantindo o contexto correto.
+    Substitui TemplateView para maior robustez em produção (DEBUG=False).
+    """
+    # Usando render() em vez de TemplateView. Isso resolve problemas de carregamento de template
+    return render(request, 'index.html', {})
+# --------------------------------------------------------------------------
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
 
@@ -118,7 +128,7 @@ class SaleCreate(generics.CreateAPIView):
                     sale=sale,
                     customer=customer, 
                     amount_due=final_total,
-                    # Agora 'timedelta' está definido e funciona
+                    # timedelta está importado corretamente
                     due_date=timezone.now().date() + timedelta(days=7), 
                     payment_status='PENDING'
                 )
