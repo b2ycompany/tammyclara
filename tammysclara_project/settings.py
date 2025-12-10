@@ -159,8 +159,15 @@ MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000", 
+    "http://127.0.0.1:8000",
     "http://localhost:8000",
+    # 🌟 CORREÇÃO 1: ADICIONANDO O DOMÍNIO HTTPS DE PRODUÇÃO 🌟
+    "https://tammyclara-store-b2y.fly.dev",
+]
+
+# 🌟 CORREÇÃO 2: Adicionando REGEX para subdomínios (máxima compatibilidade Fly.io) 🌟
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://(\w+\.)?tammyclara-store-b2y\.fly\.dev$",
 ]
 
 CORS_ALLOW_METHODS = [
