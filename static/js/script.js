@@ -92,9 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         async function loadProducts() {
             try {
-                // 🚨 CORRIGIDO: Usa a API_BASE_URL '/api' + '/products/' = '/api/products/'
-                const response = await fetch(API_BASE_URL + '/products/'); 
+                // 🚀 CORREÇÃO DE ROBUSTEZ: Constrói a URL de forma segura.
+                // Isso garante que `/api` + `/products/` sempre resulte em `/api/products/`
+                const apiUrl = `${API_BASE_URL.replace(/\/$/, '')}/products/`;
+                const response = await fetch(apiUrl); 
+                
                 if (!response.ok) {
+                    // Se o status não for 200 (mas, por exemplo, 404), este erro será lançado.
                     throw new Error('Erro ao carregar produtos do servidor.');
                 }
                 const products = await response.json();
