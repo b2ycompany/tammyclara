@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 🌟 CORREÇÃO APLICADA 🌟: USANDO CAMINHO RELATIVO /api
-    // Isso garante que funcionará tanto em http://127.0.0.1:8000/api quanto em https://seuapp.fly.dev/api
+    // 🌟 CORREÇÃO ESSENCIAL: Garante o uso do caminho relativo /api
     const API_BASE_URL = '/api'; 
     
     // URL base do seu servidor Django (mantido para compatibilidade, mas agora usa o domínio atual)
@@ -32,8 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Remove a barra inicial do relativePath para evitar http://...//media/...
         const cleanedPath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
         
-        // CORRIGIDO: A URL base é o domínio atual, então apenas adicionamos a pasta de mídia e o caminho limpo
-        // O navegador irá converter para https://tammyclara-store-b2y.fly.dev/media/products/arquivo.png
+        // A URL base é o domínio atual, então apenas adicionamos a pasta de mídia e o caminho limpo
         return '/media/' + cleanedPath; 
     }
 
@@ -93,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         async function loadProducts() {
             try {
-                // 🚀 CHAMADA CORRIGIDA: Usa o caminho relativo '/api/products/'
+                // CHAMADA CORRIGIDA: Usa o caminho relativo '/api/products/'
                 const apiUrl = `${API_BASE_URL}/products/`;
                 const response = await fetch(apiUrl); 
                 
@@ -176,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         '<h3>' + product.name + '</h3>' +
                         '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
                         '<button ' + 
-                            'class="btn primary-btn add-to-cart-btn" ' + // Sintaxe de aspas corrigida
+                            'class="btn primary-btn add-to-cart-btn" ' + 
                             'data-id="' + product.id + '">' +
                             'Adicionar ao Carrinho' +
                         '</button>';
@@ -484,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                // 🚨 CHAMADA CORRIGIDA: Usa o caminho relativo '/api/checkout/'
+                // CHAMADA CORRIGIDA: Usa o caminho relativo '/api/checkout/'
                 const response = await fetch(`${API_BASE_URL}/checkout/`, {
                     method: 'POST',
                     headers: {
@@ -496,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    // 🚨 CORREÇÃO DE ERRO 400: Exibe a mensagem amigável do backend 🚨
+                    // Exibe a mensagem amigável do backend 
                     throw new Error(errorData.error || `Erro ao registrar pedido. Status: ${response.status}`);
                 }
 
@@ -510,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (error) {
                 console.error("Erro no checkout:", error);
-                // 🚨 CORREÇÃO DE ERRO 400: Exibe a mensagem de estoque mais amigável 🚨
+                // Exibe a mensagem de estoque mais amigável 
                 alert(`⚠️ Atenção: ${error.message}`);
             }
         });
