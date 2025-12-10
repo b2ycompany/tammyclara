@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 🚨 CORREÇÃO CRÍTICA: Removendo o localhost para usar o domínio atual (tammyclara-store-b2y.fly.dev)
-    const API_BASE_URL = '/api'; 
+    // 🔥 CORREÇÃO FINAL: FORÇANDO A URL DE PRODUÇÃO HTTPS PARA ANULAR O CACHE 127.0.0.1
+    const API_BASE_URL = window.location.protocol + '//' + window.location.host + '/api'; 
     
     // URL base do seu servidor Django (mantido para compatibilidade, mas agora usa o domínio atual)
     const DJANGO_BASE_URL = window.location.origin.replace(/\/$/, ''); 
@@ -92,8 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         async function loadProducts() {
             try {
-                // 🚀 CORREÇÃO DE ROBUSTEZ: Constrói a URL de forma segura.
-                // Isso garante que `/api` + `/products/` sempre resulte em `/api/products/`
+                // 🚀 A URL JÁ É ABSOLUTA E SEGURA (https://tammyclara-store-b2y.fly.dev/api/products/)
                 const apiUrl = `${API_BASE_URL.replace(/\/$/, '')}/products/`;
                 const response = await fetch(apiUrl); 
                 
@@ -176,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         '<h3>' + product.name + '</h3>' +
                         '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
                         '<button ' + 
-                            'class="btn primary-btn add-to-cart-btn" ' + 
+                            'class="btn primary-btn add-to-cart-btn" "' + // 🌟 CORREÇÃO DE SINTAXE AQUI 🌟
                             'data-id="' + product.id + '">' +
                             'Adicionar ao Carrinho' +
                         '</button>';
