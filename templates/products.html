@@ -86,6 +86,9 @@
 
     <!-- SCRIPT PARA RENDERIZAR OS PRODUTOS -->
     <script>
+        // URL da imagem padrão, agora corretamente processada pelo Django
+        const NO_IMAGE_URL = "{% static 'img/no-image.png' %}";
+
         document.addEventListener("DOMContentLoaded", () => {
             const container = document.getElementById("products-container");
 
@@ -103,7 +106,7 @@
                         const card = document.createElement("div");
                         card.classList.add("product-card");
 
-                        const imgSrc = product.main_image || "{% static 'img/no-image.png' %}";
+                        const imgSrc = product.main_image || NO_IMAGE_URL;
 
                         card.innerHTML = `
                             <div class="product-img">
