@@ -4,34 +4,38 @@ Configurações para o projeto Tammy & Clara, prontas para Fly.io (produção) e
 
 import os
 from pathlib import Path
-import dj_database_url 
-from dotenv import load_dotenv 
+import dj_database_url
+from dotenv import load_dotenv
 
 # Carrega variáveis de ambiente do arquivo .env (apenas no ambiente local)
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# -----------------------------------------
 # 1. CONFIGURAÇÕES DE SEGURANÇA E AMBIENTE
+# -----------------------------------------
 
-# Busca a chave secreta da variável de ambiente (Fly.io) ou usa um valor padrão local.
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-y%k5@3=z&d-@&n79(4i^r)229*^x$@+g+21$v_c(p1q4+c+r6g')
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-y%k5@3=z&d-@&n79(4i^r)229*^x$@+g+21$v_c(p1q4+c+r6g'
+)
 
-# DEBUG: 'False' em produção (Fly.io) e 'True' em desenvolvimento local (.env)
-DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# 🚀 CORREÇÃO CRÍTICA DO TIMEOUT: Simplificando ALLOWED_HOSTS para o essencial
+# ALLOWED_HOSTS – simplificado e correto para Fly.io
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
-    # Apenas o domínio Fly.io e o IP local
     ALLOWED_HOSTS = [
         'tammyclara-store-b2y.fly.dev',
         '.tammyclara-store-b2y.fly.dev',
     ]
 
-# 2. DEFINIÇÃO DE APLICATIVOS
+
+# -----------------------------------------
+# 2. APPS DO DJANGO
+# -----------------------------------------
 
 INSTALLED_APPS = [
     # Django Padrão
@@ -42,24 +46,27 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Apps de Terceiros
-    'rest_framework',   
-    'corsheaders',      
-    'django_cleanup.apps.CleanupConfig', 
+    # Terceiros
+    'rest_framework',
+    'corsheaders',
+    'django_cleanup.apps.CleanupConfig',
 
-    # Suas Apps Locais
-    'store',            
+    # Apps Locais
+    'store',
 ]
 
+
+# -----------------------------------------
 # 3. MIDDLEWARE
+# -----------------------------------------
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Para servir Static Files em produção (Fly.io)
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Static files em produção
     'django.contrib.sessions.middleware.SessionMiddleware',
-    
-    'corsheaders.middleware.CorsMiddleware', 
-    
+
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -67,12 +74,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+# -----------------------------------------
+# 4. TEMPLATES E WSGI
+# -----------------------------------------
+
 ROOT_URLCONF = 'tammysclara_project.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], 
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,89 +100,83 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
 
-# 4. CONFIGURAÇÃO DE BANCO DE DADOS (SQLITE COM PERSISTÊNCIA)
+# -----------------------------------------
+# 5. BANCO DE DADOS (Fly.io SQLite persistente)
+# -----------------------------------------
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    # Esta configuração é apenas se usarmos um banco de dados externo (PostgreSQL)
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
 else:
-    # 🚨 CRÍTICO: Configuração para Fly.io/SQLite com volume persistente (dentro da pasta 'data') 🚨
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'data' / 'db.sqlite3', 
+            'NAME': BASE_DIR / 'data' / 'db.sqlite3',
         }
     }
 
 
-# 5. VALIDAÇÃO DE SENHAS (Padrão)
+# -----------------------------------------
+# 6. VALIDAÇÃO DE SENHAS
+# -----------------------------------------
+
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 
-# 6. INTERNACIONALIZAÇÃO
+# -----------------------------------------
+# 7. INTERNACIONALIZAÇÃO
+# -----------------------------------------
 
 LANGUAGE_CODE = 'pt-br'
-
 TIME_ZONE = 'America/Sao_Paulo'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
-# 7. ARQUIVOS ESTÁTICOS (STATIC) E MÍDIA (MEDIA)
+# -----------------------------------------
+# 8. STATIC E MEDIA CONFIG
+# -----------------------------------------
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static', 
-]
-STATIC_ROOT = BASE_DIR / 'staticfiles' 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# 🚨 CORREÇÃO CRÍTICA: STORAGES para Mídia e Estáticos 🚨
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage", 
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-# Media files (Imagens de produtos, etc., enviadas pelos usuários)
-MEDIA_URL = 'media/'
-# 🚨 CRÍTICO: MEDIA_ROOT APONTA PARA A PASTA DE DADOS (para persistência no volume) 🚨
+# Media persistente no volume Fly.io
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
 
-# 8. CONFIGURAÇÕES ADICIONAIS DE SEGURANÇA E CORS
+# -----------------------------------------
+# 9. CORS CONFIG
+# -----------------------------------------
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# 🌟 CORREÇÃO FINAL DE CORS (Não muda, pois está correta, mas agora o servidor deve iniciar) 🌟
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000", 
+    "http://127.0.0.1:8000",
     "http://localhost:8000",
     "https://tammyclara-store-b2y.fly.dev",
 ]
 
-# Permitir todos os subdomínios (máxima compatibilidade)
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://(\w+\.)?tammyclara-store-b2y\.fly\.dev$",
 ]
@@ -180,13 +186,25 @@ CORS_ALLOW_METHODS = [
 ]
 
 CORS_ALLOW_HEADERS = [
-    'accept', 'accept-encoding', 'authorization', 'content-type', 'dnt', 'origin',
-    'user-agent', 'x-csrftoken', 'x-requested-with',
+    'accept', 'accept-encoding', 'authorization',
+    'content-type', 'dnt', 'origin', 'user-agent',
+    'x-csrftoken', 'x-requested-with',
 ]
 
-# Redirecionamento forçado para HTTPS em produção (Fly.io)
+
+# -----------------------------------------
+# 10. HTTPS E PROXY (Fly.io)
+# -----------------------------------------
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# 🚀 CORREÇÃO CRÍTICA: Revertendo para a configuração padrão de produção segura
-SECURE_SSL_REDIRECT = True 
-if DEBUG:
-    SECURE_SSL_REDIRECT = False
+
+# 🛑 Correção ESSENCIAL para Fly.io:
+# Não habilitar redirect automático, pois quebra health checks.
+SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "False") == "True"
+
+
+# -----------------------------------------
+# 11. CONFIGS FINAIS
+# -----------------------------------------
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
