@@ -67,8 +67,7 @@ ROOT_URLCONF = 'tammysclara_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # 🌟 CORREÇÃO CRÍTICA APLICADA: Forçando o uso de os.path.join para robustez em produção. 
-        # Isso garante que a pasta 'templates' na raiz do projeto seja encontrada.
+        # 🎯 CORREÇÃO 1: Garante que o caminho para templates é robusto (solução para 500 por Template Not Found)
         'DIRS': [os.path.join(BASE_DIR, 'templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
@@ -96,10 +95,11 @@ if DATABASE_URL:
     }
 else:
     # 🚨 CRÍTICO: Configuração para Fly.io/SQLite com volume persistente (dentro da pasta 'data') 🚨
+    # 🎯 CORREÇÃO 2: Garantindo os.path.join para o nome do banco de dados
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'data' / 'db.sqlite3', 
+            'NAME': os.path.join(BASE_DIR, 'data', 'db.sqlite3'), 
         }
     }
 
@@ -136,9 +136,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static', 
+    # 🎯 CORREÇÃO 3: Garantindo os.path.join para o STATICFILES_DIRS
+    os.path.join(BASE_DIR, 'static'), 
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles' 
+# 🎯 CORREÇÃO 4: Garantindo os.path.join para o STATIC_ROOT
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
 # 🚨 CORREÇÃO CRÍTICA: STORAGES para Mídia e Estáticos 🚨
 STORAGES = {
@@ -152,8 +154,8 @@ STORAGES = {
 
 # Media files (Imagens de produtos, etc., enviadas pelos usuários)
 MEDIA_URL = 'media/'
-# 🚨 CRÍTICO: MEDIA_ROOT APONTA PARA A PASTA DE DADOS (para persistência no volume) 🚨
-MEDIA_ROOT = BASE_DIR / 'data' / 'media'
+# 🎯 CORREÇÃO 5: Garantindo os.path.join para o MEDIA_ROOT
+MEDIA_ROOT = os.path.join(BASE_DIR, 'data', 'media')
 
 
 # 8. CONFIGURAÇÕES ADICIONAIS DE SEGURANÇA E CORS
@@ -183,4 +185,5 @@ CORS_ALLOW_HEADERS = [
 
 # Redirecionamento forçado para HTTPS em produção (Fly.io)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+# 🎯 CORREÇÃO 6: Forçar o redirecionamento SSL para evitar loops ou comportamento errático do Fly.io
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
