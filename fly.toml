@@ -36,11 +36,11 @@ primary_region = "gru"
   [[services.http_checks]]
     interval = "10s"
     grace_period = "5s"
-    # 🚨 CORREÇÃO CRÍTICA: Verifica uma rota estável do Django 🚨
+    # ✅ Rota estável para o health check
     path = "/admin/login/" 
     timeout = "2s"
-    tls-skip-verify = false # Corrigido o traço no nome do campo
-
+    tls-skip-verify = false # Corrigido para o formato com hífen
+    
 [deploy]
-  # ✅ CORREÇÃO: Adicionando collectstatic antes da migração para garantir os estáticos em produção.
-  release_command = "python manage.py collectstatic --noinput && python manage.py migrate --noinput"
+  # ✅ CORREÇÃO CRÍTICA: Usa /bin/sh -c para executar os comandos encadeados com '&&'.
+  release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
