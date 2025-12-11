@@ -1,9 +1,9 @@
 # fly.toml
 # Nome do aplicativo registrado no Fly.io
-[cite_start]app = "tammyclara-store-b2y" [cite: 4]
+app = "tammyclara-store-b2y" 
 
 # Região primária para a máquina virtual
-[cite_start]primary_region = "gru" [cite: 4]
+primary_region = "gru"
 
 [build]
   # Usa o Dockerfile na raiz
@@ -11,35 +11,35 @@
 # CONFIGURAÇÃO DE VOLUMES: UNIFICADA PARA 1 VOLUME
 [[mounts]]
   # O volume único que armazena tanto o db.sqlite3 quanto a pasta /media
-  [cite_start]source="tammyclara_data" [cite: 4]
-  [cite_start]destination="/app/data"   # O ponto de montagem no contêiner [cite: 4]
+  source="tammyclara_data" 
+  destination="/app/data"   # O ponto de montagem no contêiner
 
 [env]
-  [cite_start]PORT = "8000" [cite: 4]
-  [cite_start]PYTHON_VERSION = "3.11" [cite: 4]
+  PORT = "8000"
+  PYTHON_VERSION = "3.11"
 
 # Configuração para servir a aplicação Web
 [[services]]
-  [cite_start]protocol = "tcp" [cite: 4]
-  [cite_start]internal_port = 8000 [cite: 4]
-  [cite_start]processes = ["app"] [cite: 4]
+  protocol = "tcp"
+  internal_port = 8000
+  processes = ["app"]
 
   [[services.ports]]
-    [cite_start]port = "80" [cite: 4]
-    [cite_start]handlers = ["http"] [cite: 4]
-    [cite_start]force_https = true [cite: 4]
+    port = "80"
+    handlers = ["http"]
+    force_https = true
 
   [[services.ports]]
-    [cite_start]port = "443" [cite: 4]
-    [cite_start]handlers = ["tls", "http"] [cite: 4]
+    port = "443"
+    handlers = ["tls", "http"]
 
   [[services.http_checks]]
-    [cite_start]interval = "10s" [cite: 4]
-    [cite_start]grace_period = "5s" [cite: 4]
-    # Usando a rota principal '/' para um health check mais rápido e confiável (Corrigido da análise anterior)
+    interval = "10s"
+    grace_period = "5s"
+    # Usando a rota principal '/' para um health check mais rápido e confiável
     path = "/" 
-    [cite_start]timeout = "5s" # Aumentado para 5s [cite: 4]
-    [cite_start]tls-skip-verify = false [cite: 4]
+    timeout = "5s" 
+    tls-skip-verify = false
     
 [deploy]
   # Usa /bin/sh -c para executar os comandos collectstatic e migrate com sucesso.
