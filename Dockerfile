@@ -13,6 +13,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia o projeto
 COPY . .
-
 # Comando correto (SEM vírgula no final)
 CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000"]
