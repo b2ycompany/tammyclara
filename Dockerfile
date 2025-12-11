@@ -11,12 +11,17 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia o projeto
+# Copia o projeto (como root)
 COPY . .
 
-# CORREÇÃO CRÍTICA: Cria e muda para o utilizador não-root 'appuser'
-# Isso resolve o problema de o Fly.io matar o processo que está a correr como root.
+# Cria o utilizador 'appuser'
 RUN adduser --disabled-password appuser
+
+# ✅ CORREÇÃO CRÍTICA FINAL: Concede ao 'appuser' a propriedade sobre o diretório /app.
+# Isso permite que o collectstatic e uploads de media (em /app/data) funcionem.
+RUN chown -R appuser:appuser /app
+
+# Muda para o utilizador não-root
 USER appuser
 
 # Comando Gunicorn
