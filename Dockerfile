@@ -17,12 +17,12 @@ COPY . .
 # Cria o utilizador 'appuser'
 RUN adduser --disabled-password appuser
 
-# ✅ CORREÇÃO CRÍTICA FINAL: Concede ao 'appuser' a propriedade sobre o diretório /app.
+# Concede ao 'appuser' a propriedade sobre o diretório /app.
 # Isso permite que o collectstatic e uploads de media (em /app/data) funcionem.
 RUN chown -R appuser:appuser /app
 
 # Muda para o utilizador não-root
 USER appuser
 
-# Comando Gunicorn
-CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--log-level", "info", "--access-logfile", "-", "--error-logfile", "-"]
+# Comando Gunicorn mais simples e limpo (compatível com a última correção)
+CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -112,6 +112,8 @@ WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 # ===========================================================
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
+# Variável para forçar o caminho DB se não for URL (SQLite)
+SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH')
 
 if DATABASE_URL:
     DATABASES = {
@@ -121,10 +123,11 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'data' / 'db.sqlite3', # Caminho para o volume persistente
+            # ✅ CORREÇÃO FINAL: Usa a variável de ambiente se o path DB estiver definido (para produção)
+            # Caso contrário, usa o caminho original.
+            'NAME': SQLITE_DB_PATH if SQLITE_DB_PATH else (BASE_DIR / 'data' / 'db.sqlite3'),
         }
     }
-
 # ===========================================================
 # 6. VALIDAÇÃO DE SENHA
 # ===========================================================
