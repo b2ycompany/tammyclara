@@ -33,15 +33,15 @@ primary_region = "gru"
     port = "443"
     handlers = ["tls", "http"]
 
+  # ❌ REMOVIDO: O bloco HTTP checks que estava a falhar
+  # [[services.http_checks]]
+  # ...
 
-    [[services.http_checks]]
+  # ✅ CORREÇÃO FINAL: Mudar para TCP check (verifica se a porta 8000 está aberta).
+  [[services.tcp_checks]]
     interval = "10s"
-    # ✅ CORREÇÃO FINAL: Aumentar a graça para 30s para dar tempo ao Django inicializar
     grace_period = "30s" 
-    path = "/" 
-    # ✅ CORREÇÃO FINAL: Aumentar o timeout para 10s
-    timeout = "10s" 
-    tls-skip-verify = false
+    timeout = "10s"
     
 [deploy]
   # Usa /bin/sh -c para executar os comandos collectstatic e migrate com sucesso.
