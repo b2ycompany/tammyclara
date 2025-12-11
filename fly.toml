@@ -36,11 +36,13 @@ primary_region = "gru"
   [[services.http_checks]]
     interval = "10s"
     grace_period = "5s"
-    # ✅ Rota estável para o health check
+    # Rota estável para o health check
     path = "/admin/login/" 
-    timeout = "2s"
-    tls-skip-verify = false # Corrigido para o formato com hífen
+    # ✅ CORREÇÃO: Aumentado de 2s para 5s para evitar timeout de inicialização do Django.
+    timeout = "5s" 
+    # ✅ CORREÇÃO: Formato correto do campo.
+    tls-skip-verify = false 
     
 [deploy]
-  # ✅ CORREÇÃO CRÍTICA: Usa /bin/sh -c para executar os comandos encadeados com '&&'.
+  # ✅ CORREÇÃO CRÍTICA: Usa /bin/sh -c para executar comandos encadeados.
   release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
