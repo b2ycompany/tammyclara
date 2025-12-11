@@ -39,8 +39,8 @@ primary_region = "gru"
     # 🚨 CORREÇÃO CRÍTICA: Verifica uma rota estável do Django 🚨
     path = "/admin/login/" 
     timeout = "2s"
-    tls_skip_verify = false
+    tls-skip-verify = false # Corrigido o traço no nome do campo
 
 [deploy]
-  # Comando de liberação: migra o banco de dados (SQLite no volume /app/data)
-  release_command = "python manage.py migrate --noinput"
+  # ✅ CORREÇÃO: Adicionando collectstatic antes da migração para garantir os estáticos em produção.
+  release_command = "python manage.py collectstatic --noinput && python manage.py migrate --noinput"
