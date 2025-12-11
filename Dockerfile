@@ -25,4 +25,4 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Comando Gunicorn
-CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--log-level", "info", "--access-logfile", "-", "--error-logfile", "-"]
