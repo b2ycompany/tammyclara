@@ -76,16 +76,17 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'tammysclara_project.urls'
 
 # ===========================================================
-# 4. TEMPLATES — CORREÇÃO ESTRUTURAL
+# 4. TEMPLATES — CAMINHO DE BUSCA
 # ===========================================================
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
 
+        # Corrigido o caminho estrutural para encontrar templates em store/templates/
         'DIRS': [
             BASE_DIR / 'templates',           
-            BASE_DIR / 'store' / 'templates'  # ⬅️ ESSENCIAL: Caminho para seus templates
+            BASE_DIR / 'store' / 'templates'  # Caminho correto para a estrutura do seu projeto
         ],
 
         'APP_DIRS': True, 
@@ -147,12 +148,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# STATICFILES_DIRS: Condicional para Dev, array vazio em Prod (garantido em código)
+# STATICFILES_DIRS: Condicional (necessário para collectstatic local)
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles' 
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Destino final do collectstatic para Whitenoise
 
 STORAGES = {
     "default": {
@@ -164,7 +165,7 @@ STORAGES = {
 }
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'data' / 'media' 
+MEDIA_ROOT = BASE_DIR / 'data' / 'media' # Volume persistente para uploads
 
 # ===========================================================
 # 9. CORS (seguro e funcional)
@@ -186,6 +187,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# Mantido em 'False' por padrão para o health check do Fly.io (Evita timeouts)
 SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
 
 # ===========================================================
