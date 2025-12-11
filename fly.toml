@@ -33,12 +33,14 @@ primary_region = "gru"
     port = "443"
     handlers = ["tls", "http"]
 
-  [[services.http_checks]]
+
+    [[services.http_checks]]
     interval = "10s"
-    grace_period = "5s"
-    # Usando a rota principal '/' para um health check mais rápido e confiável
+    # ✅ CORREÇÃO FINAL: Aumentar a graça para 30s para dar tempo ao Django inicializar
+    grace_period = "30s" 
     path = "/" 
-    timeout = "5s" 
+    # ✅ CORREÇÃO FINAL: Aumentar o timeout para 10s
+    timeout = "10s" 
     tls-skip-verify = false
     
 [deploy]
