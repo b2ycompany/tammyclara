@@ -5,7 +5,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Evita buffer
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 # Instala dependências
 COPY requirements.txt .
@@ -13,5 +13,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia o projeto
 COPY . .
-# Comando correto (SEM vírgula no final)
+
+# ----------------------------------------------------------
+# 🔥 CORREÇÃO OBRIGATÓRIA PARA O FLY.IO:
+# Cria um usuário não-root e muda o contexto de execução
+# ----------------------------------------------------------
+RUN adduser --disabled-password appuser
+USER appuser
+
+# Comando correto
 CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000"]

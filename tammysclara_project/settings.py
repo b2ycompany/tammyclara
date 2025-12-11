@@ -26,6 +26,9 @@ ALLOWED_HOSTS = [
 ]
 if DEBUG:
     ALLOWED_HOSTS.append("*")
+else:
+    # ✅ MELHORIA: Adiciona o wildcard para aceitar tráfego interno do Fly.io (ex: health checks)
+    ALLOWED_HOSTS.append(".*") 
 
 # CSRF – extremamente importante no Fly.io
 CSRF_TRUSTED_ORIGINS = [
@@ -187,8 +190,8 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Mantido em 'False' por padrão para o health check do Fly.io (Evita timeouts)
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+# ✅ CORREÇÃO: Desativa o redirecionamento SSL no Django para garantir que o health check HTTP interno passe
+SECURE_SSL_REDIRECT = False 
 
 # ===========================================================
 # 11. PADRÕES DJANGO

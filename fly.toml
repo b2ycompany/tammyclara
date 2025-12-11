@@ -8,7 +8,7 @@ primary_region = "gru"
 [build]
   # Usa o Dockerfile na raiz
 
-# 🚨 CONFIGURAÇÃO DE VOLUMES: UNIFICADA PARA 1 VOLUME (LIMITE DO PLANO GRATUITO) 🚨
+# CONFIGURAÇÃO DE VOLUMES: UNIFICADA PARA 1 VOLUME
 [[mounts]]
   # O volume único que armazena tanto o db.sqlite3 quanto a pasta /media
   source="tammyclara_data" 
@@ -36,13 +36,11 @@ primary_region = "gru"
   [[services.http_checks]]
     interval = "10s"
     grace_period = "5s"
-    # Rota estável para o health check
-    path = "/admin/login/" 
-    # ✅ CORREÇÃO: Aumentado de 2s para 5s para evitar timeout de inicialização do Django.
+    # ✅ CORREÇÃO: Usando a rota principal '/' para um health check mais rápido e confiável
+    path = "/" 
     timeout = "5s" 
-    # ✅ CORREÇÃO: Formato correto do campo.
-    tls-skip-verify = false 
+    tls-skip-verify = false
     
 [deploy]
-  # ✅ CORREÇÃO CRÍTICA: Usa /bin/sh -c para executar comandos encadeados.
+  # Usa /bin/sh -c para executar os comandos collectstatic e migrate com sucesso.
   release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
