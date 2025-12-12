@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentImageIndex = 0;
     let availableProducts = {}; 
 
+    // --- VARIÁVEIS PDV (Novas) ---
+    let posCart = []; // Carrinho específico para o PDV (não usa localStorage por padrão)
+    let selectedPayment = 'PIX'; 
+    let allProducts = []; // Cache de todos os produtos para a busca rápida do PDV
+    // --- FIM VARIÁVEIS PDV ---
+
     // Garante que o corpo do site esteja visível por padrão
     const mainBody = document.getElementById('main-body');
     if (mainBody) {
@@ -43,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return csrfInput ? csrfInput.value : null;
     }
     
-    // --- FUNÇÕES AUXILIARES DE INTERATIVIDADE ---
+    // --- FUNÇÕES AUXILIARES DE INTERATIVIDADE E-COMMERCE ---
 
     function attachAddToCartListeners() {
         document.querySelectorAll('.add-to-cart-btn').forEach(button => {
@@ -91,16 +97,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         async function loadProducts() {
             try {
-                // CHAMADA CORRIGIDA: Usa o caminho relativo '/api/products/'
                 const apiUrl = `${API_BASE_URL}/products/`;
                 const response = await fetch(apiUrl); 
                 
                 if (!response.ok) {
-                    // Se o status não for 200 (OK), lança um erro
                     throw new Error(`Erro ao carregar produtos do servidor. Status: ${response.status}`);
                 }
                 const products = await response.json();
-
+                
+                // ✅ Cache para uso geral (PDV e E-commerce)
+                allProducts = products; 
+                
                 if (!products || products.length === 0) {
                     productsGrid.innerHTML = '<p style="text-align:center;">Nenhum produto encontrado. Cadastre no Admin!</p>';
                     return;
@@ -204,14 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
         async function loadFeaturedProducts() {
              // Reusa a função loadProducts, mas limita a 4 itens
              try {
-                const apiUrl = `${API_BASE_URL}/products/`;
-                const response = await fetch(apiUrl); 
+                // Se allProducts já foi carregado, usa o cache
+                const products = allProducts.length > 0 ? allProducts : await fetch(`${API_BASE_URL}/products/`).then(res => res.json()); 
                 
-                if (!response.ok) {
-                    throw new Error(`Erro ao carregar produtos do servidor.`);
-                }
-                const products = await response.json();
-
                 if (!products || products.length === 0) {
                     featuredProductsContainer.innerHTML = '<p>Nenhum produto em destaque no momento.</p>';
                     return;
@@ -503,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartDisplay();
     
 
-    // --- Lógica de CHECKOUT (CRM/Venda Pendente) ---
+    // --- Lógica de CHECKOUT E-COMMERCE (CRM/Venda Pendente) ---
     const checkoutBtn = document.getElementById('checkout-whatsapp-btn');
     if (checkoutBtn) {
         // Altera o texto do botão para melhor UX (Se o botão tiver o ID correto)
@@ -576,4 +578,277 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
+    // =========================================================================
+    // 🛒 LÓGICA DO PONTO DE VENDA (PDV)
+    // =========================================================================
+
+    if (document.getElementById('pos-product-search')) {
+        
+        // Inicia carregando todos os produtos para a busca rápida
+        if (allProducts.length === 0) {
+             fetch(`${API_BASE_URL}/products/`)
+                .then(res => res.json())
+                .then(products => {
+                    allProducts = products;
+                    displaySearchResults(allProducts);
+                })
+                .catch(error => {
+                    document.getElementById('product-results').innerHTML = `<p style="color:red;">Falha ao carregar catálogo: ${error.message}</p>`;
+                });
+        } else {
+             displaySearchResults(allProducts);
+        }
+        
+        // Adiciona listeners para os botões de pagamento
+        document.querySelectorAll('.payment-option-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove 'active' de todos
+                document.querySelectorAll('.payment-option-btn').forEach(b => b.classList.remove('active'));
+                // Adiciona 'active' ao clicado
+                e.currentTarget.classList.add('active');
+                selectedPayment = e.currentTarget.dataset.type;
+            });
+        });
+    }
+
+    // Função auxiliar para lidar com Enter no campo de busca
+    window.handleSearchEnter = function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            searchProducts();
+        }
+    }
+    
+    // 1. FUNÇÃO DE BUSCA E EXIBIÇÃO DE PRODUTOS
+    window.searchProducts = function() {
+        const query = document.getElementById('pos-product-search').value.toLowerCase();
+        
+        if (allProducts.length === 0) {
+            document.getElementById('product-results').innerHTML = '<p>Catálogo não carregado. Tente recarregar a página.</p>';
+            return;
+        }
+
+        const filteredProducts = allProducts.filter(p => 
+            p.name.toLowerCase().includes(query) || 
+            (p.sku && p.sku.toLowerCase().includes(query))
+        );
+        
+        displaySearchResults(filteredProducts);
+    }
+    
+    function displaySearchResults(products) {
+        const resultsContainer = document.getElementById('product-results');
+        resultsContainer.innerHTML = '';
+        
+        if (products.length === 0) {
+            resultsContainer.innerHTML = '<p>Nenhum produto encontrado.</p>';
+            return;
+        }
+
+        products.forEach(product => {
+            const card = document.createElement('div');
+            card.classList.add('product-card');
+            card.dataset.id = product.id;
+            
+            card.innerHTML = `
+                <img src="${buildMediaUrl(product.main_image)}" alt="${product.name}">
+                <h4>${product.name}</h4>
+                <p>SKU: ${product.sku || 'N/A'}</p>
+                <p>R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
+            `;
+            
+            card.addEventListener('click', () => addProductToPOSCart(product));
+            resultsContainer.appendChild(card);
+        });
+    }
+    
+    // 2. FUNÇÃO PARA ADICIONAR AO CARRINHO PDV
+    function addProductToPOSCart(product, quantity = 1) {
+        const existingItem = posCart.find(item => item.id === product.id);
+        
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            posCart.push({
+                id: product.id,
+                name: product.name,
+                price: parseFloat(product.price),
+                quantity: quantity,
+                sku: product.sku
+            });
+        }
+        updatePOSCartDisplay();
+    }
+    
+    // 3. FUNÇÃO PARA ATUALIZAR EXIBIÇÃO DO CARRINHO PDV
+    window.updatePOSCartDisplay = function() {
+        const container = document.getElementById('pos-cart-items');
+        let subtotal = 0;
+        
+        container.innerHTML = '';
+
+        if (posCart.length === 0) {
+            container.innerHTML = '<p>Carrinho vazio.</p>';
+            updatePosTotal();
+            return;
+        }
+
+        posCart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            subtotal += itemTotal;
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('cart-item');
+            itemDiv.innerHTML = `
+                <h4>${item.name}</h4>
+                <div style="text-align: right;">
+                    <p style="font-size:0.8em; color:#8c735d; margin:0;">R$ ${itemTotal.toFixed(2).replace('.', ',')}</p>
+                    <div class="item-controls">
+                        <button class="qty-btn" onclick="updatePOSQuantity(${item.id}, -1)">—</button>
+                        <span>${item.quantity}</span>
+                        <button class="qty-btn" onclick="updatePOSQuantity(${item.id}, 1)">+</button>
+                        <i class="fas fa-trash" style="cursor:pointer; color:#dc3545; font-size:0.9em; margin-left:10px;" onclick="removePOSItem(${item.id})"></i>
+                    </div>
+                </div>
+            `;
+            container.appendChild(itemDiv);
+        });
+        
+        updatePosTotal(subtotal);
+    }
+    
+    // 4. FUNÇÕES DE CONTROLE DO CARRINHO PDV
+    window.updatePOSQuantity = function(productId, delta) {
+        const item = posCart.find(i => i.id === productId);
+        if (item) {
+            item.quantity += delta;
+            if (item.quantity < 1) {
+                removePOSItem(productId);
+            } else {
+                updatePOSCartDisplay();
+            }
+        }
+    }
+
+    window.removePOSItem = function(productId) {
+        posCart = posCart.filter(i => i.id !== productId);
+        updatePOSCartDisplay();
+    }
+
+    window.clearPosCart = function() {
+        if (confirm("Tem certeza que deseja limpar todo o carrinho?")) {
+            posCart = [];
+            updatePOSCartDisplay();
+        }
+    }
+    
+    // 5. FUNÇÃO PARA ATUALIZAR TOTAIS (com Desconto)
+    window.updatePosTotal = function(currentSubtotal) {
+        const subtotalCalc = currentSubtotal !== undefined ? currentSubtotal : posCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        const discountPercent = parseFloat(document.getElementById('discount-input').value) || 0;
+        
+        // Aplica desconto (Limite 100%)
+        const effectiveDiscount = Math.min(Math.max(discountPercent, 0), 100) / 100; 
+        const total = subtotalCalc * (1 - effectiveDiscount);
+        
+        document.getElementById('pos-subtotal').textContent = `R$ ${subtotalCalc.toFixed(2).replace('.', ',')}`;
+        document.getElementById('pos-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        
+        // Retorna o total para uso na finalização
+        return total; 
+    }
+    
+    // 6. FUNÇÃO FINALIZAR VENDA (API CALL)
+    window.finalizePosSale = async function() {
+        if (posCart.length === 0) {
+            alert('Adicione itens ao carrinho para finalizar a venda.');
+            return;
+        }
+
+        const clientPhone = document.getElementById('client-phone').value;
+        const clientName = document.getElementById('client-name').value;
+        const clientEmail = document.getElementById('client-email').value;
+        const totalAmount = updatePosTotal();
+        
+        if (!clientPhone) {
+            alert('O WhatsApp do cliente é obrigatório para registrar a venda no CRM.');
+            document.getElementById('client-phone').focus();
+            return;
+        }
+
+        if (!confirm(`Confirmar venda de R$ ${totalAmount.toFixed(2).replace('.', ',')} com ${selectedPayment}? Isso dará baixa no estoque.`)) {
+            return; 
+        }
+        
+        // Obtém o token CSRF
+        const csrfToken = getCsrfToken();
+        if (!csrfToken) {
+            alert('Erro de segurança: Token CSRF não encontrado. Recarregue a página.');
+            return;
+        }
+        
+        const payload = {
+            customer_info: {
+                first_name: clientName || "Cliente Loja Física",
+                email: clientEmail,
+                phone_number: clientPhone 
+            },
+            items: posCart.map(item => ({
+                id: item.id,
+                quantity: item.quantity,
+                price: item.price // Preço já com desconto, se aplicado
+            })),
+            // ✅ MELHORIA: Incluir forma de pagamento/promoções nos detalhes da venda para o CRM
+            payment_info: {
+                method: selectedPayment,
+                details: document.getElementById('payment-details').value,
+                discount_percent: parseFloat(document.getElementById('discount-input').value) || 0,
+            }
+        };
+
+        try {
+             // Desabilita o botão para evitar cliques duplos
+            document.getElementById('finalize-sale-btn').disabled = true;
+
+            const response = await fetch(`${API_BASE_URL}/checkout/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken 
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Erro ao registrar pedido. Status: ${response.status}`);
+            }
+
+            // Venda finalizada com sucesso!
+            const result = await response.json();
+            
+            alert(`✅ Venda PDV Nº ${result.sale_id} finalizada! Estoque atualizado.`);
+            
+            // ✅ Ação de UX/UI: Enviar nota pelo WhatsApp/E-mail (Feedback para o funcionário)
+            if (clientEmail || clientPhone) {
+                alert(`Lembre-se de enviar a Nota/Recibo (Invoice) para o cliente via WhatsApp/E-mail.`);
+            }
+
+            // Limpa o PDV para a próxima venda
+            clearPosCart();
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-phone').value = '';
+            document.getElementById('client-email').value = '';
+            document.getElementById('discount-input').value = '0';
+
+
+        } catch (error) {
+            console.error("Erro na finalização PDV:", error);
+            alert(`⚠️ Falha na Transação: ${error.message}`);
+        } finally {
+            document.getElementById('finalize-sale-btn').disabled = false;
+        }
+    }
 });
