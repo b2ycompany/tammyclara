@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===========================================================
@@ -19,18 +18,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================================
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+# ✅ CORREÇÃO FINAL: FORÇAR DEBUG=TRUE NO ARQUIVO
+DEBUG = True 
 
-# Lê a variável de ambiente ALLOWED_HOSTS (que definimos como "tammyclara-store-b2y.fly.dev")
-HOSTS_ENV = os.environ.get('ALLOWED_HOSTS', '') 
-ALLOWED_HOSTS = HOSTS_ENV.split(',') if HOSTS_ENV else []
-
-if DEBUG:
-    # Em debug, permitimos tudo para testes locais (ou se a var. não estiver definida)
-    ALLOWED_HOSTS = ['*']
-elif not ALLOWED_HOSTS:
-    # Se não for debug e o segredo não estiver definido, usamos apenas o domínio Fly.dev
-    ALLOWED_HOSTS = ["tammyclara-store-b2y.fly.dev"]
+# Simplificamos o ALLOWED_HOSTS para o modo DEBUG (aceita tudo)
+ALLOWED_HOSTS = ['*']
 
 # ===========================================================
 # 2. APLICATIVOS INSTALADOS
@@ -119,8 +111,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            # ✅ CORREÇÃO FINAL: Usa a variável de ambiente se o path DB estiver definido (para produção)
-            # Caso contrário, usa o caminho original.
+            # Usa a variável de ambiente (já definida) se o path DB estiver definido.
             'NAME': SQLITE_DB_PATH if SQLITE_DB_PATH else (BASE_DIR / 'data' / 'db.sqlite3'),
         }
     }
