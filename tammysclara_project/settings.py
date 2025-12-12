@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================================
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
-# ✅ CORREÇÃO: Volta a ler a variável do ambiente (que já definimos como False)
+# ✅ CORREÇÃO: Volta a ler a variável do ambiente (que já definimos como False no Fly.io)
 DEBUG = os.environ.get('DEBUG', 'False') == 'True' 
 
 # Simplifica o ALLOWED_HOSTS (já havíamos corrigido isso)
@@ -27,8 +27,6 @@ ALLOWED_HOSTS = HOSTS_ENV.split(',') if HOSTS_ENV else []
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
-# O seu código aqui não precisa de lógica ELSE complexa, pois os segredos estão definidos no Fly.io.
-# Se o código precisar de mais de um ALLOWED_HOST, ele deve estar no segredo, separado por vírgula.
 
 # ===========================================================
 # 2. APLICATIVOS INSTALADOS
