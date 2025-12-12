@@ -740,6 +740,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm("Tem certeza que deseja limpar todo o carrinho?")) {
             posCart = [];
             updatePOSCartDisplay();
+            
+            // Limpa também os dados do cliente ao limpar o carrinho
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-phone').value = '';
+            document.getElementById('client-email').value = '';
         }
     }
     
@@ -760,6 +765,55 @@ document.addEventListener('DOMContentLoaded', () => {
         return total; 
     }
     
+    // ✅ NOVO: FUNÇÃO PARA BUSCAR CLIENTE
+    window.searchCustomerByPhone = async function() {
+        const phoneInput = document.getElementById('client-phone');
+        const phone_number = phoneInput.value.trim();
+        
+        const nameInput = document.getElementById('client-name');
+        const emailInput = document.getElementById('client-email');
+
+        nameInput.value = '';
+        emailInput.value = '';
+        
+        if (!phone_number) {
+            alert("Por favor, digite o WhatsApp do cliente para buscar.");
+            phoneInput.focus();
+            return;
+        }
+
+        try {
+            // Remove o foco para não atrapalhar a digitação
+            phoneInput.blur(); 
+            
+            const apiUrl = `${API_BASE_URL}/customer/search/${phone_number}/`;
+            const response = await fetch(apiUrl);
+
+            if (response.status === 404) {
+                alert(`Cliente não encontrado com o WhatsApp ${phone_number}. Por favor, complete o cadastro manualmente.`);
+                nameInput.focus();
+                return;
+            }
+
+            if (!response.ok) {
+                 throw new Error(`Erro ao buscar cliente. Status: ${response.status}`);
+            }
+
+            const customerData = await response.json();
+            
+            // Preenche os campos
+            nameInput.value = customerData.first_name || '';
+            emailInput.value = customerData.email || '';
+            
+            alert(`✅ Cliente "${customerData.first_name}" encontrado e dados preenchidos.`);
+
+        } catch (error) {
+            console.error("Erro na busca de cliente:", error);
+            alert(`⚠️ Erro ao tentar buscar cliente: ${error.message}`);
+        }
+    }
+
+
     // 6. FUNÇÃO FINALIZAR VENDA (API CALL)
     window.finalizePosSale = async function() {
         if (posCart.length === 0) {

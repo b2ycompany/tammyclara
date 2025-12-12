@@ -18,8 +18,8 @@
         
         /* Painéis */
         .products-panel, .cart-panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); overflow-y: auto; }
-        .products-panel { flex: 3; max-height: calc(100vh - 100px); } 
-        .cart-panel { flex: 2; min-width: 350px; max-height: calc(100vh - 100px); }
+        .products-panel { flex: 2; max-height: calc(100vh - 100px); } 
+        .cart-panel { flex: 1; min-width: 300px; max-height: calc(100vh - 100px); }
 
         /* Busca */
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -62,6 +62,8 @@
     </style>
 </head>
 <body>
+    {% csrf_token %} 
+    
     <div class="pos-header">
         <h1>Frente de Caixa (PDV)</h1>
         <a href="{% url 'home' %}" style="color: white; text-decoration: none; font-size: 0.9em;">
@@ -115,8 +117,15 @@
 
             <div id="client-section">
                 <h4>Dados do Cliente (para CRM e Nota)</h4>
-                <input type="text" id="client-name" placeholder="Nome Completo (Recomendado)">
-                <input type="tel" id="client-phone" placeholder="WhatsApp (Obrigatório, ex: 5511987654321)">
+                <input type="text" id="client-name" placeholder="Nome Completo (Preenchido automaticamente)">
+                
+                <div style="display: flex; gap: 5px;">
+                    <input type="tel" id="client-phone" placeholder="WhatsApp (Obrigatório, ex: 5511987654321)">
+                    <button type="button" class="primary-btn" style="width: 120px; padding: 0;" onclick="searchCustomerByPhone()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+
                 <input type="email" id="client-email" placeholder="E-mail (Para nota)">
             </div>
             

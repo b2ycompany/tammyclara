@@ -55,9 +55,30 @@ class ProductList(generics.ListAPIView):
     serializer_class = ProductSerializer
 
 class CustomerCreate(generics.CreateAPIView):
-    """Cria um novo cliente."""
+    """Cria um novo cliente (Usado no e-commerce para leads)."""
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+
+# ✅ NOVO: API para buscar cliente pelo telefone
+class CustomerSearchByPhone(generics.RetrieveAPIView):
+    """
+    Busca um cliente existente no CRM pelo número de telefone.
+    Usado pelo PDV para preencher dados.
+    """
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    lookup_field = 'phone_number' # O campo que será usado na URL
+    
+    def get_object(self):
+        # Captura o valor de 'phone_number' passado na URL
+        phone_number = self.kwargs['phone_number']
+        
+        try:
+            # Tenta encontrar o cliente
+            return Customer.objects.get(phone_number=phone_number)
+        except Customer.DoesNotExist:
+            # Se não encontrado, levanta um erro 404
+            raise status.HTTP_404_NOT_FOUND("Cliente não encontrado.")
 
 # --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO (CRM/LEAD) ---
 
@@ -82,12 +103,12 @@ class SaleCreate(generics.CreateAPIView):
         try:
             with transaction.atomic():
                 
-                # 2.1. CLIENTE: CRIA ou ATUALIZA
+                # 2.1. CLIENTE: CRIA ou ATUALIZA (Lógica de Upsert)
                 # Usamos o phone_number como chave principal para PDV/e-commerce
                 customer, created = Customer.objects.get_or_create(
                     phone_number=customer_data.get('phone_number'),
                     defaults={
-                        'first_name': customer_data.get('first_name', 'Cliente Online'),
+                        'first_name': customer_data.get('first_name', 'Cliente Loja Física'),
                         'email': customer_data.get('email', ''),
                     }
                 )
@@ -101,7 +122,7 @@ class SaleCreate(generics.CreateAPIView):
                     customer=customer,
                     sale_date=timezone.now(),
                     total_amount=Decimal('0.00'),
-                    # ✅ Melhoria PDV: Você pode adicionar um campo 'source' no modelo Sale para rastrear (Loja vs Online)
+                    # O payment_info (forma de pagamento/desconto) pode ser armazenado em um campo JSONField no seu modelo Sale
                 )
                 
                 final_total = Decimal('0.00')
