@@ -12,8 +12,8 @@ from store.admin import crm_admin_site
 
 
 urlpatterns = [
-    # Rota para o Painel de Administração Padrão
-    path('admin/', admin.site.urls), 
+    # Rota para o Painel de Administração Padrão (O acesso é feito aqui)
+    path('admin/', admin.site.urls, name='acesso'), # ✅ CORREÇÃO: Nome 'acesso' DEVE ser definido aqui!
     
     # Rota para o Dashboard de Vendas (CRM) 
     path('crm-dashboard/', crm_admin_site.urls, name='crm-dashboard'), 
@@ -26,9 +26,6 @@ urlpatterns = [
     path('products/', store.views.products_view, name='products'),
     path('cart/', store.views.cart_view, name='cart'),
     path('order-success/', store.views.order_success_view, name='order-success'),
-
-    # ✅ CORREÇÃO: Rota de acesso ao Admin com name='acesso' (Resolve NoReverseMatch)
-    path('acesso/', admin.site.urls, name='acesso'),
 ]
 
 # Configuração para servir arquivos estáticos e de mídia em ambiente de desenvolvimento
