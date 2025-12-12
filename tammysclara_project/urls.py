@@ -1,4 +1,4 @@
-# tammysclara_project/urls.py (CÓDIGO COMPLETO E CORRIGIDO)
+# tammysclara_project/urls.py (CÓDIGO COMPLETO)
 
 from django.contrib import admin
 from django.urls import path, include
@@ -27,8 +27,7 @@ urlpatterns = [
     path('cart/', store.views.cart_view, name='cart'),
     path('order-success/', store.views.order_success_view, name='order-success'),
 
-    # ✅ Melhoria UX: Rota de Login/Acesso ao Admin
-    # Usaremos esta rota para o ícone de login
+    # ✅ CORREÇÃO: Rota de Login/Acesso ao Admin COM NOME DEFINIDO
     path('acesso/', admin.site.urls, name='acesso'),
 ]
 
