@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frente de Caixa (PDV) | Tammy´s Store</title>
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Estilos básicos para a interface PDV */
+        body { font-family: 'Montserrat', sans-serif; background-color: #f4f4f9; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+        .pos-header { background-color: #333; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .pos-header h1 { margin: 0; font-size: 1.5em; }
+        .pos-container { display: flex; flex-grow: 1; padding: 20px; gap: 20px; }
+        .products-panel, .cart-panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .products-panel { flex: 2; } /* Painel de produtos maior */
+        .cart-panel { flex: 1; min-width: 300px; position: sticky; top: 20px; align-self: flex-start; }
+        
+        /* Estilos do Carrinho */
+        #pos-cart-items { margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .cart-item-details { flex-grow: 1; text-align: left; }
+        .cart-item-details h4 { margin: 0; font-size: 0.9em; font-weight: 600; }
+        .cart-item-details p { margin: 2px 0; font-size: 0.8em; color: #555; }
+        
+        /* Botões */
+        .primary-btn { background-color: #8c735d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; width: 100%; margin-top: 10px; }
+        .primary-btn:hover { background-color: #725a47; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .input-group input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; }
+        .total-summary { text-align: right; padding: 15px 0; font-size: 1.2em; font-weight: 700; }
+        .product-card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="pos-header">
+        <h1>Frente de Caixa (PDV)</h1>
+        <a href="{% url 'home' %}" style="color: white; text-decoration: none;">
+             <i class="fas fa-home"></i> Voltar para o Site
+        </a>
+    </div>
+
+    <div class="pos-container">
+        
+        <div class="products-panel">
+            <h2>Catálogo de Produtos</h2>
+            
+            <div class="input-group">
+                <input type="text" id="product-search" placeholder="Buscar por nome ou SKU (código do produto)">
+                <button class="primary-btn" onclick="searchProducts()">Buscar</button>
+            </div>
+            
+            <div id="product-results">
+                <p>Use a busca para adicionar produtos ao carrinho.</p>
+            </div>
+        </div>
+
+        <div class="cart-panel">
+            <h2>Carrinho de Venda</h2>
+            
+            <div id="pos-cart-items">
+                <p>Carrinho vazio.</p>
+            </div>
+
+            <div class="total-summary">
+                Subtotal: <span id="pos-subtotal">R$ 0,00</span>
+            </div>
+             <div class="total-summary">
+                Total: <span id="pos-total">R$ 0,00</span>
+            </div>
+
+            <form id="pos-checkout-form">
+                <hr>
+                <h4>Dados do Cliente (Opcional)</h4>
+                <input type="text" id="client-name" placeholder="Nome do Cliente">
+                <input type="tel" id="client-phone" placeholder="WhatsApp (Obrigatório para registrar venda)">
+                <input type="email" id="client-email" placeholder="E-mail">
+
+                <button type="submit" class="primary-btn" id="finalize-sale-btn">
+                    <i class="fas fa-check"></i> Finalizar Venda (Transação)
+                </button>
+                <button type="button" class="primary-btn" style="background-color: #dc3545;" onclick="clearPosCart()">
+                    <i class="fas fa-trash"></i> Limpar Carrinho
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="{% static 'js/script.js' %}"></script>
+    </body>
+</html>

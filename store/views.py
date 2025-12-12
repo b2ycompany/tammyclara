@@ -1,10 +1,9 @@
-# store/views.py (CÓDIGO COM CORREÇÃO DE IMPORTAÇÃO/ISOLAMENTO)
+# store/views.py (CÓDIGO COMPLETO)
 
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db import transaction
 from django.utils import timezone
-# 🛑 REMOVIDO: import urllib.parse (desnecessário para views de template)
 from django.shortcuts import get_object_or_404, render 
 from decimal import Decimal
 from django.utils.decorators import method_decorator
@@ -39,18 +38,24 @@ def order_success_view(request):
     Renderiza a página de sucesso do pedido.
     """
     return render(request, 'order_success.html', {})
+
+def pos_view(request):
+    """
+    Renderiza o template do Ponto de Venda (PDV) para vendas físicas.
+    """
+    return render(request, 'pos.html', {})
 # ----------------------------------------------------------------------
 
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
 
 class ProductList(generics.ListAPIView):
-# ... (código ProductList) ...
+    """Lista todos os produtos ativos."""
     queryset = Product.objects.filter(is_active=True).order_by('name')
     serializer_class = ProductSerializer
 
 class CustomerCreate(generics.CreateAPIView):
-# ... (código CustomerCreate) ...
+    """Cria um novo cliente."""
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
@@ -58,7 +63,10 @@ class CustomerCreate(generics.CreateAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SaleCreate(generics.CreateAPIView):
-# ... (código SaleCreate) ...
+    """
+    Cria uma nova venda (usada pelo e-commerce e PDV).
+    Processa itens, dá baixa no estoque e gera fatura em uma transação atômica.
+    """
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     
@@ -66,6 +74,7 @@ class SaleCreate(generics.CreateAPIView):
         customer_data = request.data.get('customer_info')
         items_data = request.data.get('items')
         
+        # O PDV ou e-commerce deve garantir que estes dados existam.
         if not customer_data or not items_data:
             return Response({"error": "Dados do cliente e/ou itens do pedido estão faltando."}, 
                             status=status.HTTP_400_BAD_REQUEST)
@@ -74,6 +83,7 @@ class SaleCreate(generics.CreateAPIView):
             with transaction.atomic():
                 
                 # 2.1. CLIENTE: CRIA ou ATUALIZA
+                # Usamos o phone_number como chave principal para PDV/e-commerce
                 customer, created = Customer.objects.get_or_create(
                     phone_number=customer_data.get('phone_number'),
                     defaults={
@@ -86,11 +96,12 @@ class SaleCreate(generics.CreateAPIView):
                     customer.email = customer_data.get('email', customer.email)
                     customer.save()
                     
-                # 2.2. VENDA: CRIAÇÃO INICIAL (is_completed=False por padrão)
+                # 2.2. VENDA: CRIAÇÃO INICIAL
                 sale = Sale.objects.create(
                     customer=customer,
                     sale_date=timezone.now(),
-                    total_amount=Decimal('0.00')
+                    total_amount=Decimal('0.00'),
+                    # ✅ Melhoria PDV: Você pode adicionar um campo 'source' no modelo Sale para rastrear (Loja vs Online)
                 )
                 
                 final_total = Decimal('0.00')
@@ -131,18 +142,16 @@ class SaleCreate(generics.CreateAPIView):
                 sale.save()
                 
                 # 2.5. FATURA: CRIAÇÃO AUTOMÁTICA
-                # Cria a fatura/conta a receber
                 Invoice.objects.create(
                     sale=sale,
                     customer=customer, 
                     amount_due=final_total,
-                    # timedelta está importado corretamente
                     due_date=timezone.now().date() + timedelta(days=7), 
                     payment_status='PENDING'
                 )
 
 
-                # 3. RESPOSTA PARA O FRONTEND (Redirecionamento CRM)
+                # 3. RESPOSTA PARA O FRONTEND
                 return Response({
                     "message": "Pedido registrado com sucesso!",
                     "sale_id": sale.id,
