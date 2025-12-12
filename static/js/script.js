@@ -83,9 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- CÓDIGO PRINCIPAL loadProducts (Para products.html) ---
+    // --- LÓGICA DE PRODUTOS (products.html) ---
     
-    const productsGrid = document.querySelector('.products-grid');
+    const productsGrid = document.querySelector('.products-grid#products-container');
 
     if (productsGrid) {
         
@@ -193,6 +193,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         loadProducts(); 
+    }
+    
+    // --- LÓGICA DA HOME PAGE: Destaques (Injetar Conteúdo na Home) ---
+    
+    const featuredProductsContainer = document.getElementById('featured-products-container');
+
+    if (featuredProductsContainer) {
+        
+        async function loadFeaturedProducts() {
+             // Reusa a função loadProducts, mas limita a 4 itens
+             try {
+                const apiUrl = `${API_BASE_URL}/products/`;
+                const response = await fetch(apiUrl); 
+                
+                if (!response.ok) {
+                    throw new Error(`Erro ao carregar produtos do servidor.`);
+                }
+                const products = await response.json();
+
+                if (!products || products.length === 0) {
+                    featuredProductsContainer.innerHTML = '<p>Nenhum produto em destaque no momento.</p>';
+                    return;
+                }
+                
+                featuredProductsContainer.innerHTML = '';
+                
+                // Exibir apenas os primeiros 4 produtos (os destaques)
+                products.slice(0, 4).forEach(product => {
+                    if (!product || !product.id) return;
+                    
+                    availableProducts[product.id] = product; // Adiciona ao cache
+
+                    let initialImageUrl = buildMediaUrl(product.main_image);
+                    
+                    // --- Injeção simplificada (reutilizando o layout do product-item) ---
+                    const productItem = document.createElement('div');
+                    productItem.classList.add('product-item'); // Reusa a classe CSS
+
+                    productItem.innerHTML = 
+                        '<div class="product-image-container">' +
+                            '<img src="' + initialImageUrl + '" alt="' + product.name + '">' +
+                        '</div>' +
+                        '<h3>' + product.name + '</h3>' +
+                        '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
+                        '<button ' + 
+                            'class="btn primary-btn add-to-cart-btn" ' + 
+                            'data-id="' + product.id + '">' +
+                            'Adicionar ao Carrinho' +
+                        '</button>';
+                    
+                    featuredProductsContainer.appendChild(productItem);
+                });
+                
+                // Os listeners de carrinho precisam ser re-anexados
+                attachAddToCartListeners(); 
+                
+            } catch (error) {
+                console.error('Falha ao buscar destaques:', error);
+                featuredProductsContainer.innerHTML = `<p class="error-msg" style="color:red;">Erro ao carregar destaques: ${error.message}</p>`;
+            }
+        }
+        
+        loadFeaturedProducts();
     }
     
     // --- LÓGICA DO MODAL/LIGHTBOX (Interatividade UX/UI) ---

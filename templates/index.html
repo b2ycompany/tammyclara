@@ -21,16 +21,17 @@
         </div>
 
         <nav>
-            <a href="/">Home</a>
-            <a href="/products/">Coleção</a>
-            <a href="#novidades">Novidades</a>
-            <a href="#lojas">Lojas</a>
-            <a href="#contato">Contato</a>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'products' %}">Coleção</a>
+            
+            <a href="{% url 'home' %}#novidades">Novidades</a>
+            <a href="{% url 'home' %}#lojas">Lojas</a>
+            <a href="{% url 'home' %}#contato">Contato</a>
 
-            <a href="/cart/" class="icon-link" aria-label="Carrinho de Compras">
+            <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">
                 <i class="fas fa-shopping-bag"></i>
             </a>
-            <a href="/admin/" class="icon-link" aria-label="Acesso ao CRM/Conta">
+            <a href="{% url 'acesso' %}" class="icon-link" aria-label="Acesso ao CRM/Conta">
                 <i class="fas fa-user-lock"></i>
             </a>
         </nav>
@@ -63,16 +64,27 @@
 
             </div>
 
-            <a href="/products/" class="btn primary-btn mt-4">Ver a Coleção</a>
+            <a href="{% url 'products' %}" class="btn primary-btn mt-4">Ver a Coleção</a>
         </div>
 
         <div class="hero-media"></div>
     </section>
 
+    <section class="featured-products-section" style="padding: 50px 20px; text-align: center;">
+        <h2>🌟 Nossos Destaques da Semana</h2>
+        <p>Peças favoritas da coleção, escolhidas a dedo para você.</p>
+        <div class="products-grid" id="featured-products-container">
+             <p>Carregando destaques...</p>
+        </div>
+        <a href="{% url 'products' %}" class="btn primary-btn" style="margin-top: 30px;">
+            Ver Coleção Completa
+        </a>
+    </section>
+
     <section class="feature-section" id="novidades" style="text-align: center; padding: 50px;">
         <h2>✨ Destaques e Novidades</h2>
         <p>Mais de 50 novas peças adicionadas. Venha conferir as tendências da moda Primavera/Verão!</p>
-        <a href="/products/" class="btn secondary-btn" style="margin-top: 15px;">Comprar Agora</a>
+        <a href="{% url 'products' %}" class="btn secondary-btn" style="margin-top: 15px;">Comprar Agora</a>
     </section>
 
     <section class="store-location" id="lojas" style="text-align: center; padding: 50px; background-color: #f8f8f8;">

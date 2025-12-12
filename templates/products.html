@@ -18,17 +18,17 @@
             <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy">
         </div>
         <nav>
-            <a href="/">Home</a>
-            <a href="/products/">Coleção</a>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'products' %}">Coleção</a>
             
-            <a href="#novidades">Novidades</a>
-            <a href="#lojas">Lojas</a>
-            <a href="#contato">Contato</a>
+            <a href="{% url 'home' %}#novidades">Novidades</a>
+            <a href="{% url 'home' %}#lojas">Lojas</a>
+            <a href="{% url 'home' %}#contato">Contato</a>
             
-            <a href="/cart/" class="icon-link" aria-label="Carrinho de Compras">
+            <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">
                 <i class="fas fa-shopping-bag"></i>
             </a>
-            <a href="/admin/" class="icon-link" aria-label="Acesso ao CRM/Conta">
+            <a href="{% url 'acesso' %}" class="icon-link" aria-label="Acesso ao CRM/Conta">
                 <i class="fas fa-user-lock"></i>
             </a>
         </nav>
