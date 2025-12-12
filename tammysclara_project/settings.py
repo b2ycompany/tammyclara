@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 # Carrega variáveis do .env no ambiente local
 load_dotenv()
 
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===========================================================
@@ -19,22 +21,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    "tammyclara-store-b2y.fly.dev",
-    "localhost",
-    "127.0.0.1",
-]
-if DEBUG:
-    ALLOWED_HOSTS.append("*")
-else:
-    # ✅ MELHORIA: Adiciona o wildcard para aceitar tráfego interno do Fly.io (ex: health checks)
-    ALLOWED_HOSTS.append(".*") 
+# Lê a variável de ambiente ALLOWED_HOSTS (que definimos como "tammyclara-store-b2y.fly.dev")
+HOSTS_ENV = os.environ.get('ALLOWED_HOSTS', '') 
+ALLOWED_HOSTS = HOSTS_ENV.split(',') if HOSTS_ENV else []
 
-# CSRF – extremamente importante no Fly.io
-CSRF_TRUSTED_ORIGINS = [
-    "https://tammyclara-store-b2y.fly.dev",
-    "https://*.fly.dev",
-]
+if DEBUG:
+    # Em debug, permitimos tudo para testes locais (ou se a var. não estiver definida)
+    ALLOWED_HOSTS = ['*']
+elif not ALLOWED_HOSTS:
+    # Se não for debug e o segredo não estiver definido, usamos apenas o domínio Fly.dev
+    ALLOWED_HOSTS = ["tammyclara-store-b2y.fly.dev"]
 
 # ===========================================================
 # 2. APLICATIVOS INSTALADOS
