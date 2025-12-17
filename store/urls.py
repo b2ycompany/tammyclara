@@ -16,7 +16,7 @@ urlpatterns = [
     # PDV (Frente de Caixa)
     path('pdv/', pos_view, name='pos-view'),
 
-    # APIs
+    # APIs (Catálogo, Checkout e CRM)
     path('api/products/', ProductList.as_view(), name='product-list'),
     path('api/checkout/', SaleCreate.as_view(), name='checkout-create'),
     path('api/customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),

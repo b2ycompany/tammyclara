@@ -10,7 +10,7 @@ primary_region = "gru"
   source = "tammyclara_data"
   destination = "/app/data"
 
-# ✅ CONFIGURAÇÃO UNIFICADA: Resolve o erro PR01 e libera o tráfego externo
+# ✅ CONFIGURAÇÃO UNIFICADA: Resolve o erro PR01 e libera o site
 [http_service]
   internal_port = 8000
   force_https = true
@@ -25,7 +25,7 @@ primary_region = "gru"
     soft_limit = 20
 
 [deploy]
-  # ✅ Comando que garante permissões de escrita e migração no banco de dados
+  # ✅ Garante permissão de escrita e prepara estáticos/banco
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
