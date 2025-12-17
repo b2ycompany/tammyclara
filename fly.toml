@@ -19,7 +19,7 @@ primary_region = "gru"
   processes = ["app"]
 
 [deploy]
-  # ✅ EXECUÇÃO EM SHELL: Resolve erros de argumentos e permissão de volume
+  # ✅ CORREÇÃO: Garante permissões antes de qualquer operação do Django
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
