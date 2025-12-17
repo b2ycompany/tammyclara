@@ -1,102 +1,127 @@
-import os
-from pathlib import Path
-import dj_database_url
-from dotenv import load_dotenv
+# store/views.py (CÓDIGO COMPLETO)
 
-load_dotenv()
+from rest_framework import generics, status
+from rest_framework.response import Response
+from django.db import transaction
+from django.utils import timezone
+from django.shortcuts import get_object_or_404, render 
+from decimal import Decimal
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+# Importamos os modelos necessários para o processo
+from .models import Product, Customer, Sale, SaleItem, Invoice 
+from .serializers import ProductSerializer, CustomerSerializer, SaleSerializer, SaleItemSerializer
 
-# ===========================================================
-# 1. SEGURANÇA E AMBIENTE
-# ===========================================================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
-DEBUG = False 
+# --- VIEWS PARA RENDERIZAÇÃO DE TEMPLATES (CORREÇÃO DE ESTABILIDADE) ---
+def home_view(request):
+    """Renderiza o template da página inicial."""
+    return render(request, 'index.html', {})
 
-ALLOWED_HOSTS = [
-    'tammysstore.com.br',
-    'www.tammysstore.com.br',
-    'tammyclara-store-b2y.fly.dev',
-    'localhost',
-    '127.0.0.1'
-]
+def products_view(request):
+    """Renderiza o template da página de produtos."""
+    return render(request, 'products.html', {})
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://tammysstore.com.br',
-    'https://www.tammysstore.com.br',
-    'https://tammyclara-store-b2y.fly.dev'
-]
+def cart_view(request):
+    """Renderiza o template da página de carrinho."""
+    return render(request, 'cart.html', {})
+    
+def order_success_view(request):
+    """Renderiza a página de sucesso do pedido."""
+    return render(request, 'order_success.html', {})
 
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'django_cleanup.apps.CleanupConfig',
-    'store',
-]
+def pos_view(request):
+    """Renderiza o template do PDV."""
+    return render(request, 'pos.html', {})
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+# --- 1. VIEWS PARA O CATÁLOGO E CLIENTES ---
 
-ROOT_URLCONF = 'tammysclara_project.urls'
+class ProductList(generics.ListAPIView):
+    queryset = Product.objects.filter(is_active=True).order_by('name')
+    serializer_class = ProductSerializer
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'store' / 'templates'],
-        'APP_DIRS': True, 
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+class CustomerCreate(generics.CreateAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
 
-WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
+class CustomerSearchByPhone(generics.RetrieveAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    lookup_field = 'phone_number' 
+    
+    def get_object(self):
+        phone_number = self.kwargs['phone_number']
+        try:
+            return Customer.objects.get(phone_number=phone_number)
+        except Customer.DoesNotExist:
+            raise status.HTTP_404_NOT_FOUND
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
-SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH')
+# --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO ---
 
-if DATABASE_URL:
-    DATABASES = {'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)}
-else:
-    DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': SQLITE_DB_PATH if SQLITE_DB_PATH else (BASE_DIR / 'data' / 'db.sqlite3')}}
+@method_decorator(csrf_exempt, name='dispatch')
+class SaleCreate(generics.CreateAPIView):
+    queryset = Sale.objects.all()
+    serializer_class = SaleSerializer
+    
+    def create(self, request, *args, **kwargs):
+        customer_data = request.data.get('customer_info')
+        items_data = request.data.get('items')
+        
+        if not customer_data or not items_data:
+            return Response({"error": "Dados incompletos."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            with transaction.atomic():
+                customer, created = Customer.objects.get_or_create(
+                    phone_number=customer_data.get('phone_number'),
+                    defaults={
+                        'first_name': customer_data.get('first_name', 'Cliente Loja Física'),
+                        'email': customer_data.get('email', ''),
+                    }
+                )
+                if not created:
+                    customer.first_name = customer_data.get('first_name', customer.first_name)
+                    customer.email = customer_data.get('email', customer.email)
+                    customer.save()
+                    
+                sale = Sale.objects.create(
+                    customer=customer,
+                    sale_date=timezone.now(),
+                    total_amount=Decimal('0.00'),
+                )
+                
+                final_total = Decimal('0.00')
+                
+                for item_data in items_data:
+                    product = get_object_or_404(Product, pk=item_data.get('id'))
+                    quantity = item_data.get('quantity')
+                    
+                    if quantity <= 0: continue
+                        
+                    if product.stock_quantity < quantity:
+                        raise ValueError(f"Estoque insuficiente para {product.name}")
+                        
+                    product.stock_quantity -= quantity
+                    product.save()
 
-LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'
-USE_I18N = True
-USE_TZ = True
+                    SaleItem.objects.create(
+                        sale=sale, product=product, quantity=quantity, price_at_sale=product.price 
+                    )
+                    final_total += product.price * quantity
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+                sale.total_amount = final_total
+                sale.save()
+                
+                Invoice.objects.create(
+                    sale=sale, customer=customer, amount_due=final_total,
+                    due_date=timezone.now().date() + timedelta(days=7), 
+                    payment_status='PENDING'
+                )
 
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-}
+                return Response({"message": "Pedido registrado!", "sale_id": sale.id}, status=status.HTTP_201_CREATED)
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'data' / 'media'
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
