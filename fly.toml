@@ -1,54 +1,48 @@
-app = "tammyclara-store-b2y"
+# fly.toml
+# Nome do aplicativo registrado no Fly.io
+app = "tammyclara-store-b2y" 
+
+# Região primária para a máquina virtual
 primary_region = "gru"
 
 [build]
+  # Usa o Dockerfile na raiz
+
+# CONFIGURAÇÃO DE VOLUMES: UNIFICADA PARA 1 VOLUME
+[[mounts]]
+  # O volume único que armazena tanto o db.sqlite3 quanto a pasta /media
+  source="tammyclara_data" 
+  destination="/app/data"   # O ponto de montagem no contêiner
 
 [env]
   PORT = "8000"
+  PYTHON_VERSION = "3.11"
 
-[[mounts]]
-  source = "tammyclara_data"
-  destination = "/app/data"
-
-# ✅ Configuração Unificada de HTTP
-[http_service]
-  internal_port = 8000
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 1
-  processes = ["app"]
-
-  [http_service.concurrency]
-    type = "connections"
-    hard_limit = 25
-    soft_limit = 20
-
-# ✅ Bloco de serviço robusto para evitar que a máquina caia
+# Configuração para servir a aplicação Web
 [[services]]
   protocol = "tcp"
   internal_port = 8000
   processes = ["app"]
 
   [[services.ports]]
-    port = 80
+    port = "80"
     handlers = ["http"]
     force_https = true
 
   [[services.ports]]
-    port = 443
+    port = "443"
     handlers = ["tls", "http"]
 
-  # ✅ Tempo de tolerância aumentado para estabilizar o site e PDV
+  # ❌ REMOVIDO: O bloco HTTP checks que estava a falhar
+  # [[services.http_checks]]
+  # ...
+
+  # ✅ CORREÇÃO FINAL: Mudar para TCP check (verifica se a porta 8000 está aberta).
   [[services.tcp_checks]]
-    interval = "15s"
-    timeout = "2s"
-    grace_period = "120s" 
-
+    interval = "10s"
+    grace_period = "30s" 
+    timeout = "10s"
+    
 [deploy]
-  release_command = "python manage.py migrate --noinput"
-
-[[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
-  cpus = 1
+  # Usa /bin/sh -c para executar os comandos collectstatic e migrate com sucesso.
+  release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"

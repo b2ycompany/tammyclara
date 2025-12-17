@@ -1,19 +1,15 @@
+# CUsersIDocumentsstorestore.py (store/urls.py)
+
 from django.urls import path
-from .views import ProductList, SaleCreate, CustomerSearchByPhone, pos_view
+from .views import ProductList, SaleCreate 
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
-    # API para listar produtos
+    # API para listar produtos (products.html) - Agora a única definição
     path('products/', ProductList.as_view(), name='product-list'),
     
-    # API para checkout (E-commerce e PDV)
+    # API para submeter o carrinho e checkout - Agora a única definição
     path('checkout/', SaleCreate.as_view(), name='checkout-create'),
-    
-    # API para busca de cliente
-    path('customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),
-    
-    # ✅ Rota para o Ponto de Venda (PDV)
-    path('pdv/', pos_view, name='pos-view'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

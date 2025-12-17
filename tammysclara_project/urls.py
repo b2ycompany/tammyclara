@@ -1,30 +1,35 @@
+# tammysclara_project/urls.py (CÓDIGO COMPLETO E FINAL)
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings 
 from django.conf.urls.static import static 
 
+# Importe o módulo completo de views para maior robustez
 import store.views 
+# Importe a instância do seu Admin Site customizado
 from store.admin import crm_admin_site 
 
+
 urlpatterns = [
-    # Rotas de Administração
+    # Rota para o Painel de Administração Padrão
     path('admin/', admin.site.urls), 
     
-    # ✅ Correção CRM: Garante que a rota sales-pipeline seja encontrada
-    path('crm-dashboard/', crm_admin_site.urls), 
+    # Rota para o Dashboard de Vendas (CRM) 
+    path('crm-dashboard/', crm_admin_site.urls, name='crm-dashboard'), 
     
     # Rotas de API
     path('api/', include('store.urls')),
     
-    # Rotas de Navegação Front-end
+    # Rotas de navegação (Usando names para links amigáveis)
     path('', store.views.home_view, name='home'),
     path('products/', store.views.products_view, name='products'),
     path('cart/', store.views.cart_view, name='cart'),
     path('order-success/', store.views.order_success_view, name='order-success'),
-    
-    # ✅ Rota PDV: Garante o acesso ao Frente de Caixa
-    path('pdv/', store.views.pos_view, name='pos-view'), 
+
+    # Rota 'acesso' removida. O HTML usará o link hard-coded '/admin/'
 ]
 
+# Configuração para servir arquivos estáticos e de mídia em ambiente de desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
