@@ -1,5 +1,3 @@
-# store/views.py (ARQUIVO COMPLETO)
-
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db import transaction
@@ -87,6 +85,6 @@ class SaleCreate(generics.CreateAPIView):
                 sale.total_amount = final_total
                 sale.save()
                 Invoice.objects.create(sale=sale, customer=customer, amount_due=final_total, due_date=timezone.now().date() + timedelta(days=7), payment_status='PENDING')
-                return Response({"message": "Sucesso!", "sale_id": sale.id}, status=status.HTTP_201_CREATED)
+                return Response({"message": "Pedido registrado!", "sale_id": sale.id}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
