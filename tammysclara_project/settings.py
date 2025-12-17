@@ -24,7 +24,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÃO PARA LOGIN SEGURO: Resolve erro 500 no Admin/CRM
+# ✅ CONFIGURAÇÃO PARA LOGIN: Resolve erro 500 no Admin/CRM
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -88,7 +88,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# ✅ ESTABILIDADE: Não derruba o site por falta de arquivos estáticos
+# ✅ WHITENOISE: Impede erro 503 por arquivos em falta
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
