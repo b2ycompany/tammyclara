@@ -8,13 +8,13 @@ urlpatterns = [
     # API para listar produtos
     path('products/', ProductList.as_view(), name='product-list'),
     
-    # API para checkout (Usado pelo E-commerce e PDV)
+    # API para checkout
     path('checkout/', SaleCreate.as_view(), name='checkout-create'),
     
-    # API para buscar cliente por telefone (Necessário para o PDV)
+    # API para buscar cliente por telefone
     path('customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),
     
-    # ✅ Rota para carregar a página do PDV
+    # Rota para carregar a página do PDV
     path('pdv/', pos_view, name='pos-view'),
 ]
 

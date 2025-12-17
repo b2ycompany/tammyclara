@@ -18,8 +18,12 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
 [deploy]
-  # ✅ Simplificado para garantir que o deploy não aborte por causa de arquivos estáticos
   release_command = "python manage.py migrate --noinput"
 
 [[vm]]
