@@ -1,4 +1,3 @@
-# tammysclara_project/settings.py (ARQUIVO COMPLETO)
 import os
 from pathlib import Path
 import dj_database_url
@@ -8,16 +7,38 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ===========================================================
+# 1. SEGURANÇA E AMBIENTE
+# ===========================================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DEBUG = False 
 
-ALLOWED_HOSTS = ['tammysstore.com.br', 'www.tammysstore.com.br', 'tammyclara-store-b2y.fly.dev', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://tammysstore.com.br', 'https://www.tammysstore.com.br', 'https://tammyclara-store-b2y.fly.dev']
+# ✅ DOMÍNIOS FIXADOS (Evita erro de Host inválido)
+ALLOWED_HOSTS = [
+    'tammysstore.com.br',
+    'www.tammysstore.com.br',
+    'tammyclara-store-b2y.fly.dev',
+    'localhost',
+    '127.0.0.1'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://tammysstore.com.br',
+    'https://www.tammysstore.com.br',
+    'https://tammyclara-store-b2y.fly.dev'
+]
 
 INSTALLED_APPS = [
-    'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes', 
-    'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
-    'rest_framework', 'corsheaders', 'django_cleanup.apps.CleanupConfig', 'store',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
+    'django_cleanup.apps.CleanupConfig',
+    'store',
 ]
 
 MIDDLEWARE = [
@@ -41,8 +62,10 @@ TEMPLATES = [
         'APP_DIRS': True, 
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug', 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth', 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
