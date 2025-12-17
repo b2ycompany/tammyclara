@@ -16,13 +16,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o código completo
 COPY . .
 
-# Garante permissões nas pastas de dados e estáticos
+# Garante pastas e permissões
 RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/data /app/staticfiles /app/data/media && \
     chown -R appuser:appuser /app /app/data
 
 USER appuser
 
-# ✅ EXPOSE e CMD Corrigidos para escuta global na porta 8000
+# ✅ EXPOSE e CMD corrigidos para escuta global
 EXPOSE 8000
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120", "tammysclara_project.wsgi:application"]

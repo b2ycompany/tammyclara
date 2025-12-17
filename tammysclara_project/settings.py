@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed-key')
 DEBUG = False
 
 ALLOWED_HOSTS = [
@@ -23,7 +23,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÃO DE COOKIE: Resolve erro 500 no Admin/CRM
+# ✅ Login Seguro
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -91,6 +91,6 @@ WHITENOISE_MANIFEST_STRICT = False
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
-APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+APPEND_SLASH = True
 LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'
