@@ -4,14 +4,11 @@ import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ===========================================================
-# 1. SEGURANÇA E AMBIENTE
-# ===========================================================
+# SEGURANÇA
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
-DEBUG = False 
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
@@ -27,7 +24,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÕES CRÍTICAS PARA ADMIN/CRM EM PRODUÇÃO
+# ✅ CONFIGURAÇÃO PARA LOGIN SEGURO: Resolve erro 500 no Admin/CRM
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -47,7 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # WhiteNoise logo após o Security
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,7 +60,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'store' / 'templates'],
-        'APP_DIRS': True, 
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -75,9 +72,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
-
-# ✅ BANCO DE DADOS NO VOLUME PERSISTENTE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -94,16 +88,16 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# ✅ CORREÇÃO PARA EVITAR ERRO 503/PROX01: Não quebra o app se faltar arquivo
+# ✅ ESTABILIDADE: Não derruba o site por falta de arquivos estáticos
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
-WHITENOISE_MANIFEST_STRICT = False 
+WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
-APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+APPEND_SLASH = True
 LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'

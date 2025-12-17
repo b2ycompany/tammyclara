@@ -13,13 +13,22 @@ primary_region = "gru"
 [http_service]
   internal_port = 8000
   force_https = true
-  auto_stop_machines = true
+  # ✅ CORREÇÃO: Desativa auto-stop para evitar loops com volume persistente
+  auto_stop_machines = false
   auto_start_machines = true
   min_machines_running = 1
   processes = ["app"]
 
+  # ✅ HEALTH CHECK: Faz o proxy do Fly liberar o tráfego para o site
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/"
+
 [deploy]
-  # ✅ CORREÇÃO: Garante permissões antes de qualquer operação do Django
+  # ✅ PERMISSÕES: Garante que o Django consiga escrever no banco de dados
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
