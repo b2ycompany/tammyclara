@@ -10,7 +10,7 @@ primary_region = "gru"
   source = "tammyclara_data"
   destination = "/app/data"
 
-# ✅ CONFIGURAÇÃO UNIFICADA: Resolve o erro PR01 e libera o site
+# ✅ CONFIGURAÇÃO UNIFICADA: Resolve o erro PR01 e libera as 4 URLs
 [http_service]
   internal_port = 8000
   force_https = true

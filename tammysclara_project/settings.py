@@ -10,10 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================================
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DEBUG = False 
 
-# ✅ DOMÍNIOS FIXADOS (Evita erro 400 Bad Request)
+# ✅ DOMÍNIOS FIXADOS
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -73,7 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ✅ BANCO DE DADOS FIXADO NO VOLUME (Resolve OperationalError: readonly)
+# ✅ BANCO DE DADOS NO VOLUME
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
