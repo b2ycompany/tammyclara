@@ -9,13 +9,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================================
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chave-de-producao')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chave-producao-fixada')
 DEBUG = False 
 
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
     'tammyclara-store-b2y.fly.dev',
+    'localhost',
+    '127.0.0.1'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -24,14 +26,11 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# Configurações de Cookie Críticas para Produção
+# ✅ CORREÇÃO PARA ADMIN/CRM: Garante que o login funcione em HTTPS
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ===========================================================
-# 2. DEFINIÇÃO DE APPS E MIDDLEWARES
-# ===========================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -77,9 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ===========================================================
-# 3. BANCO DE DADOS (Volume Persistente Fly.io)
-# ===========================================================
+# ✅ BANCO DE DADOS NO VOLUME: Resolve OperationalError: readonly
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -87,9 +84,6 @@ DATABASES = {
     }
 }
 
-# ===========================================================
-# 4. ARQUIVOS ESTÁTICOS E MEDIA
-# ===========================================================
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
@@ -101,13 +95,11 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
-# Configurações Adicionais
 APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'
