@@ -1,3 +1,5 @@
+# store/views.py (CÓDIGO COMPLETO)
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db import transaction
@@ -34,6 +36,7 @@ class CustomerCreate(generics.CreateAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
+# ✅ Restaurada para evitar erro 500 no roteamento do PDV
 class CustomerSearchByPhone(generics.RetrieveAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
@@ -54,7 +57,6 @@ class SaleCreate(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         customer_data = request.data.get('customer_info')
         items_data = request.data.get('items')
-        
         if not customer_data or not items_data:
             return Response({"error": "Dados incompletos."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -69,7 +71,7 @@ class SaleCreate(generics.CreateAPIView):
                     customer.email = customer_data.get('email', customer.email)
                     customer.save()
                     
-                sale = Sale.objects.create(customer=customer, total_amount=Decimal('0.00'))
+                sale = Sale.objects.create(customer=customer, total_amount=Decimal('0.00'), sale_date=timezone.now())
                 final_total = Decimal('0.00')
                 
                 for item_data in items_data:
@@ -85,6 +87,6 @@ class SaleCreate(generics.CreateAPIView):
                 sale.total_amount = final_total
                 sale.save()
                 Invoice.objects.create(sale=sale, customer=customer, amount_due=final_total, due_date=timezone.now().date() + timedelta(days=7), payment_status='PENDING')
-                return Response({"message": "Pedido registrado!", "sale_id": sale.id}, status=status.HTTP_201_CREATED)
+                return Response({"message": "Sucesso!", "sale_id": sale.id}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -77,30 +77,16 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH')
 
 if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
-    }
+    DATABASES = {'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)}
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': SQLITE_DB_PATH if SQLITE_DB_PATH else (BASE_DIR / 'data' / 'db.sqlite3'),
-        }
-    }
-
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
+    DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': SQLITE_DB_PATH if SQLITE_DB_PATH else (BASE_DIR / 'data' / 'db.sqlite3')}}
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# ARQUIVOS ESTÁTICOS E MÍDIA
+# ✅ CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -112,13 +98,6 @@ STORAGES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data' / 'media'
-
-CORS_ALLOWED_ORIGINS = [
-    "https://tammysstore.com.br",
-    "https://www.tammysstore.com.br",
-    "https://tammyclara-store-b2y.fly.dev",
-    "http://localhost:8000",
-]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = False 
