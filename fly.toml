@@ -10,6 +10,7 @@ primary_region = "gru"
   source = "tammyclara_data"
   destination = "/app/data"
 
+# ✅ CONFIGURAÇÃO UNIFICADA: Remove conflitos e resolve o erro 503
 [http_service]
   internal_port = 8000
   force_https = true
@@ -24,8 +25,8 @@ primary_region = "gru"
     soft_limit = 20
 
 [deploy]
-  # ✅ CORREÇÃO: Dá permissão de escrita ao usuário da aplicação antes de rodar o Django
-  release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
+  # ✅ Comando com sintaxe correta que funcionou no seu último log
+  release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
   size = "shared-cpu-1x"
