@@ -1,4 +1,3 @@
-# store/urls.py (ARQUIVO COMPLETO)
 from django.urls import path
 from .views import (
     home_view, products_view, cart_view, 
@@ -17,7 +16,7 @@ urlpatterns = [
     # PDV (Frente de Caixa)
     path('pdv/', pos_view, name='pos-view'),
 
-    # APIs (Catálogo, Checkout e Busca de Cliente)
+    # APIs
     path('api/products/', ProductList.as_view(), name='product-list'),
     path('api/checkout/', SaleCreate.as_view(), name='checkout-create'),
     path('api/customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),
