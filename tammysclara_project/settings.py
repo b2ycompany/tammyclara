@@ -3,7 +3,6 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-# Carrega variáveis do .env
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,8 +11,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
-
-# ✅ ALTERAÇÃO: DEBUG como False para produção conforme o erro 404 sugeriu
 DEBUG = False 
 
 ALLOWED_HOSTS = [
@@ -57,16 +54,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'tammysclara_project.urls'
 
-# ===========================================================
-# 4. TEMPLATES
-# ===========================================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'templates',           
-            BASE_DIR / 'store' / 'templates'
-        ],
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'store' / 'templates'],
         'APP_DIRS': True, 
         'OPTIONS': {
             'context_processors': [
@@ -81,39 +72,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ===========================================================
-# 5. BANCO DE DADOS
-# ===========================================================
 DATABASE_URL = os.environ.get('DATABASE_URL')
 SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH')
 
 if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
-    }
+    DATABASES = {'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)}
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': SQLITE_DB_PATH if SQLITE_DB_PATH else (BASE_DIR / 'data' / 'db.sqlite3'),
-        }
-    }
-
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
+    DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': SQLITE_DB_PATH if SQLITE_DB_PATH else (BASE_DIR / 'data' / 'db.sqlite3')}}
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-# ===========================================================
-# 8. ARQUIVOS ESTÁTICOS E MÍDIA
-# ===========================================================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -126,17 +97,6 @@ STORAGES = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
-# ===========================================================
-# 9. CORS E PROXY SSL
-# ===========================================================
-CORS_ALLOWED_ORIGINS = [
-    "https://tammysstore.com.br",
-    "https://www.tammysstore.com.br",
-    "https://tammyclara-store-b2y.fly.dev",
-    "http://localhost:8000",
-]
-
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = False 
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
