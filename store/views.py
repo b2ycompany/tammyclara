@@ -44,18 +44,23 @@ def pos_view(request):
     Renderiza o template do Ponto de Venda (PDV) para vendas físicas.
     """
     return render(request, 'pos.html', {})
+
 # ----------------------------------------------------------------------
 
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
 
 class ProductList(generics.ListAPIView):
-    """Lista todos os produtos ativos."""
+    """
+    Lista todos os produtos ativos no catálogo.
+    """
     queryset = Product.objects.filter(is_active=True).order_by('name')
     serializer_class = ProductSerializer
 
 class CustomerCreate(generics.CreateAPIView):
-    """Cria um novo cliente (Usado no e-commerce para leads)."""
+    """
+    Cria um novo cliente (Usado principalmente no e-commerce para capturar leads).
+    """
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
@@ -63,7 +68,7 @@ class CustomerCreate(generics.CreateAPIView):
 class CustomerSearchByPhone(generics.RetrieveAPIView):
     """
     Busca um cliente existente no CRM pelo número de telefone.
-    Usado pelo PDV para preencher dados.
+    Usado pelo PDV para preencher automaticamente os dados do cliente.
     """
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
@@ -76,13 +81,13 @@ class CustomerSearchByPhone(generics.RetrieveAPIView):
         except Customer.DoesNotExist:
             raise status.HTTP_404_NOT_FOUND
 
-# --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO (CRM/LEAD) ---
+# --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO (A "INTELIGÊNCIA" DO CRM/LEAD) ---
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SaleCreate(generics.CreateAPIView):
     """
-    Cria uma nova venda (usada pelo e-commerce e PDV).
-    Processa itens, dá baixa no estoque e gera fatura em uma transação atômica.
+    View principal que cria uma nova venda (usada tanto pelo e-commerce quanto pelo PDV).
+    Processa os itens, dá baixa no estoque e gera a fatura em uma transação atômica.
     """
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
@@ -91,14 +96,16 @@ class SaleCreate(generics.CreateAPIView):
         customer_data = request.data.get('customer_info')
         items_data = request.data.get('items')
         
+        # Validação básica de entrada
         if not customer_data or not items_data:
             return Response({"error": "Dados do cliente e/ou itens do pedido estão faltando."}, 
                             status=status.HTTP_400_BAD_REQUEST)
         
         try:
+            # Iniciamos uma transação atômica: ou tudo salva, ou nada salva (evita erro de estoque)
             with transaction.atomic():
                 
-                # 2.1. CLIENTE: CRIA ou ATUALIZA (Lógica de Upsert)
+                # 2.1. CLIENTE: CRIA ou ATUALIZA (Lógica de Upsert para o CRM)
                 customer, created = Customer.objects.get_or_create(
                     phone_number=customer_data.get('phone_number'),
                     defaults={
@@ -106,6 +113,8 @@ class SaleCreate(generics.CreateAPIView):
                         'email': customer_data.get('email', ''),
                     }
                 )
+                
+                # Se o cliente já existia, atualizamos os dados para manter o CRM limpo
                 if not created:
                     customer.first_name = customer_data.get('first_name', customer.first_name)
                     customer.email = customer_data.get('email', customer.email)
@@ -115,7 +124,7 @@ class SaleCreate(generics.CreateAPIView):
                 sale = Sale.objects.create(
                     customer=customer,
                     sale_date=timezone.now(),
-                    total_amount=Decimal('0.00'),
+                    total_amount=Decimal('0.00'), # Será atualizado após somar os itens
                 )
                 
                 final_total = Decimal('0.00')
@@ -124,31 +133,39 @@ class SaleCreate(generics.CreateAPIView):
                 for item_data in items_data:
                     product_id = item_data.get('id')
                     quantity = item_data.get('quantity')
+                    
+                    # Busca o produto ou retorna 404
                     product = get_object_or_404(Product, pk=product_id)
                     
                     if quantity <= 0:
                         continue
                         
-                    # 🚨 Validação Crítica de Estoque 🚨
+                    # 🚨 VALIDAÇÃO CRÍTICA DE ESTOQUE 🚨
                     if product.stock_quantity < quantity:
-                        raise ValueError(f"Estoque insuficiente para {product.name}")
+                        # Se não houver estoque, a transação atômica cancela tudo o que foi feito acima
+                        raise ValueError(f"Estoque insuficiente para o produto: {product.name}")
                         
+                    # Baixa o estoque do produto
                     product.stock_quantity -= quantity
                     product.save()
 
+                    # Cria o vínculo do item com a venda, gravando o preço do momento da venda
                     SaleItem.objects.create(
                         sale=sale,
                         product=product,
                         quantity=quantity,
                         price_at_sale=product.price 
                     )
+                    
+                    # Soma ao total final
                     final_total += product.price * quantity
 
-                # 2.4. VENDA: ATUALIZAÇÃO FINAL
+                # 2.4. VENDA: ATUALIZAÇÃO FINAL (TOTAL)
                 sale.total_amount = final_total
                 sale.save()
                 
                 # 2.5. FATURA: CRIAÇÃO AUTOMÁTICA
+                # Gera uma fatura pendente com vencimento para 7 dias
                 Invoice.objects.create(
                     sale=sale,
                     customer=customer, 
@@ -157,13 +174,17 @@ class SaleCreate(generics.CreateAPIView):
                     payment_status='PENDING'
                 )
 
+
+                # 3. RESPOSTA PARA O FRONTEND
                 return Response({
                     "message": "Pedido registrado com sucesso!",
                     "sale_id": sale.id,
                 }, status=status.HTTP_201_CREATED)
 
         except ValueError as e:
+            # Captura o erro de Estoque ou Validação e devolve 400
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            # Qualquer outro erro de processamento
             return Response({"error": f"Ocorreu um erro interno: {str(e)}"}, 
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)

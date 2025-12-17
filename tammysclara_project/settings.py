@@ -3,6 +3,7 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
+# Carrega variáveis do .env
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,9 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ✅ Domínios autorizados para o novo endereço
+# ✅ ALTERAÇÃO: DEBUG como False para produção conforme o erro 404 sugeriu
+DEBUG = False 
+
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -22,7 +24,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
-# ✅ Confiança de origem (Crucial para o funcionamento do POST no PDV)
 CSRF_TRUSTED_ORIGINS = [
     'https://tammysstore.com.br',
     'https://www.tammysstore.com.br',
