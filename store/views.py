@@ -44,28 +44,50 @@ def pos_view(request):
     Renderiza o template do Ponto de Venda (PDV) para vendas físicas.
     """
     return render(request, 'pos.html', {})
+
 # ----------------------------------------------------------------------
 
 
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES (Leitura/Criação Simples) ---
 
 class ProductList(generics.ListAPIView):
-    """Lista todos os produtos ativos."""
+    """
+    Lista todos os produtos ativos no catálogo.
+    """
     queryset = Product.objects.filter(is_active=True).order_by('name')
     serializer_class = ProductSerializer
 
 class CustomerCreate(generics.CreateAPIView):
-    """Cria um novo cliente."""
+    """
+    Cria um novo cliente (Usado principalmente no e-commerce para capturar leads).
+    """
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
-# --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO (CRM/LEAD) ---
+# ✅ API para buscar cliente pelo telefone (ESSENCIAL PARA O PDV)
+class CustomerSearchByPhone(generics.RetrieveAPIView):
+    """
+    Busca um cliente existente no CRM pelo número de telefone.
+    Usado pelo PDV para preencher automaticamente os dados do cliente.
+    """
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    lookup_field = 'phone_number' 
+    
+    def get_object(self):
+        phone_number = self.kwargs['phone_number']
+        try:
+            return Customer.objects.get(phone_number=phone_number)
+        except Customer.DoesNotExist:
+            raise status.HTTP_404_NOT_FOUND
+
+# --- 2. VIEW PARA CRIAÇÃO DE VENDA/PEDIDO (A "INTELIGÊNCIA" DO CRM/LEAD) ---
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SaleCreate(generics.CreateAPIView):
     """
-    Cria uma nova venda (usada pelo e-commerce e PDV).
-    Processa itens, dá baixa no estoque e gera fatura em uma transação atômica.
+    View principal que cria uma nova venda (usada tanto pelo e-commerce quanto pelo PDV).
+    Processa os itens, dá baixa no estoque e gera a fatura em uma transação atômica.
     """
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
@@ -74,23 +96,25 @@ class SaleCreate(generics.CreateAPIView):
         customer_data = request.data.get('customer_info')
         items_data = request.data.get('items')
         
-        # O PDV ou e-commerce deve garantir que estes dados existam.
+        # Validação básica de entrada
         if not customer_data or not items_data:
             return Response({"error": "Dados do cliente e/ou itens do pedido estão faltando."}, 
                             status=status.HTTP_400_BAD_REQUEST)
         
         try:
+            # Iniciamos uma transação atômica: ou tudo salva, ou nada salva (evita erro de estoque)
             with transaction.atomic():
                 
-                # 2.1. CLIENTE: CRIA ou ATUALIZA
-                # Usamos o phone_number como chave principal para PDV/e-commerce
+                # 2.1. CLIENTE: CRIA ou ATUALIZA (Lógica de Upsert para o CRM)
                 customer, created = Customer.objects.get_or_create(
                     phone_number=customer_data.get('phone_number'),
                     defaults={
-                        'first_name': customer_data.get('first_name', 'Cliente Online'),
+                        'first_name': customer_data.get('first_name', 'Cliente Loja Física'),
                         'email': customer_data.get('email', ''),
                     }
                 )
+                
+                # Se o cliente já existia, atualizamos os dados para manter o CRM limpo
                 if not created:
                     customer.first_name = customer_data.get('first_name', customer.first_name)
                     customer.email = customer_data.get('email', customer.email)
@@ -100,34 +124,32 @@ class SaleCreate(generics.CreateAPIView):
                 sale = Sale.objects.create(
                     customer=customer,
                     sale_date=timezone.now(),
-                    total_amount=Decimal('0.00'),
-                    # ✅ Melhoria PDV: Você pode adicionar um campo 'source' no modelo Sale para rastrear (Loja vs Online)
+                    total_amount=Decimal('0.00'), # Será atualizado após somar os itens
                 )
                 
                 final_total = Decimal('0.00')
                 
-                # 2.3. ITENS DA VENDA E ATUALIZAÇÃO DE ESTOQUE/TOTAL
+                # 2.3. ITENS DA VENDA E ATUALIZAÇÃO DE ESTOQUE
                 for item_data in items_data:
                     product_id = item_data.get('id')
                     quantity = item_data.get('quantity')
                     
+                    # Busca o produto ou retorna 404
                     product = get_object_or_404(Product, pk=product_id)
                     
                     if quantity <= 0:
                         continue
                         
-                    # 🚨 Validação de Estoque 🚨
+                    # 🚨 VALIDAÇÃO CRÍTICA DE ESTOQUE 🚨
                     if product.stock_quantity < quantity:
-                        raise ValueError(
-                            f"Não temos {quantity} unidades de '{product.name}' em estoque. "
-                            f"Apenas {product.stock_quantity} unidades estão disponíveis."
-                        )
+                        # Se não houver estoque, a transação atômica cancela tudo o que foi feito acima
+                        raise ValueError(f"Estoque insuficiente para o produto: {product.name}")
                         
-                    # Baixa Provisória no Estoque:
+                    # Baixa o estoque do produto
                     product.stock_quantity -= quantity
                     product.save()
 
-                    # Cria o item na venda
+                    # Cria o vínculo do item com a venda, gravando o preço do momento da venda
                     SaleItem.objects.create(
                         sale=sale,
                         product=product,
@@ -135,6 +157,7 @@ class SaleCreate(generics.CreateAPIView):
                         price_at_sale=product.price 
                     )
                     
+                    # Soma ao total final
                     final_total += product.price * quantity
 
                 # 2.4. VENDA: ATUALIZAÇÃO FINAL (TOTAL)
@@ -142,6 +165,7 @@ class SaleCreate(generics.CreateAPIView):
                 sale.save()
                 
                 # 2.5. FATURA: CRIAÇÃO AUTOMÁTICA
+                # Gera uma fatura pendente com vencimento para 7 dias
                 Invoice.objects.create(
                     sale=sale,
                     customer=customer, 
