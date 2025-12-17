@@ -10,15 +10,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================================
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False 
 
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
     'tammyclara-store-b2y.fly.dev',
-    'localhost',
-    '127.0.0.1'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -27,8 +25,13 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
+# Configurações de Cookie para evitar Erro 500 no Login
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # ===========================================================
-# 2. DEFINIÇÃO DE APPS E MIDDLEWARES
+# 2. APPS E MIDDLEWARES
 # ===========================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -86,7 +89,7 @@ DATABASES = {
 }
 
 # ===========================================================
-# 4. INTERNACIONALIZAÇÃO E ESTÁTICOS
+# 4. ARQUIVOS ESTÁTICOS E MEDIA
 # ===========================================================
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
@@ -105,7 +108,5 @@ STORAGES = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False 
-APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'
