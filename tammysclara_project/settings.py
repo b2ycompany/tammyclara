@@ -3,7 +3,6 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-# Carrega variáveis do .env no ambiente local
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ✅ CORREÇÃO PONTUAL: Adição dos domínios tammysstore para resolver o 503
+# ✅ Domínios autorizados para o novo endereço
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -23,7 +22,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
-# ✅ CORREÇÃO PONTUAL: Confiança de origem para o novo domínio (Evita Forbidden)
+# ✅ Confiança de origem (Crucial para o funcionamento do POST no PDV)
 CSRF_TRUSTED_ORIGINS = [
     'https://tammysstore.com.br',
     'https://www.tammysstore.com.br',
@@ -57,6 +56,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'tammysclara_project.urls'
 
+# ===========================================================
+# 4. TEMPLATES
+# ===========================================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -124,7 +126,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
 # ===========================================================
-# 9. CORS E PROXY
+# 9. CORS E PROXY SSL
 # ===========================================================
 CORS_ALLOWED_ORIGINS = [
     "https://tammysstore.com.br",
