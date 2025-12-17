@@ -24,7 +24,7 @@ primary_region = "gru"
     soft_limit = 20
 
 [deploy]
-  # ✅ CORREÇÃO: Garante que o usuário do Django tenha permissão de escrita no DB e na pasta de mídia
+  # ✅ CORREÇÃO: Força permissão de escrita no volume antes de rodar o Django
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]

@@ -2,12 +2,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings 
 from django.conf.urls.static import static 
-
-import store.views 
 from store.admin import crm_admin_site 
 
 urlpatterns = [
-    # 1. Painel Admin
+    # 1. Admin Padrão
     path('admin/', admin.site.urls), 
     
     # 2. Pipeline de Vendas (CRM)

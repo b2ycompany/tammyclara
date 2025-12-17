@@ -10,10 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================================
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DEBUG = False 
 
-# ✅ DOMÍNIOS FIXADOS (Resolve Erro 503 e 400)
+# ✅ DOMÍNIOS FIXADOS: Resolve o erro 500/400 de Host inválido
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -73,10 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ===========================================================
-# 5. BANCO DE DADOS (CORREÇÃO: CAMINHO ABSOLUTO NO VOLUME)
-# ===========================================================
-# ✅ Forçamos o caminho /app/data para evitar erro 'readonly database'
+# ✅ BANCO DE DADOS FIXADO NO VOLUME: Resolve OperationalError: readonly
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
