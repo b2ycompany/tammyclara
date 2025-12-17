@@ -11,9 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = False 
 
-# ✅ CORREÇÃO DEFINITIVA: Domínios fixos para evitar erro 503/400
+# ✅ Domínios autorizados para tammysstore
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -22,7 +22,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
-# ✅ CORREÇÃO DE CSRF: Permite que o PDV e Checkout funcionem no novo domínio
+# ✅ Confiança de origem para o novo domínio (Resolve Erro 403)
 CSRF_TRUSTED_ORIGINS = [
     'https://tammysstore.com.br',
     'https://www.tammysstore.com.br',
@@ -81,7 +81,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
 # ===========================================================
-# 5. BANCO DE DADOS (SQLite Persistente no Fly.io)
+# 5. BANCO DE DADOS
 # ===========================================================
 DATABASE_URL = os.environ.get('DATABASE_URL')
 SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH')
@@ -98,9 +98,13 @@ else:
         }
     }
 
-# ===========================================================
-# 7. INTERNACIONALIZAÇÃO
-# ===========================================================
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
@@ -121,8 +125,18 @@ STORAGES = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
-# ✅ CONFIGURAÇÃO DE HTTPS PARA FLY.IO
+# ===========================================================
+# 9. CORS E PROXY SSL
+# ===========================================================
+CORS_ALLOWED_ORIGINS = [
+    "https://tammysstore.com.br",
+    "https://www.tammysstore.com.br",
+    "https://tammyclara-store-b2y.fly.dev",
+    "http://localhost:8000",
+]
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = False 
+APPEND_SLASH = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
