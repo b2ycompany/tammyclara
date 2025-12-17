@@ -13,7 +13,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False 
 
-# ✅ DOMÍNIOS FIXADOS: Resolve o erro 500/400 de Host inválido
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -28,7 +27,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÕES DE COOKIE PARA PRODUÇÃO: Resolve Erro 500 no Admin/CRM
+# ✅ CONFIGURAÇÕES CRÍTICAS PARA ADMIN/CRM: Resolve Erro 500 no Login
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -48,7 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # WhiteNoise deve vir logo após o Security
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -78,7 +77,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ✅ BANCO DE DADOS FIXADO NO VOLUME: Resolve OperationalError: readonly
+# ✅ BANCO DE DADOS: SQLite no volume persistente
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -95,11 +94,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# ✅ CONFIGURAÇÃO WHITENOISE: Evita erro 503 se o favicon ou arquivos falharem
+# ✅ CORREÇÃO WHITENOISE: Impede o erro 503 se arquivos como favicon.png falharem
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
+WHITENOISE_MANIFEST_STRICT = False 
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
