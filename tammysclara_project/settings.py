@@ -27,7 +27,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÕES CRÍTICAS PARA ADMIN/CRM: Resolve Erro 500 no Login
+# ✅ CONFIGURAÇÕES PARA ADMIN/CRM: Garante login seguro em HTTPS
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # WhiteNoise deve vir logo após o Security
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,7 +77,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ✅ BANCO DE DADOS: SQLite no volume persistente
+# ✅ BANCO DE DADOS: SQLite no volume persistente do Fly.io
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -94,12 +94,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# ✅ CORREÇÃO WHITENOISE: Impede o erro 503 se arquivos como favicon.png falharem
+# ✅ CORREÇÃO CRÍTICA: Mudei para CompressedStaticFilesStorage
+# Isso evita o erro 500/503 caso o favicon ou algum arquivo CSS falhe
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
-WHITENOISE_MANIFEST_STRICT = False 
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
