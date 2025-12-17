@@ -24,7 +24,7 @@ primary_region = "gru"
     soft_limit = 20
 
 [deploy]
-  # ✅ Destrava o banco dando permissão ao usuário 'appuser' no volume
+  # ✅ Comando que limpa permissões, estáticos e migra o banco de uma vez
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]

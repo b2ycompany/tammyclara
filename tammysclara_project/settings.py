@@ -72,7 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ✅ BANCO DE DADOS FIXADO NO VOLUME (Resolve OperationalError: readonly)
+# ✅ BANCO DE DADOS FIXADO NO VOLUME PARA EVITAR ERRO 'READONLY'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -85,6 +85,7 @@ TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
+# ✅ CONFIGURAÇÃO DE ESTÁTICOS CORRIGIDA PARA EVITAR ERRO 500
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
