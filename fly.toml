@@ -19,7 +19,8 @@ primary_region = "gru"
   processes = ["app"]
 
 [deploy]
-  release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
+  # ✅ Correção: Removido collectstatic para evitar falha no deploy
+  release_command = "python manage.py migrate --noinput"
 
 [[vm]]
   size = "shared-cpu-1x"
