@@ -6,13 +6,15 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed')
 DEBUG = False
 
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
     'tammyclara-store-b2y.fly.dev',
+    'localhost',
+    '127.0.0.1'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -21,7 +23,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# Segurança de Sessão para Admin/CRM
+# ✅ CONFIGURAÇÃO DE COOKIE: Resolve erro 500 no Admin/CRM
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -75,11 +77,6 @@ DATABASES = {
         'NAME': '/app/data/db.sqlite3',
     }
 }
-
-LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'
-USE_I18N = True
-USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
