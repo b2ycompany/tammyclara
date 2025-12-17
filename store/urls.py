@@ -12,7 +12,7 @@ urlpatterns = [
     # API para busca de cliente
     path('customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),
     
-    # ✅ Rota explícita para o PDV (Garanta que pos-view esteja correto)
+    # ✅ Rota para o Ponto de Venda (PDV)
     path('pdv/', pos_view, name='pos-view'),
 ]
 

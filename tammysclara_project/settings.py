@@ -3,7 +3,6 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-# Carrega variáveis do .env
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,7 +13,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
 DEBUG = False 
 
-# ✅ Correção: Domínios autorizados para tammysstore
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -23,7 +21,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
-# ✅ Correção: Confiança de origem para evitar Forbidden no PDV e Admin
 CSRF_TRUSTED_ORIGINS = [
     'https://tammysstore.com.br',
     'https://www.tammysstore.com.br',
@@ -127,7 +124,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data' / 'media'
 
 # ===========================================================
-# 9. CORS E CONFIGURAÇÃO DE PROXY
+# 9. CONFIGURAÇÃO DE REDE
 # ===========================================================
 CORS_ALLOWED_ORIGINS = [
     "https://tammysstore.com.br",
