@@ -1,44 +1,37 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tammy´s Store </title>
+    <title>Tammy's Store | Elegância e Estilo</title>
 
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2">
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-
-<body id="main-body">
+<body id="main-body" style="opacity: 0;">
 
     <header class="header">
-        <div class="logo">
-            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy">
-        </div>
-
-        <nav>
-            <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'products' %}">Coleção</a>
-            
-            <a href="{% url 'home' %}#novidades">Novidades</a>
-            <a href="{% url 'home' %}#lojas">Lojas</a>
-            <a href="{% url 'home' %}#contato">Contato</a>
-
-            <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">
-                <i class="fas fa-shopping-bag"></i>
-            </a>
-            </nav>
+        <nav class="navbar">
+            <div class="logo">Tammy's Store</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="{% url 'products' %}">Coleção</a></li>
+                <li><a href="#novidades">Novidades</a></li>
+                <li><a href="#lojas">Loja Física</a></li>
+                <li><a href="{% url 'cart' %}"><i class="fas fa-shopping-cart"></i> Carrinho</a></li>
+                <li><a href="/admin/">Painel</a></li>
+            </ul>
+        </nav>
     </header>
 
     <section class="hero-section" id="home">
         <div class="hero-content">
-
             <div class="fusion-highlight-row">
-
                 <div class="fusion-branding">
                     <div class="hero-logo">
                         <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy & Clara">
@@ -58,7 +51,6 @@
 
                     <button id="toggle-story" class="btn secondary-btn">Leia Mais</button>
                 </div>
-
             </div>
 
             <a href="{% url 'products' %}" class="btn primary-btn mt-4">Ver a Coleção</a>
@@ -71,76 +63,44 @@
         <h2>🌟 Nossos Destaques da Semana</h2>
         <p>Peças favoritas da coleção, escolhidas a dedo para você.</p>
         <div class="products-grid" id="featured-products-container">
-             <p>Carregando destaques...</p>
+            <p>Carregando destaques...</p>
         </div>
-        <a href="{% url 'products' %}" class="btn primary-btn" style="margin-top: 30px;">
-            Ver Coleção Completa
-        </a>
+        <a href="{% url 'products' %}" class="btn primary-btn" style="margin-top: 30px;">Ver Coleção Completa</a>
     </section>
 
     <section class="feature-section" id="novidades" style="text-align: center; padding: 50px;">
         <h2>✨ Novidades | Coleção Primavera/Verão 2026</h2>
         <p>
-            **Aguarde!** Nossa nova coleção 'Aurora' chega em breve com tecidos fluidos, cores vibrantes e peças exclusivas para celebrar o seu estilo. 
-            Siga-nos nas redes sociais para sneak peeks diários!
+            Aguarde! Nossa nova coleção <strong>Aurora</strong> chega em breve com tecidos fluidos, cores vibrantes e peças exclusivas.
         </p>
         <a href="{% url 'products' %}" class="btn secondary-btn" style="margin-top: 15px;">Comprar Agora</a>
     </section>
 
     <section class="store-location" id="lojas" style="text-align: center; padding: 50px; background-color: #f8f8f8;">
         <h2>🛍️ Visite-nos em Cotia!</h2>
-
         <p class="address-line">
             Endereço:
-            <strong>R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP, 06703-000</strong>
-        </p>
-        <p style="margin-top: 10px; color: #555;">
-            *Atendimento presencial com consultoria de moda exclusiva. Estacionamento gratuito.*
+            <strong>R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP</strong>
         </p>
 
         <div class="map-container" style="margin-top: 25px; max-width: 800px; margin-left: auto; margin-right: auto;">
-            <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.876796472483!2d-46.92095942475479!3d-23.53580526017169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf983d582f342b%3A0x1d5d1c5d9a9b7a42!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" 
-                width="100%" 
-                height="350" 
-                style="border:0; border-radius: 8px;" 
-                allowfullscreen="" 
-                loading="lazy" 
-                referrerpolicy="no-referrer-when-downgrade">
+            <iframe width="100%" height="350" style="border:0; border-radius:8px;" loading="lazy" allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.123456789!2d-46.9!3d-23.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDM2JzAwLjAiUyA0NsKwNTQnMDAuMCJX!5e0!3m2!1spt-BR!2sbr!4v1234567890">
             </iframe>
         </div>
-        
-        <a href="https://maps.google.com" target="_blank" class="btn primary-btn" style="margin-top: 20px;">
-            Obter Rotas no Google Maps
-        </a>
     </section>
 
-    <section class="call-to-action" id="contato" style="padding: 50px;">
-        <h2>Fale Conosco | Atendimento Personalizado</h2>
-
-        <p>Para dúvidas, trocas ou consultoria online, entre em contato:</p>
-
-        <p class="mt-3 contact-info">
-            **WhatsApp (Agendamentos e Suporte):**
-            <a href="tel:+5511998765432"><strong>(11) 99876-5432</strong></a>
-        </p>
-
-        <p class="mt-3 contact-info">
-            **E-mail (Geral):**
-            <a href="mailto:contato@tammysstore.com">contato@tammysstore.com</a>
-        </p>
-
-        <form class="newsletter-form" style="margin-top: 30px;">
-            <input type="email" placeholder="Inscreva-se para receber novidades por e-mail" required>
-            <button type="submit" class="btn primary-btn">Inscrever-se</button>
-        </form>
+    <section class="call-to-action" id="contato" style="padding: 50px; text-align: center;">
+        <h2>Fale Conosco</h2>
+        <p>WhatsApp: <a href="https://wa.me/5511998765432"><strong>(11) 99876-5432</strong></a></p>
+        <p>E-mail: <a href="mailto:contato@tammysstore.com.br">contato@tammysstore.com.br</a></p>
     </section>
 
-    <footer class="footer">
-        <p>© 2024 Tammy´s Store — Todos os direitos reservados.</p>
+    <footer class="footer" style="text-align: center; padding: 20px; background: #333; color: #fff;">
+        <p>© 2024 Tammy's Store — Todos os direitos reservados.</p>
     </footer>
 
-    <script src="{% static 'js/script.js' %}"></script>
-
+    <script src="{% static 'js/script.js' %}?v=2"></script>
 </body>
 </html>
