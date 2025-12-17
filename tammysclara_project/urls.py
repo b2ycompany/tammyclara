@@ -8,26 +8,23 @@ from django.conf.urls.static import static
 import store.views 
 from store.admin import crm_admin_site 
 
-
 urlpatterns = [
-    # Rotas de Administração
+    # 1. Painel Admin (Completo)
     path('admin/', admin.site.urls), 
-    path('crm-dashboard/', crm_admin_site.urls, name='crm-dashboard'), 
     
-    # Rotas de API
-    path('api/', include('store.urls')),
+    # 2. Dashboard de Vendas (CRM / Pipeline)
+    path('crm-dashboard/', crm_admin_site.urls), 
     
-    # Rotas de Navegação Front-end
+    # 3. Rotas da API e PDV (Inclui o arquivo store/urls.py)
+    path('', include('store.urls')),
+    
+    # 4. Rotas de Navegação Front-end (Site Principal)
     path('', store.views.home_view, name='home'),
     path('products/', store.views.products_view, name='products'),
     path('cart/', store.views.cart_view, name='cart'),
     path('order-success/', store.views.order_success_view, name='order-success'),
-    
-    # ✅ NOVO: Rota para o Ponto de Venda (PDV)
-    path('pdv/', store.views.pos_view, name='pos-view'), 
-
 ]
 
-# Configuração para servir arquivos estáticos e de mídia em ambiente de desenvolvimento
+# Servir arquivos de mídia em desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

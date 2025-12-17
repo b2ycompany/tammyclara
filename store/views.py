@@ -14,7 +14,7 @@ from datetime import timedelta
 from .models import Product, Customer, Sale, SaleItem, Invoice 
 from .serializers import ProductSerializer, CustomerSerializer, SaleSerializer, SaleItemSerializer
 
-# --- VIEWS PARA RENDERIZAÇÃO DE TEMPLATES (CORREÇÃO DE ESTABILIDADE) ---
+# --- VIEWS PARA RENDERIZAÇÃO DE TEMPLATES ---
 def home_view(request):
     """Renderiza o template da página inicial."""
     return render(request, 'index.html', {})
@@ -38,18 +38,15 @@ def pos_view(request):
 # --- 1. VIEWS PARA O CATÁLOGO E CLIENTES ---
 
 class ProductList(generics.ListAPIView):
-    """Lista todos os produtos ativos no catálogo."""
     queryset = Product.objects.filter(is_active=True).order_by('name')
     serializer_class = ProductSerializer
 
 class CustomerCreate(generics.CreateAPIView):
-    """Cria um novo cliente."""
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
-# ✅ API ESSENCIAL PARA O PDV (Resolve ImportError no deploy)
+# ✅ API para buscar cliente pelo telefone (Resolve ImportError no deploy)
 class CustomerSearchByPhone(generics.RetrieveAPIView):
-    """Busca um cliente existente no CRM pelo número de telefone."""
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     lookup_field = 'phone_number' 
@@ -65,9 +62,6 @@ class CustomerSearchByPhone(generics.RetrieveAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SaleCreate(generics.CreateAPIView):
-    """
-    Cria uma nova venda, processa estoque e gera fatura em transação atômica.
-    """
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     
@@ -80,7 +74,6 @@ class SaleCreate(generics.CreateAPIView):
         
         try:
             with transaction.atomic():
-                # 2.1. CLIENTE: CRIA ou ATUALIZA
                 customer, created = Customer.objects.get_or_create(
                     phone_number=customer_data.get('phone_number'),
                     defaults={
@@ -93,7 +86,6 @@ class SaleCreate(generics.CreateAPIView):
                     customer.email = customer_data.get('email', customer.email)
                     customer.save()
                     
-                # 2.2. VENDA: CRIAÇÃO
                 sale = Sale.objects.create(
                     customer=customer,
                     sale_date=timezone.now(),
@@ -102,12 +94,12 @@ class SaleCreate(generics.CreateAPIView):
                 
                 final_total = Decimal('0.00')
                 
-                # 2.3. ESTOQUE E ITENS
                 for item_data in items_data:
                     product = get_object_or_404(Product, pk=item_data.get('id'))
                     quantity = item_data.get('quantity')
                     
                     if quantity <= 0: continue
+                        
                     if product.stock_quantity < quantity:
                         raise ValueError(f"Estoque insuficiente para {product.name}")
                         
@@ -122,7 +114,6 @@ class SaleCreate(generics.CreateAPIView):
                 sale.total_amount = final_total
                 sale.save()
                 
-                # 2.4. FATURA
                 Invoice.objects.create(
                     sale=sale, customer=customer, amount_due=final_total,
                     due_date=timezone.now().date() + timedelta(days=7), 
