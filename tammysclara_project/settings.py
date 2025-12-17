@@ -6,22 +6,43 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SEGURANÇA
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed-key')
-DEBUG = False
+# ===========================================================
+# 1. SEGURANÇA E AMBIENTE
+# ===========================================================
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chave-de-producao')
+DEBUG = False 
 
-ALLOWED_HOSTS = ['tammysstore.com.br', 'www.tammysstore.com.br', 'tammyclara-store-b2y.fly.dev']
-CSRF_TRUSTED_ORIGINS = ['https://tammysstore.com.br', 'https://www.tammysstore.com.br', 'https://tammyclara-store-b2y.fly.dev']
+ALLOWED_HOSTS = [
+    'tammysstore.com.br',
+    'www.tammysstore.com.br',
+    'tammyclara-store-b2y.fly.dev',
+]
 
-# Configurações de Cookie para Produção (Resolve erro 500 no CRM)
+CSRF_TRUSTED_ORIGINS = [
+    'https://tammysstore.com.br',
+    'https://www.tammysstore.com.br',
+    'https://tammyclara-store-b2y.fly.dev'
+]
+
+# Configurações de Cookie Críticas para Produção
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# ===========================================================
+# 2. DEFINIÇÃO DE APPS E MIDDLEWARES
+# ===========================================================
 INSTALLED_APPS = [
-    'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
-    'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
-    'rest_framework', 'corsheaders', 'django_cleanup.apps.CleanupConfig', 'store',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
+    'django_cleanup.apps.CleanupConfig',
+    'store',
 ]
 
 MIDDLEWARE = [
@@ -42,22 +63,42 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'store' / 'templates'],
-        'APP_DIRS': True,
+        'APP_DIRS': True, 
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug', 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth', 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': '/app/data/db.sqlite3'}}
+WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ESTÁTICOS
+# ===========================================================
+# 3. BANCO DE DADOS (Volume Persistente Fly.io)
+# ===========================================================
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/app/data/db.sqlite3',
+    }
+}
+
+# ===========================================================
+# 4. ARQUIVOS ESTÁTICOS E MEDIA
+# ===========================================================
+LANGUAGE_CODE = 'pt-br'
+TIME_ZONE = 'America/Sao_Paulo'
+USE_I18N = True
+USE_TZ = True
+
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
@@ -66,5 +107,7 @@ STORAGES = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Configurações Adicionais
 APPEND_SLASH = True
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'
