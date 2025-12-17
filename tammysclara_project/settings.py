@@ -4,14 +4,16 @@ import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===========================================================
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chave-producao-fixada')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False 
 
+# ✅ DOMÍNIOS FIXADOS: Resolve o erro 500/400 de Host inválido
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -26,7 +28,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CORREÇÃO PARA ADMIN/CRM: Garante que o login funcione em HTTPS
+# ✅ CONFIGURAÇÕES DE COOKIE PARA PRODUÇÃO: Resolve Erro 500 no Admin/CRM
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -76,7 +78,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ✅ BANCO DE DADOS NO VOLUME: Resolve OperationalError: readonly
+# ✅ BANCO DE DADOS FIXADO NO VOLUME: Resolve OperationalError: readonly
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -93,9 +95,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+# ✅ CONFIGURAÇÃO WHITENOISE: Evita erro 503 se o favicon ou arquivos falharem
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
 MEDIA_URL = '/media/'
@@ -103,3 +106,4 @@ MEDIA_ROOT = '/app/data/media'
 
 APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'

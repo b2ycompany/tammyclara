@@ -19,8 +19,8 @@ primary_region = "gru"
   processes = ["app"]
 
 [deploy]
-  # ✅ CORREÇÃO: Usa shell para rodar múltiplos comandos sem erro de argumentos
-  release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
+  # ✅ CORREÇÃO: Garante permissão de escrita antes de migrar
+  release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
   size = "shared-cpu-1x"

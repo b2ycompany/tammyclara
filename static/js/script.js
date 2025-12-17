@@ -90,13 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- LÓGICA DE PRODUTOS (products.html) ---
-    
     const productsGrid = document.querySelector('.products-grid#products-container');
 
     if (productsGrid) {
-        
         async function loadProducts() {
             try {
+                // ✅ CORREÇÃO: Usa caminho relativo sem 127.0.0.1
                 const apiUrl = `${API_BASE_URL}/products/`;
                 const response = await fetch(apiUrl); 
                 
@@ -105,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const products = await response.json();
                 
-                // ✅ Cache para uso geral (PDV e E-commerce)
                 allProducts = products; 
                 
                 if (!products || products.length === 0) {
@@ -116,15 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 productsGrid.innerHTML = '';
                 
                 products.forEach(product => {
-                    if (!product || !product.id) {
-                        return; 
-                    }
+                    if (!product || !product.id) return;
                     
                     availableProducts[product.id] = product; 
 
                     let initialImageUrl = '/static/img/placeholder-produto.png';
                     
-                    // --- 1. LÓGICA DE GERAÇÃO DA LISTA DE IMAGENS ---
                     let allImages = []; 
                     let mainImageUrl = product.main_image; 
                     const addedUrls = new Set();
@@ -143,50 +138,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
 
-
                     if (allImages.length > 0) {
                         initialImageUrl = buildMediaUrl(allImages[0].url);
                     }
                     
-                    // --- 2. CONSTRUÇÃO DA GALERIA DE MINIATURAS (HTML) ---
                     let galleryHtml = '';
-                    
                     if (allImages.length > 1) { 
                         galleryHtml = '<div class="product-gallery">';
                         allImages.forEach((img, index) => {
-                            
                             const thumbUrl = buildMediaUrl(img.url);
-
-                            galleryHtml += 
-                                '<img ' + 
-                                    'src="' + thumbUrl + '" ' + 
-                                    'alt="' + product.name + ' miniatura ' + (index + 1) + '" ' + 
-                                    'class="gallery-thumb" ' + 
-                                    'data-full-img="' + thumbUrl + '"' + 
-                                    'data-product-id="' + product.id + '"' +
-                                '/>';
+                            galleryHtml += `<img src="${thumbUrl}" alt="${product.name} miniatura ${index + 1}" class="gallery-thumb" data-full-img="${thumbUrl}" data-product-id="${product.id}"/>`;
                         });
                         galleryHtml += '</div>';
                     }
                     
-                    // --- 3. CONSTRUÇÃO DO ELEMENTO PRINCIPAL ---
-                    
                     const productItem = document.createElement('div');
                     productItem.classList.add('product-item');
-
-                    productItem.innerHTML = 
-                        '<div class="product-image-container">' +
-                            '<img src="' + initialImageUrl + '" alt="' + product.name + '" id="main-image-' + product.id + '">' +
-                        '</div>' +
-                        galleryHtml + 
-                        '<h3>' + product.name + '</h3>' +
-                        '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
-                        '<button ' + 
-                            'class="btn primary-btn add-to-cart-btn" ' + 
-                            'data-id="' + product.id + '">' +
-                            'Adicionar ao Carrinho' +
-                        '</button>';
-                    
+                    productItem.innerHTML = `
+                        <div class="product-image-container">
+                            <img src="${initialImageUrl}" alt="${product.name}" id="main-image-${product.id}">
+                        </div>
+                        ${galleryHtml}
+                        <h3>${product.name}</h3>
+                        <p>R$ ${parseFloat(product.price).toFixed(2)}</p>
+                        <button class="btn primary-btn add-to-cart-btn" data-id="${product.id}">Adicionar ao Carrinho</button>
+                    `;
                     productsGrid.appendChild(productItem);
                 });
                 
@@ -198,100 +174,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 productsGrid.innerHTML = `<p class="error-msg" style="text-align:center; color:red;">Erro ao carregar produtos: ${error.message}</p>`;
             }
         }
-        
         loadProducts(); 
     }
     
-    // --- LÓGICA DA HOME PAGE: Destaques (Injetar Conteúdo na Home) ---
-    
+    // --- LÓGICA DA HOME PAGE: Destaques ---
     const featuredProductsContainer = document.getElementById('featured-products-container');
 
     if (featuredProductsContainer) {
-        
         async function loadFeaturedProducts() {
-             // Reusa a função loadProducts, mas limita a 4 itens
              try {
-                // Se allProducts já foi carregado, usa o cache
                 const products = allProducts.length > 0 ? allProducts : await fetch(`${API_BASE_URL}/products/`).then(res => res.json()); 
-                
                 if (!products || products.length === 0) {
-                    featuredProductsContainer.innerHTML = '<p>Nenhum produto em destaque no momento.</p>';
+                    featuredProductsContainer.innerHTML = '<p>Nenhum produto em destaque.</p>';
                     return;
                 }
-                
                 featuredProductsContainer.innerHTML = '';
-                
-                // Exibir apenas os primeiros 4 produtos (os destaques)
                 products.slice(0, 4).forEach(product => {
                     if (!product || !product.id) return;
-                    
-                    availableProducts[product.id] = product; // Adiciona ao cache
-
-                    let initialImageUrl = buildMediaUrl(product.main_image);
-                    
-                    // --- Injeção simplificada (reutilizando o layout do product-item) ---
+                    availableProducts[product.id] = product;
+                    let imgUrl = buildMediaUrl(product.main_image);
                     const productItem = document.createElement('div');
-                    productItem.classList.add('product-item'); // Reusa a classe CSS
-
-                    productItem.innerHTML = 
-                        '<div class="product-image-container">' +
-                            '<img src="' + initialImageUrl + '" alt="' + product.name + '">' +
-                        '</div>' +
-                        '<h3>' + product.name + '</h3>' +
-                        '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
-                        '<button ' + 
-                            'class="btn primary-btn add-to-cart-btn" ' + 
-                            'data-id="' + product.id + '">' +
-                            'Adicionar ao Carrinho' +
-                        '</button>';
-                    
+                    productItem.classList.add('product-item');
+                    productItem.innerHTML = `
+                        <div class="product-image-container"><img src="${imgUrl}" alt="${product.name}"></div>
+                        <h3>${product.name}</h3>
+                        <p>R$ ${parseFloat(product.price).toFixed(2)}</p>
+                        <button class="btn primary-btn add-to-cart-btn" data-id="${product.id}">Adicionar ao Carrinho</button>
+                    `;
                     featuredProductsContainer.appendChild(productItem);
                 });
-                
-                // Os listeners de carrinho precisam ser re-anexados
                 attachAddToCartListeners(); 
-                
             } catch (error) {
                 console.error('Falha ao buscar destaques:', error);
-                featuredProductsContainer.innerHTML = `<p class="error-msg" style="color:red;">Erro ao carregar destaques: ${error.message}</p>`;
             }
         }
-        
         loadFeaturedProducts();
     }
     
-    // --- LÓGICA DO MODAL/LIGHTBOX (Interatividade UX/UI) ---
-
+    // --- LÓGICA DO MODAL/LIGHTBOX ---
     function openImageModal(productId, initialUrl) {
         const product = availableProducts[productId];
         if (!product) return;
-
-        // 1. Constrói a lista de imagens completa
         currentGalleryImages = [];
         const mainImageUrl = product.main_image;
-        
         const addedUrls = new Set();
-        
         if (mainImageUrl) {
             let fullUrl = buildMediaUrl(mainImageUrl);
             currentGalleryImages.push(fullUrl);
             addedUrls.add(fullUrl);
         }
-        
         if (product.images) {
             product.images.forEach(img => {
                 let fullUrl = buildMediaUrl(img.image);
-                if (!addedUrls.has(fullUrl)) {
-                    currentGalleryImages.push(fullUrl);
-                }
+                if (!addedUrls.has(fullUrl)) currentGalleryImages.push(fullUrl);
             });
         }
-        
-        // 2. Define o índice inicial
         const initialIndex = currentGalleryImages.findIndex(url => url === initialUrl);
         currentImageIndex = initialIndex !== -1 ? initialIndex : 0;
-        
-        // 3. Injeta e abre o modal
         injectModalThumbnails(currentGalleryImages);
         updateModalDisplay(currentImageIndex);
         document.getElementById('image-modal').style.display = 'flex';
@@ -299,610 +238,192 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateModalDisplay(index) {
         if (currentGalleryImages.length === 0) return;
-        
-        const fullUrl = currentGalleryImages[index];
-
-        document.getElementById('modal-main-image').src = fullUrl;
+        document.getElementById('modal-main-image').src = currentGalleryImages[index];
         currentImageIndex = index;
-
-        // Marca a miniatura ativa (melhoria UX)
         document.querySelectorAll('#modal-thumbnails-container img').forEach((img, i) => {
-            img.classList.remove('active');
-            if (i === index) {
-                img.classList.add('active');
-            }
+            img.classList.toggle('active', i === index);
         });
     }
 
     function injectModalThumbnails(images) {
         const container = document.getElementById('modal-thumbnails-container');
         container.innerHTML = '';
-        
         images.forEach((fullUrl, index) => {
             const thumb = document.createElement('img');
-            thumb.src = fullUrl;
-            thumb.classList.add('modal-thumb');
+            thumb.src = fullUrl; thumb.classList.add('modal-thumb');
             thumb.addEventListener('click', () => updateModalDisplay(index));
             container.appendChild(thumb);
         });
     }
 
-
-    // --- 5. LIGAÇÃO DE EVENTOS DO MODAL ---
-    
     const modal = document.getElementById('image-modal');
     if (modal) {
-        // Fechar com o 'X'
-        document.querySelector('#image-modal .close-btn').addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-        
-        // Fechar clicando fora do modal
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-        
-        // Navegação (Prev e Next)
+        document.querySelector('#image-modal .close-btn').addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (event) => { if (event.target === modal) modal.style.display = 'none'; });
         document.querySelector('#image-modal .prev-btn').addEventListener('click', () => {
-            let newIndex = currentImageIndex - 1;
-            if (newIndex < 0) {
-                newIndex = currentGalleryImages.length - 1; // Volta para o final
-            }
-            updateModalDisplay(newIndex);
+            currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+            updateModalDisplay(currentImageIndex);
         });
-
         document.querySelector('#image-modal .next-btn').addEventListener('click', () => {
-            let newIndex = currentImageIndex + 1;
-            if (newIndex >= currentGalleryImages.length) {
-                newIndex = 0; // Vai para o início
-            }
-            updateModalDisplay(newIndex);
+            currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
+            updateModalDisplay(currentImageIndex);
         });
     }
 
-
-    // --- LÓGICA DO CARRINHO E INTERATIVIDADE (RESTANTE DO CÓDIGO) ---
-    
-    // --- LÓGICA DA INTERATIVIDADE DE FUSÃO (Leia Mais) ---
-    const toggleButton = document.getElementById('toggle-story');
-    const storyDetail = document.querySelector('.story-detail');
-
-    if (toggleButton && storyDetail) {
-        toggleButton.addEventListener('click', () => {
-            if (storyDetail.style.display === 'none') {
-                storyDetail.style.display = 'block';
-                toggleButton.textContent = 'Leia Menos';
-            } else {
-                storyDetail.style.display = 'none';
-                toggleButton.textContent = 'Leia Mais';
-            }
-        });
-    }
-
-    // --- Lógica para o Carrinho de Compras (Frontend Simplificado) ---
+    // --- CARRINHO DE COMPRAS ---
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
-
-    function saveCart() {
-        localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
-    }
+    function saveCart() { localStorage.setItem('tammyClaraCart', JSON.stringify(cart)); }
 
     function addToCart(product) {
         const existingItem = cart.find(item => item.id === product.id);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            // Cria um objeto de item simples com os dados necessários
-            cart.push({
-                id: product.id,
-                name: product.name,
-                price: parseFloat(product.price),
-                quantity: 1,
-                main_image: product.main_image,
-                sku: product.sku
-            });
-        }
-        saveCart();
-        updateCartDisplay();
+        if (existingItem) existingItem.quantity += 1;
+        else cart.push({ id: product.id, name: product.name, price: parseFloat(product.price), quantity: 1, main_image: product.main_image, sku: product.sku });
+        saveCart(); updateCartDisplay();
         alert(`${product.name} adicionado ao carrinho!`);
     }
 
-    function removeFromCart(productId) {
-        cart = cart.filter(item => item.id != productId);
-        saveCart();
-        updateCartDisplay();
-    }
-
     function updateCartDisplay() {
-        const cartItemsContainer = document.querySelector('.cart-items');
-        const cartTotalSpan = document.getElementById('cart-total');
-
-        if (cartItemsContainer) {
-            cartItemsContainer.innerHTML = '';
+        const container = document.querySelector('.cart-items');
+        const totalSpan = document.getElementById('cart-total');
+        if (container) {
+            container.innerHTML = cart.length === 0 ? '<p>Carrinho vazio.</p>' : '';
             let total = 0;
-
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="empty-cart-message">Seu carrinho está vazio.</p>';
-            } else {
-                cart.forEach(item => {
-                    const itemTotal = item.price * item.quantity;
-                    total += itemTotal;
-                    
-                    const imageUrl = buildMediaUrl(item.main_image);
-
-                    const itemHtml = `
-                        <div class="cart-item" data-product-id="${item.id}">
-                            <img src="${imageUrl}" alt="${item.name}" class="cart-item-image">
-                            <div class="cart-item-details">
-                                <h4>${item.name} (${item.sku})</h4>
-                                <p>Preço: R$ ${item.price.toFixed(2).replace('.', ',')}</p>
-                                <div class="cart-quantity-controls">
-                                    <button class="qty-btn qty-minus-btn" data-id="${item.id}" data-action="decrease">—</button>
-                                    <span class="qty-count">${item.quantity}</span>
-                                    <button class="qty-btn qty-plus-btn" data-id="${item.id}" data-action="increase">+</button>
-                                </div>
-                                <p class="cart-item-total">Subtotal: R$ ${itemTotal.toFixed(2).replace('.', ',')}</p>
-                                <button class="btn-remove btn secondary-btn" data-id="${item.id}">Remover</button>
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${buildMediaUrl(item.main_image)}" class="cart-item-image">
+                        <div class="cart-item-details">
+                            <h4>${item.name} (${item.sku})</h4>
+                            <p>R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                            <div class="cart-controls">
+                                <button class="qty-btn" data-id="${item.id}" data-action="decrease">—</button>
+                                <span>${item.quantity}</span>
+                                <button class="qty-btn" data-id="${item.id}" data-action="increase">+</button>
                             </div>
+                            <button class="btn-remove btn" data-id="${item.id}">Remover</button>
                         </div>
-                    `;
-                    cartItemsContainer.innerHTML += itemHtml;
-                });
-            }
-
-            // Atualiza o total
-            if (cartTotalSpan) {
-                cartTotalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            }
-
-            // Re-anexa os listeners para os botões do carrinho
+                    </div>`;
+            });
+            if (totalSpan) totalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
             attachCartListeners();
-        } else if (cartTotalSpan) {
-             let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-             cartTotalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        } else if (totalSpan) {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            totalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
         }
     }
 
     function attachCartListeners() {
-        // Lógica para botões de Quantidade (+ e -)
-        document.querySelectorAll('.qty-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const id = parseInt(e.currentTarget.getAttribute('data-id'));
-                const action = e.currentTarget.getAttribute('data-action');
-                
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.dataset.id);
+                const action = e.currentTarget.dataset.action;
                 const item = cart.find(i => i.id === id);
                 if (!item) return;
-
-                if (action === 'increase') {
-                    item.quantity += 1;
-                } else if (action === 'decrease') {
-                    item.quantity -= 1;
-                    if (item.quantity < 1) {
-                        // Remove se a quantidade for zero
-                        cart = cart.filter(i => i.id !== id);
-                    }
-                }
-                
-                saveCart();
-                updateCartDisplay();
+                if (action === 'increase') item.quantity += 1;
+                else { item.quantity -= 1; if (item.quantity < 1) cart = cart.filter(i => i.id !== id); }
+                saveCart(); updateCartDisplay();
             });
         });
-
-        // Lógica para botão Remover
-        document.querySelectorAll('.btn-remove').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const id = parseInt(e.currentTarget.getAttribute('data-id'));
-                cart = cart.filter(i => i.id !== id);
-                saveCart();
-                updateCartDisplay();
+        document.querySelectorAll('.btn-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                cart = cart.filter(i => i.id !== parseInt(e.currentTarget.dataset.id));
+                saveCart(); updateCartDisplay();
             });
         });
     }
 
-    // Inicializa a exibição do carrinho ao carregar a página
-    updateCartDisplay();
-    
-
-    // --- Lógica de CHECKOUT E-COMMERCE (CRM/Venda Pendente) ---
+    // --- CHECKOUT E-COMMERCE ---
     const checkoutBtn = document.getElementById('checkout-whatsapp-btn');
     if (checkoutBtn) {
-        // Altera o texto do botão para melhor UX (Se o botão tiver o ID correto)
-        checkoutBtn.textContent = 'FINALIZAR PEDIDO'; 
-        
         checkoutBtn.addEventListener('click', async () => {
-            if (cart.length === 0) {
-                alert('Seu carrinho está vazio. Adicione itens antes de finalizar.');
-                return;
-            }
-            
-            // Requisita dados do cliente
+            if (cart.length === 0) return alert('Carrinho vazio.');
             const customerInfo = {
-                first_name: prompt("Seu nome (obrigatório):"),
-                email: prompt("Seu e-mail:"),
-                phone_number: prompt("Seu WhatsApp (obrigatório, ex: 5511987654321):") 
+                first_name: prompt("Nome (obrigatório):"),
+                email: prompt("E-mail:"),
+                phone_number: prompt("WhatsApp (obrigatório):") 
             };
-
-            if (!customerInfo.first_name || !customerInfo.phone_number) {
-                 alert('Nome e WhatsApp são obrigatórios para a venda ser registrada.');
-                 return;
-            }
-
-            // Obtém o token CSRF
+            if (!customerInfo.first_name || !customerInfo.phone_number) return alert('Dados incompletos.');
             const csrfToken = getCsrfToken();
-            if (!csrfToken) {
-                alert('Erro de segurança: Token CSRF não encontrado. Recarregue a página.');
-                return;
-            }
-
-            const payload = {
-                customer_info: customerInfo,
-                items: cart.map(item => ({
-                    id: item.id,
-                    quantity: item.quantity,
-                    price: item.price 
-                }))
-            };
+            if (!csrfToken) return alert('Erro de segurança CSRF.');
 
             try {
-                // CHAMADA CORRIGIDA: Usa o caminho relativo '/api/checkout/'
+                // ✅ CORREÇÃO: Caminho relativo
                 const response = await fetch(`${API_BASE_URL}/checkout/`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken 
-                    },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ customer_info: customerInfo, items: cart.map(i => ({ id: i.id, quantity: i.quantity })) })
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    // Exibe a mensagem amigável do backend 
-                    throw new Error(errorData.error || `Erro ao registrar pedido. Status: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error((await response.json()).error || 'Erro no pedido.');
                 const result = await response.json();
-                
-                // Limpa o carrinho e redireciona para a página de sucesso
-                cart = [];
-                saveCart();
+                cart = []; saveCart();
                 window.location.href = `/order-success/?id=${result.sale_id}`;
-
-
-            } catch (error) {
-                console.error("Erro no checkout:", error);
-                // Exibe a mensagem de estoque mais amigável 
-                alert(`⚠️ Atenção: ${error.message}`);
-            }
+            } catch (error) { alert(`⚠️ Erro: ${error.message}`); }
         });
     }
 
-
-    // =========================================================================
-    // 🛒 LÓGICA DO PONTO DE VENDA (PDV)
-    // =========================================================================
-
+    // --- PONTO DE VENDA (PDV) ---
     if (document.getElementById('pos-product-search')) {
-        
-        // Inicia carregando todos os produtos para a busca rápida
-        if (allProducts.length === 0) {
-             fetch(`${API_BASE_URL}/products/`)
-                .then(res => res.json())
-                .then(products => {
-                    allProducts = products;
-                    displaySearchResults(allProducts);
-                })
-                .catch(error => {
-                    document.getElementById('product-results').innerHTML = `<p style="color:red;">Falha ao carregar catálogo: ${error.message}</p>`;
-                });
-        } else {
-             displaySearchResults(allProducts);
-        }
-        
-        // Adiciona listeners para os botões de pagamento
-        document.querySelectorAll('.payment-option-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Remove 'active' de todos
-                document.querySelectorAll('.payment-option-btn').forEach(b => b.classList.remove('active'));
-                // Adiciona 'active' ao clicado
-                e.currentTarget.classList.add('active');
-                selectedPayment = e.currentTarget.dataset.type;
-            });
-        });
+        fetch(`${API_BASE_URL}/products/`).then(r => r.json()).then(p => { allProducts = p; displaySearchResults(p); });
     }
 
-    // Função auxiliar para lidar com Enter no campo de busca
-    window.handleSearchEnter = function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            searchProducts();
-        }
-    }
-    
-    // 1. FUNÇÃO DE BUSCA E EXIBIÇÃO DE PRODUTOS
     window.searchProducts = function() {
         const query = document.getElementById('pos-product-search').value.toLowerCase();
-        
-        if (allProducts.length === 0) {
-            document.getElementById('product-results').innerHTML = '<p>Catálogo não carregado. Tente recarregar a página.</p>';
-            return;
-        }
-
-        const filteredProducts = allProducts.filter(p => 
-            p.name.toLowerCase().includes(query) || 
-            (p.sku && p.sku.toLowerCase().includes(query))
-        );
-        
-        displaySearchResults(filteredProducts);
+        displaySearchResults(allProducts.filter(p => p.name.toLowerCase().includes(query) || (p.sku && p.sku.toLowerCase().includes(query))));
     }
-    
-    function displaySearchResults(products) {
-        const resultsContainer = document.getElementById('product-results');
-        resultsContainer.innerHTML = '';
-        
-        if (products.length === 0) {
-            resultsContainer.innerHTML = '<p>Nenhum produto encontrado.</p>';
-            return;
-        }
 
-        products.forEach(product => {
-            const card = document.createElement('div');
-            card.classList.add('product-card');
-            card.dataset.id = product.id;
-            
-            card.innerHTML = `
-                <img src="${buildMediaUrl(product.main_image)}" alt="${product.name}">
-                <h4>${product.name}</h4>
-                <p>SKU: ${product.sku || 'N/A'}</p>
-                <p>R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
-            `;
-            
-            card.addEventListener('click', () => addProductToPOSCart(product));
-            resultsContainer.appendChild(card);
+    function displaySearchResults(products) {
+        const container = document.getElementById('product-results');
+        container.innerHTML = products.length === 0 ? '<p>Nenhum produto.</p>' : '';
+        products.forEach(p => {
+            const card = document.createElement('div'); card.className = 'product-card';
+            card.innerHTML = `<img src="${buildMediaUrl(p.main_image)}"><h4>${p.name}</h4><p>R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>`;
+            card.addEventListener('click', () => {
+                const item = posCart.find(i => i.id === p.id);
+                if (item) item.quantity += 1; else posCart.push({ id: p.id, name: p.name, price: parseFloat(p.price), quantity: 1 });
+                updatePOSCartDisplay();
+            });
+            container.appendChild(card);
         });
     }
-    
-    // 2. FUNÇÃO PARA ADICIONAR AO CARRINHO PDV
-    function addProductToPOSCart(product, quantity = 1) {
-        const existingItem = posCart.find(item => item.id === product.id);
-        
-        if (existingItem) {
-            existingItem.quantity += quantity;
-        } else {
-            posCart.push({
-                id: product.id,
-                name: product.name,
-                price: parseFloat(product.price),
-                quantity: quantity,
-                sku: product.sku
-            });
-        }
-        updatePOSCartDisplay();
-    }
-    
-    // 3. FUNÇÃO PARA ATUALIZAR EXIBIÇÃO DO CARRINHO PDV
+
     window.updatePOSCartDisplay = function() {
         const container = document.getElementById('pos-cart-items');
-        let subtotal = 0;
-        
-        container.innerHTML = '';
-
-        if (posCart.length === 0) {
-            container.innerHTML = '<p>Carrinho vazio.</p>';
-            updatePosTotal();
-            return;
-        }
-
+        let subtotal = 0; container.innerHTML = posCart.length === 0 ? '<p>Carrinho vazio.</p>' : '';
         posCart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
-            subtotal += itemTotal;
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.classList.add('cart-item');
-            itemDiv.innerHTML = `
-                <h4>${item.name}</h4>
-                <div style="text-align: right;">
-                    <p style="font-size:0.8em; color:#8c735d; margin:0;">R$ ${itemTotal.toFixed(2).replace('.', ',')}</p>
-                    <div class="item-controls">
-                        <button class="qty-btn" onclick="updatePOSQuantity(${item.id}, -1)">—</button>
-                        <span>${item.quantity}</span>
-                        <button class="qty-btn" onclick="updatePOSQuantity(${item.id}, 1)">+</button>
-                        <i class="fas fa-trash" style="cursor:pointer; color:#dc3545; font-size:0.9em; margin-left:10px;" onclick="removePOSItem(${item.id})"></i>
-                    </div>
-                </div>
-            `;
-            container.appendChild(itemDiv);
+            subtotal += item.price * item.quantity;
+            container.innerHTML += `<div class="cart-item"><h4>${item.name}</h4><p>R$ ${(item.price * item.quantity).toFixed(2)}</p></div>`;
         });
-        
-        updatePosTotal(subtotal);
-    }
-    
-    // 4. FUNÇÕES DE CONTROLE DO CARRINHO PDV
-    window.updatePOSQuantity = function(productId, delta) {
-        const item = posCart.find(i => i.id === productId);
-        if (item) {
-            item.quantity += delta;
-            if (item.quantity < 1) {
-                removePOSItem(productId);
-            } else {
-                updatePOSCartDisplay();
-            }
-        }
+        document.getElementById('pos-total').textContent = `R$ ${subtotal.toFixed(2)}`;
     }
 
-    window.removePOSItem = function(productId) {
-        posCart = posCart.filter(i => i.id !== productId);
-        updatePOSCartDisplay();
-    }
-
-    window.clearPosCart = function() {
-        if (confirm("Tem certeza que deseja limpar todo o carrinho?")) {
-            posCart = [];
-            updatePOSCartDisplay();
-            
-            // Limpa também os dados do cliente ao limpar o carrinho
-            document.getElementById('client-name').value = '';
-            document.getElementById('client-phone').value = '';
-            document.getElementById('client-email').value = '';
-        }
-    }
-    
-    // 5. FUNÇÃO PARA ATUALIZAR TOTAIS (com Desconto)
-    window.updatePosTotal = function(currentSubtotal) {
-        const subtotalCalc = currentSubtotal !== undefined ? currentSubtotal : posCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
-        const discountPercent = parseFloat(document.getElementById('discount-input').value) || 0;
-        
-        // Aplica desconto (Limite 100%)
-        const effectiveDiscount = Math.min(Math.max(discountPercent, 0), 100) / 100; 
-        const total = subtotalCalc * (1 - effectiveDiscount);
-        
-        document.getElementById('pos-subtotal').textContent = `R$ ${subtotalCalc.toFixed(2).replace('.', ',')}`;
-        document.getElementById('pos-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        
-        // Retorna o total para uso na finalização
-        return total; 
-    }
-    
-    // ✅ NOVO: FUNÇÃO PARA BUSCAR CLIENTE
     window.searchCustomerByPhone = async function() {
-        const phoneInput = document.getElementById('client-phone');
-        const phone_number = phoneInput.value.trim();
-        
-        const nameInput = document.getElementById('client-name');
-        const emailInput = document.getElementById('client-email');
-
-        nameInput.value = '';
-        emailInput.value = '';
-        
-        if (!phone_number) {
-            alert("Por favor, digite o WhatsApp do cliente para buscar.");
-            phoneInput.focus();
-            return;
-        }
-
+        const phone = document.getElementById('client-phone').value.trim();
+        if (!phone) return alert("WhatsApp obrigatório.");
         try {
-            // Remove o foco para não atrapalhar a digitação
-            phoneInput.blur(); 
-            
-            const apiUrl = `${API_BASE_URL}/customer/search/${phone_number}/`;
-            const response = await fetch(apiUrl);
-
-            if (response.status === 404) {
-                alert(`Cliente não encontrado com o WhatsApp ${phone_number}. Por favor, complete o cadastro manualmente.`);
-                nameInput.focus();
-                return;
-            }
-
-            if (!response.ok) {
-                 throw new Error(`Erro ao buscar cliente. Status: ${response.status}`);
-            }
-
-            const customerData = await response.json();
-            
-            // Preenche os campos
-            nameInput.value = customerData.first_name || '';
-            emailInput.value = customerData.email || '';
-            
-            alert(`✅ Cliente "${customerData.first_name}" encontrado e dados preenchidos.`);
-
-        } catch (error) {
-            console.error("Erro na busca de cliente:", error);
-            alert(`⚠️ Erro ao tentar buscar cliente: ${error.message}`);
-        }
+            const response = await fetch(`${API_BASE_URL}/customer/search/${phone}/`);
+            if (response.status === 404) return alert("Não encontrado.");
+            const data = await response.json();
+            document.getElementById('client-name').value = data.first_name;
+            alert(`✅ Cliente "${data.first_name}" localizado.`);
+        } catch (e) { alert("Erro na busca."); }
     }
 
-
-    // 6. FUNÇÃO FINALIZAR VENDA (API CALL)
     window.finalizePosSale = async function() {
-        if (posCart.length === 0) {
-            alert('Adicione itens ao carrinho para finalizar a venda.');
-            return;
-        }
-
-        const clientPhone = document.getElementById('client-phone').value;
-        const clientName = document.getElementById('client-name').value;
-        const clientEmail = document.getElementById('client-email').value;
-        const totalAmount = updatePosTotal();
-        
-        if (!clientPhone) {
-            alert('O WhatsApp do cliente é obrigatório para registrar a venda no CRM.');
-            document.getElementById('client-phone').focus();
-            return;
-        }
-
-        if (!confirm(`Confirmar venda de R$ ${totalAmount.toFixed(2).replace('.', ',')} com ${selectedPayment}? Isso dará baixa no estoque.`)) {
-            return; 
-        }
-        
-        // Obtém o token CSRF
+        if (posCart.length === 0) return alert('Carrinho vazio.');
+        const phone = document.getElementById('client-phone').value;
+        if (!phone) return alert('WhatsApp obrigatório.');
         const csrfToken = getCsrfToken();
-        if (!csrfToken) {
-            alert('Erro de segurança: Token CSRF não encontrado. Recarregue a página.');
-            return;
-        }
-        
-        const payload = {
-            customer_info: {
-                first_name: clientName || "Cliente Loja Física",
-                email: clientEmail,
-                phone_number: clientPhone 
-            },
-            items: posCart.map(item => ({
-                id: item.id,
-                quantity: item.quantity,
-                price: item.price // Preço já com desconto, se aplicado
-            })),
-            // ✅ MELHORIA: Incluir forma de pagamento/promoções nos detalhes da venda para o CRM
-            payment_info: {
-                method: selectedPayment,
-                details: document.getElementById('payment-details').value,
-                discount_percent: parseFloat(document.getElementById('discount-input').value) || 0,
-            }
-        };
-
         try {
-             // Desabilita o botão para evitar cliques duplos
-            document.getElementById('finalize-sale-btn').disabled = true;
-
-            const response = await fetch(`${API_BASE_URL}/checkout/`, {
+            const res = await fetch(`${API_BASE_URL}/checkout/`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken 
-                },
-                body: JSON.stringify(payload)
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ customer_info: { phone_number: phone, first_name: document.getElementById('client-name').value }, items: posCart })
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Erro ao registrar pedido. Status: ${response.status}`);
-            }
-
-            // Venda finalizada com sucesso!
-            const result = await response.json();
-            
-            alert(`✅ Venda PDV Nº ${result.sale_id} finalizada! Estoque atualizado.`);
-            
-            // ✅ Ação de UX/UI: Enviar nota pelo WhatsApp/E-mail (Feedback para o funcionário)
-            if (clientEmail || clientPhone) {
-                alert(`Lembre-se de enviar a Nota/Recibo (Invoice) para o cliente via WhatsApp/E-mail.`);
-            }
-
-            // Limpa o PDV para a próxima venda
-            clearPosCart();
-            document.getElementById('client-name').value = '';
-            document.getElementById('client-phone').value = '';
-            document.getElementById('client-email').value = '';
-            document.getElementById('discount-input').value = '0';
-
-
-        } catch (error) {
-            console.error("Erro na finalização PDV:", error);
-            alert(`⚠️ Falha na Transação: ${error.message}`);
-        } finally {
-            document.getElementById('finalize-sale-btn').disabled = false;
-        }
+            if (res.ok) { alert("✅ Venda finalizada!"); posCart = []; updatePOSCartDisplay(); }
+        } catch (e) { alert("Erro na venda."); }
     }
+
+    updateCartDisplay();
 });
