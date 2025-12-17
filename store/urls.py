@@ -1,21 +1,26 @@
-# store/urls.py (CÓDIGO COMPLETO)
-
+# store/urls.py (ARQUIVO COMPLETO)
 from django.urls import path
-from .views import ProductList, SaleCreate, CustomerSearchByPhone, pos_view
+from .views import (
+    home_view, products_view, cart_view, 
+    order_success_view, pos_view, ProductList, 
+    SaleCreate, CustomerSearchByPhone
+)
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
-    # API para listar produtos
-    path('api/products/', ProductList.as_view(), name='product-list'),
+    # Site Principal
+    path('', home_view, name='home'),
+    path('products/', products_view, name='products'),
+    path('cart/', cart_view, name='cart'),
+    path('order-success/', order_success_view, name='order-success'),
     
-    # API para submeter o checkout (E-commerce e PDV)
-    path('api/checkout/', SaleCreate.as_view(), name='checkout-create'),
-    
-    # API para buscar cliente por telefone (Resolve o ImportError)
-    path('api/customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),
-    
-    # Rota para o Frente de Caixa (PDV)
+    # PDV (Frente de Caixa)
     path('pdv/', pos_view, name='pos-view'),
+
+    # APIs (Catálogo, Checkout e Busca de Cliente)
+    path('api/products/', ProductList.as_view(), name='product-list'),
+    path('api/checkout/', SaleCreate.as_view(), name='checkout-create'),
+    path('api/customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
