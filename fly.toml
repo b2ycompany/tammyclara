@@ -17,9 +17,34 @@ primary_region = "gru"
   auto_start_machines = true
   min_machines_running = 1
   processes = ["app"]
+  
+  # ✅ Adicione este bloco para dar tempo à aplicação de iniciar
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8000
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  # ✅ Aumentamos o tempo de tolerância para 60 segundos
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "60s" 
 
 [deploy]
-  # ✅ Correção: Removido collectstatic para evitar falha no deploy
   release_command = "python manage.py migrate --noinput"
 
 [[vm]]

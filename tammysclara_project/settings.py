@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',  # ✅ Obrigatório para o deploy
+    'django.contrib.staticfiles',  # ✅ Obrigatório para o collectstatic
     'rest_framework',
     'corsheaders',
     'django_cleanup.apps.CleanupConfig',
@@ -135,5 +135,6 @@ CORS_ALLOWED_ORIGINS = [
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = False 
+APPEND_SLASH = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
