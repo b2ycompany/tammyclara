@@ -18,13 +18,9 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  [http_service.concurrency]
-    type = "connections"
-    hard_limit = 25
-    soft_limit = 20
-
 [deploy]
-  release_command = "python manage.py migrate --noinput"
+  # ✅ Correção Final: Garante que os arquivos do site e do PDV sejam preparados no deploy
+  release_command = "python manage.py collectstatic --noinput && python manage.py migrate --noinput"
 
 [[vm]]
   size = "shared-cpu-1x"

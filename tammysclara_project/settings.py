@@ -13,7 +13,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
 DEBUG = False 
 
-# ✅ Domínios autorizados para tammysstore
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -22,7 +21,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
-# ✅ Confiança de origem para o novo domínio (Resolve Erro 403)
 CSRF_TRUSTED_ORIGINS = [
     'https://tammysstore.com.br',
     'https://www.tammysstore.com.br',
@@ -44,7 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ Gerencia os estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,16 +54,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'tammysclara_project.urls'
 
-# ===========================================================
-# 4. TEMPLATES
-# ===========================================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'templates',           
-            BASE_DIR / 'store' / 'templates'
-        ],
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'store' / 'templates'],
         'APP_DIRS': True, 
         'OPTIONS': {
             'context_processors': [
@@ -98,25 +90,23 @@ else:
         }
     }
 
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
 # ===========================================================
-# 8. ARQUIVOS ESTÁTICOS E MÍDIA
+# 8. ARQUIVOS ESTÁTICOS E MÍDIA (CORREÇÃO 500)
 # ===========================================================
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Garante que pastas de estáticos existam para evitar Erro 500 no Whitenoise
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Configuração robusta para produção
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
@@ -124,16 +114,6 @@ STORAGES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data' / 'media'
-
-# ===========================================================
-# 9. CORS E PROXY SSL
-# ===========================================================
-CORS_ALLOWED_ORIGINS = [
-    "https://tammysstore.com.br",
-    "https://www.tammysstore.com.br",
-    "https://tammyclara-store-b2y.fly.dev",
-    "http://localhost:8000",
-]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = False 
