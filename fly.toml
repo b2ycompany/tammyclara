@@ -10,7 +10,6 @@ primary_region = "gru"
   source = "tammyclara_data"
   destination = "/app/data"
 
-# ✅ Configuração ÚNICA: Resolve conflito de porta e erro 503
 [http_service]
   internal_port = 8000
   force_https = true
@@ -19,13 +18,8 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # Dá tempo para o Django carregar sem marcar como erro
-  [http_service.concurrency]
-    type = "connections"
-    hard_limit = 25
-    soft_limit = 20
-
 [deploy]
+  # ✅ Simplificado para garantir que o deploy não aborte por causa de arquivos estáticos
   release_command = "python manage.py migrate --noinput"
 
 [[vm]]
