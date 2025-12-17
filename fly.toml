@@ -18,16 +18,15 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ AJUSTE DE SAÚDE: Mais tempo para o Django carregar (60 segundos)
   [[http_service.checks]]
-    interval = "20s"
-    timeout = "10s"
-    grace_period = "60s"
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "15s"
     method = "GET"
     path = "/"
 
 [deploy]
-  # ✅ PERMISSÕES E MIGRAÇÕES: Essencial para o Admin e CRM
+  # ✅ Correção: Shell script para garantir permissão e migração antes do boot
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
