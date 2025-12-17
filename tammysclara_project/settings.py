@@ -10,10 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================================
 # 1. SEGURANÇA E AMBIENTE
 # ===========================================================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-sua-chave-aqui')
 DEBUG = False 
 
-# ✅ DOMÍNIOS FIXADOS: Resolve o erro 500/400 de Host inválido
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -28,6 +27,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
+# ===========================================================
+# 2. DEFINIÇÃO DE APPS E MIDDLEWARES
+# ===========================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -73,7 +75,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
-# ✅ BANCO DE DADOS FIXADO NO VOLUME: Resolve OperationalError: readonly
+# ===========================================================
+# 3. BANCO DE DADOS (Volume Persistente)
+# ===========================================================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -81,6 +85,9 @@ DATABASES = {
     }
 }
 
+# ===========================================================
+# 4. INTERNACIONALIZAÇÃO E ESTÁTICOS
+# ===========================================================
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
@@ -92,7 +99,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
 MEDIA_URL = '/media/'
@@ -101,5 +108,4 @@ MEDIA_ROOT = '/app/data/media'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = False 
 APPEND_SLASH = True
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

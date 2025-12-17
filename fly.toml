@@ -18,14 +18,9 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  [http_service.concurrency]
-    type = "connections"
-    hard_limit = 25
-    soft_limit = 20
-
 [deploy]
-  # ✅ CORREÇÃO: Força permissão de escrita no volume antes de rodar o Django
-  release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
+  # ✅ CORREÇÃO: Usando /bin/sh para executar múltiplos comandos corretamente
+  release_command = "/bin/sh -c 'python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
   size = "shared-cpu-1x"

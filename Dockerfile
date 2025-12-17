@@ -1,28 +1,38 @@
-# Usa uma imagem oficial do Python, ideal para Fly.io
+# Imagem base
 FROM python:3.11-slim
 
-# Define o diretório de trabalho dentro do contêiner
+# Variáveis de ambiente
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV PORT 8000
+
+# Diretório de trabalho
 WORKDIR /app
 
-# Evita buffer
-ENV PYTHONUNBUFFERED 1
+# Instala dependências do sistema
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Instala dependências
+# Instala dependências Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia o projeto (como root)
+# Copia o restante do código
 COPY . .
 
-# Cria o utilizador 'appuser'
-RUN adduser --disabled-password appuser
+# Configurações de usuário e permissões
+RUN adduser --disabled-password --gecos "" appuser && \
+    mkdir -p /app/data /app/staticfiles /app/data/media && \
+    chown -R appuser:appuser /app && \
+    chown -R appuser:appuser /app/data
 
-# Concede ao 'appuser' a propriedade sobre o diretório /app.
-# Isso permite que o collectstatic e uploads de media (em /app/data) funcionem.
-RUN chown -R appuser:appuser /app
-
-# Muda para o utilizador não-root
+# Troca para o usuário seguro
 USER appuser
 
-# Comando Gunicorn mais simples e limpo (compatível com a última correção)
-CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Expondo a porta
+EXPOSE 8000
+
+# Comando para rodar o servidor
+CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]
