@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-# ✅ LIBERAÇÃO TOTAL
+# ✅ LIBERAÇÃO TOTAL PARA DOMÍNIO PRÓPRIO
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
     'store',
 ]
 
@@ -30,6 +32,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -38,6 +41,24 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'tammysclara_project.urls'
+
+# ✅ SEÇÃO RESTAURADA (Resolve erro admin.E403)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'store' / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
 WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
 
 DATABASES = {
@@ -47,7 +68,6 @@ DATABASES = {
     }
 }
 
-# ✅ CONFIGURAÇÃO DE ESTÁTICOS (Resolve erro do build)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
@@ -59,3 +79,4 @@ MEDIA_ROOT = '/app/data/media'
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
