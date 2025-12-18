@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles', 
     'store',
 ]
 
@@ -41,7 +41,7 @@ ROOT_URLCONF = 'tammysclara_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'store' / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,10 +63,17 @@ DATABASES = {
     }
 }
 
-# ✅ CONFIGURAÇÃO DE ARQUIVOS (Layout e Imagens)
+# ✅ CONFIGURAÇÃO DE ESTÁTICOS PARA PRODUÇÃO
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Sua pasta de origem
+
+# Configura o WhiteNoise para servir e comprimir os arquivos
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
