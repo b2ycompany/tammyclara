@@ -15,16 +15,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o código completo
 COPY . .
 
-# Cria usuário e garante permissões
+# Garante permissões em volumes e estáticos
 RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/data /app/staticfiles /app/data/media && \
     chown -R appuser:appuser /app /app/data
 
 USER appuser
 
-# ✅ EXPOSE: Porta 8000 para Django e 8081 para Health Check
 EXPOSE 8000
-EXPOSE 8081
 
-# ✅ CMD: Inicia o servidor de saúde em background e o Gunicorn em foreground
-CMD sh -c "python health.py & gunicorn tammysclara_project.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4 --timeout 120"
+# ✅ COMANDO DIRETO: Escuta global na porta 8000
+CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]

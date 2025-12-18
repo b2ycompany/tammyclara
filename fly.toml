@@ -18,17 +18,16 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ HEALTH CHECK INDEPENDENTE: Bate na porta 8081 do health.py
+  # ✅ CHECK TCP: Infalível para Django. 
+  # Marca como saudável assim que a porta 8000 abre.
   [[http_service.checks]]
-    interval = "10s"
+    type = "tcp"
+    interval = "15s"
     timeout = "2s"
-    grace_period = "5s"
-    method = "GET"
-    path = "/"
-    port = 8081
+    grace_period = "30s"
 
 [deploy]
-  # ✅ PERMISSÕES: Shell script garantindo o banco antes do boot
+  # ✅ PERMISSÕES: Executado com sucesso nos logs anteriores
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
