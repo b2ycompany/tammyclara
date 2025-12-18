@@ -1,20 +1,19 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings 
-from django.conf.urls.static import static 
-from store.admin import crm_admin_site 
+from django.conf import settings
+from django.conf.urls.static import static
+from store.admin import crm_admin_site # Importa o seu CRM customizado
 
 urlpatterns = [
-    # 1. Admin Padrão
-    path('admin/', admin.site.urls), 
-    
-    # 2. Pipeline de Vendas (CRM)
-    path('crm-dashboard/', crm_admin_site.urls), 
-    
-    # 3. Todo o restante (Site, PDV, APIs e Healthz) vem de store/urls.py
+    # 1. Painel Admin Completo: https://tammysstore.com.br/admin/
+    path('admin/', admin.site.urls),
+
+    # 2. Dashboard de Vendas (CRM): https://tammysstore.com.br/crm-dashboard/sales-pipeline/
+    path('crm-dashboard/', crm_admin_site.urls),
+
+    # 3. Loja e PDV: https://tammysstore.com.br/ e /pdv/
     path('', include('store.urls')),
 ]
 
-# Servir mídia em ambiente de desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
