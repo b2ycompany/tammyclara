@@ -8,14 +8,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-# ✅ ALLOWED HOSTS COMPLETO
+# ✅ LIBERAÇÃO DE ACESSO: Domínio oficial e Fly.dev
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
     'tammyclara-store-b2y.fly.dev',
-    'localhost',
+    '0.0.0.0',
     '127.0.0.1',
-    '0.0.0.0'
+    'localhost'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -24,7 +24,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# Configurações de Segurança para Domínio Próprio
+# Configurações para que o Login funcione no Domínio Oficial
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

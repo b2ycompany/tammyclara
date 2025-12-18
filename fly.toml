@@ -18,7 +18,7 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ CHECK TCP: Se a porta 8000 abrir, o site fica online. Sem frescura de rota.
+  # ✅ CHECK TCP: Mais robusto para liberar o domínio rapidamente
   [[http_service.checks]]
     type = "tcp"
     interval = "15s"
