@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-# ✅ ALLOWED HOSTS: Inclui wildcard para o domínio interno do Fly
+# ✅ ALLOWED HOSTS: Inclui wildcard para o domínio interno do Fly e o seu domínio oficial
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -26,7 +26,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÃO DE COOKIE: Resolve erro 500 no Admin/CRM
+# Configurações de Cookie para HTTPS (Admin/CRM)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -74,6 +74,8 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = 'tammysclara_project.wsgi.application'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -89,7 +91,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Em produção, evita erro se a pasta static de dev estiver vazia
 if DEBUG:
     STATICFILES_DIRS = [BASE_DIR / 'static']
 else:
