@@ -7,10 +7,10 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SEGURANÇA
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed-key')
 DEBUG = False
 
-# ✅ LIBERAÇÃO DE HOSTS: Essencial para o Health Check e Domínio passarem
+# ✅ LIBERAÇÃO DE HOSTS: Aceita o domínio e a rede interna do Fly
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -26,7 +26,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÕES DE COOKIE PARA HTTPS: Resolve Erro 500 no Admin/CRM
+# ✅ CONFIGURAÇÃO DE COOKIE: Essencial para Admin/CRM funcionarem em HTTPS
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ WhiteNoise logo após o Security
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ Deve estar aqui
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-# ✅ BANCO DE DADOS PERSISTENTE
+# ✅ BANCO DE DADOS NO VOLUME PERSISTENTE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -91,7 +91,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# ✅ ARMAZENAMENTO ESTÁTICO SEGURO
+# ✅ ARMAZENAMENTO ESTÁTICO: CompressedStaticFilesStorage é o mais estável
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
