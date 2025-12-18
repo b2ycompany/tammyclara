@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-# ✅ ALLOWED HOSTS: Essencial para o Health Check passar
+# ✅ ALLOWED HOSTS: Essencial para o Health Check e Domínio passarem
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
@@ -26,7 +26,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# Configurações de Cookie para HTTPS (Admin/CRM)
+# ✅ CONFIGURAÇÃO DE COOKIE PARA HTTPS: Resolve Erro 500 no Admin/CRM
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
