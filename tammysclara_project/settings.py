@@ -6,16 +6,18 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SEGURANÇA
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed-key')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed')
 DEBUG = False
 
+# ✅ ADICIONADO: IP interno e wildcard para o Fly.io
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
     'tammyclara-store-b2y.fly.dev',
+    '.fly.dev',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    '0.0.0.0'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -24,7 +26,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÃO DE LOGIN: Essencial para Admin e CRM
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -94,4 +95,3 @@ MEDIA_ROOT = '/app/data/media'
 
 APPEND_SLASH = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'
