@@ -2,27 +2,23 @@ from django.urls import path
 from django.http import HttpResponse
 from . import views
 
-# Função simples para health check que não depende de infraestrutura complexa
+# Endpoint de saúde isolado para o Fly.io (Garante que o Proxy libere o site)
 def healthz(request):
     return HttpResponse("ok")
 
 urlpatterns = [
-    # Endpoint de saúde para o Fly.io
+    # 1. Health Check
     path('healthz/', healthz, name='healthz'),
     
-    # Rota Principal (E-commerce)
-    path('', views.home, name='home'),
-    
-    # Produtos e API
-    path('produtos/', views.product_list, name='products'),
-    path('api/products/', views.api_product_list, name='api_products'),
-    
-    # Carrinho e Checkout
+    # 2. Páginas do Site (Templates) - Nomes corrigidos conforme views.py
+    path('', views.home_view, name='home'),
+    path('produtos/', views.products_view, name='products'),
     path('carrinho/', views.cart_view, name='cart'),
-    path('api/checkout/', views.api_checkout, name='api_checkout'),
-    path('order-success/', views.order_success, name='order_success'),
-    
-    # CRM e PDV
+    path('order-success/', views.order_success_view, name='order_success'),
     path('pdv/', views.pos_view, name='pos'),
-    path('api/customer/search/<str:phone_number>/', views.api_customer_search, name='api_customer_search'),
+    
+    # 3. APIs (Utilizando Classes conforme seu views.py)
+    path('api/products/', views.ProductList.as_view(), name='api_products'),
+    path('api/customer/search/<str:phone_number>/', views.CustomerSearchByPhone.as_view(), name='api_customer_search'),
+    path('api/checkout/', views.SaleCreate.as_view(), name='api_checkout'),
 ]
