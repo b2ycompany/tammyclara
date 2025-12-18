@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SEGURANÇA
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed-key')
 DEBUG = False
 
@@ -23,7 +24,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ Login Seguro
+# ✅ CONFIGURAÇÃO DE LOGIN: Essencial para Admin e CRM
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -91,6 +92,6 @@ WHITENOISE_MANIFEST_STRICT = False
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPEND_SLASH = True
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'
