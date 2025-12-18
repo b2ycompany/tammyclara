@@ -18,7 +18,7 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ CHECK TCP: Essencial para não travar o deploy no novo cluster
+  # ✅ CHECK TCP: Rápido e evita timeouts de boot
   [[http_service.checks]]
     type = "tcp"
     interval = "15s"
@@ -26,7 +26,8 @@ primary_region = "gru"
     grace_period = "30s"
 
 [deploy]
-  release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
+  # ✅ RELEASE COMMAND LIMPO: Apenas migrações (as permissões já estão no Dockerfile)
+  release_command = "python manage.py migrate --noinput"
 
 [[vm]]
   size = "shared-cpu-1x"

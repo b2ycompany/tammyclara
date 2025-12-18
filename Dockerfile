@@ -1,30 +1,36 @@
-ARG PYTHON_VERSION=3.11-slim
+FROM python:3.11-slim
 
-FROM python:${PYTHON_VERSION}
+# Definir diretório de trabalho
+WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Variáveis de ambiente para Python
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
-# install psycopg2 dependencies.
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# Instala dependências do sistema
+RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /code
+# Instala dependências Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /code
+# Copia o código do projeto
+COPY . .
 
-COPY requirements.txt /tmp/requirements.txt
-RUN set -ex && \
-    pip install --upgrade pip && \
-    pip install -r /tmp/requirements.txt && \
-    rm -rf /root/.cache/
-COPY . /code
+# ✅ CRIAÇÃO DO USUÁRIO E PASTAS (Resolve o erro do log)
+RUN adduser --disabled-password --gecos "" appuser && \
+    mkdir -p /app/data /app/staticfiles /app/data/media && \
+    chown -R appuser:appuser /app /app/data
 
-ENV SECRET_KEY "uX6qmUgLho27NoKAWzzqjx12yhReHK98LIgCh3N4eKNxejgT5K"
+# Coleta arquivos estáticos durante o build
 RUN python manage.py collectstatic --noinput
 
+# Define o usuário de execução
+USER appuser
+
+# Exposição da porta
 EXPOSE 8000
 
-CMD ["gunicorn","--bind",":8000","--workers","2","tammysclara_project.wsgi"]
+# Comando para iniciar o Gunicorn
+CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]
