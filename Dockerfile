@@ -1,29 +1,30 @@
-FROM python:3.11-slim
+ARG PYTHON_VERSION=3.11-slim
 
-WORKDIR /app
+FROM python:${PYTHON_VERSION}
 
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Instala dependências de sistema essenciais
-RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
+# install psycopg2 dependencies.
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Instala bibliotecas Python
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN mkdir -p /code
 
-# Copia o código completo respeitando a estrutura do diretório
-COPY . .
+WORKDIR /code
 
-# Cria usuário e garante permissões em volumes e estáticos
-RUN adduser --disabled-password --gecos "" appuser && \
-    mkdir -p /app/data /app/staticfiles /app/data/media && \
-    chown -R appuser:appuser /app /app/data
+COPY requirements.txt /tmp/requirements.txt
+RUN set -ex && \
+    pip install --upgrade pip && \
+    pip install -r /tmp/requirements.txt && \
+    rm -rf /root/.cache/
+COPY . /code
 
-USER appuser
+ENV SECRET_KEY "uX6qmUgLho27NoKAWzzqjx12yhReHK98LIgCh3N4eKNxejgT5K"
+RUN python manage.py collectstatic --noinput
 
-# Exposição da porta para o Fly Proxy
 EXPOSE 8000
 
-# ✅ CMD DEFINITIVO: Aponta para o módulo WSGI do projeto tammysclara_project
-CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]
+CMD ["gunicorn","--bind",":8000","--workers","2","tammysclara_project.wsgi"]

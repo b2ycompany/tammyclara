@@ -18,8 +18,7 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ CHECK TCP: Marca a máquina como saudável assim que o Gunicorn reserva a porta 8000.
-  # Isso evita que o Fly cancele o deploy enquanto o Django ainda carrega o pandas/sklearn.
+  # ✅ CHECK TCP: Essencial para não travar o deploy no novo cluster
   [[http_service.checks]]
     type = "tcp"
     interval = "15s"
@@ -27,7 +26,6 @@ primary_region = "gru"
     grace_period = "30s"
 
 [deploy]
-  # ✅ PERMISSÕES: Shell script garantindo acesso antes do boot (provado funcional nos logs)
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
