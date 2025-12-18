@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*'] # ✅ Aceita tammysstore.com.br
 
 CSRF_TRUSTED_ORIGINS = [
     'https://tammysstore.com.br',
@@ -21,13 +21,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles', 
+    'django.contrib.staticfiles', # ✅ Essencial
     'store',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ ESSENCIAL PARA O LAYOUT
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O LAYOUT
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -41,7 +41,7 @@ ROOT_URLCONF = 'tammysclara_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], 
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,12 +63,12 @@ DATABASES = {
     }
 }
 
-# ✅ CONFIGURAÇÃO DE ESTÁTICOS PARA PRODUÇÃO
+# ✅ CONFIGURAÇÃO DE ESTÁTICOS (RESTAURA O LAYOUT)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Sua pasta de origem
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Sua pasta original
 
-# Configura o WhiteNoise para servir e comprimir os arquivos
+# WhiteNoise configurado para gerar ficheiros novos e ignorar cache velha
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
