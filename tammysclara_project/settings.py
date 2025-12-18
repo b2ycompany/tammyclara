@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
+# ✅ LIBERAÇÃO TOTAL
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
@@ -27,7 +28,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O LAYOUT DO SITE
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O VISUAL DO SITE
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -63,7 +64,7 @@ DATABASES = {
     }
 }
 
-# ✅ CONFIGURAÇÃO DE ESTÁTICOS (ESTRUTURA COMPLETA PARA FLY.IO)
+# ✅ CONFIGURAÇÃO DE ESTÁTICOS (RESOLVE O LAYOUT BRANCO)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
