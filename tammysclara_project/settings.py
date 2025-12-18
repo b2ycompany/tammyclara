@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-ALLOWED_HOSTS = ['*'] # ✅ Aceita tammysstore.com.br
+ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://tammysstore.com.br',
@@ -21,13 +21,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles', # ✅ Essencial
+    'django.contrib.staticfiles', 
     'store',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O LAYOUT
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O LAYOUT DO SITE
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -63,12 +63,11 @@ DATABASES = {
     }
 }
 
-# ✅ CONFIGURAÇÃO DE ESTÁTICOS (RESTAURA O LAYOUT)
+# ✅ CONFIGURAÇÃO DE ESTÁTICOS (ESTRUTURA COMPLETA PARA FLY.IO)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Sua pasta original
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
 
-# WhiteNoise configurado para gerar ficheiros novos e ignorar cache velha
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
