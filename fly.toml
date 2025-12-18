@@ -13,20 +13,22 @@ primary_region = "gru"
 [http_service]
   internal_port = 8000
   force_https = true
+  # ✅ DESATIVADO: Evita que a máquina desligue e demore a religar com o volume
   auto_stop_machines = false
   auto_start_machines = true
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ HEALTH CHECK: Ajustado para o limite de 60s do Fly Proxy
+  # ✅ HEALTH CHECK: Rota raiz deve retornar 200 OK para o proxy liberar o tráfego
   [[http_service.checks]]
     interval = "15s"
     timeout = "5s"
-    grace_period = "60s"
+    grace_period = "1m"
     method = "GET"
     path = "/"
 
 [deploy]
+  # ✅ PERMISSÕES: Garante acesso ao banco e arquivos antes do servidor subir
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
