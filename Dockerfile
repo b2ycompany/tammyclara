@@ -2,29 +2,27 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Variáveis para evitar travamento de logs e bytecode
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PORT=8000
 
-# Instalação de dependências de sistema essenciais
+# Instala dependências de sistema
 RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
-# Instalação das bibliotecas Python
+# Instala dependências Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Cópia integral do projeto
+# Copia o código completo
 COPY . .
 
-# Criação do usuário e garantia de permissões em volumes e estáticos
+# Cria utilizador e garante permissões
 RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/data /app/staticfiles /app/data/media && \
     chown -R appuser:appuser /app /app/data
 
 USER appuser
 
-# ✅ EXPOSE: Informa ao Fly qual porta abrir
+# ✅ EXPOSE E CMD: Bind explícito em 0.0.0.0 na porta 8000
 EXPOSE 8000
-
-# ✅ BIND: Garante que o servidor aceite conexões de fora do container
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120", "tammysclara_project.wsgi:application"]
+CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]

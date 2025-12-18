@@ -6,15 +6,15 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SEGURANÇA
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-fixed-key')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-# ✅ LIBERAÇÃO DE HOSTS: Aceita o domínio e a rede interna do Fly
+# ✅ ALLOWED HOSTS: Inclui wildcard para o domínio interno do Fly
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
     'tammyclara-store-b2y.fly.dev',
+    '.fly.dev',
     'localhost',
     '127.0.0.1',
     '0.0.0.0'
@@ -26,7 +26,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# ✅ CONFIGURAÇÃO DE COOKIE: Essencial para Admin/CRM funcionarem em HTTPS
+# Configurações de Cookie para HTTPS (Admin/CRM)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -74,7 +74,6 @@ TEMPLATES = [
     },
 ]
 
-# ✅ BANCO DE DADOS NO VOLUME PERSISTENTE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -82,16 +81,10 @@ DATABASES = {
     }
 }
 
-LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'
-USE_I18N = True
-USE_TZ = True
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# ✅ ARMAZENAMENTO ESTÁTICO: CompressedStaticFilesStorage é o mais estável
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
