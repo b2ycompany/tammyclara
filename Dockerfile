@@ -12,4 +12,5 @@ RUN adduser --disabled-password --gecos "" appuser && \
 RUN python manage.py collectstatic --noinput
 USER appuser
 EXPOSE 8000
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120", "tammysclara_project.wsgi:application"]
+# ✅ BIND DIRETO: Sem variáveis, direto no 0.0.0.0
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "tammysclara_project.wsgi:application"]

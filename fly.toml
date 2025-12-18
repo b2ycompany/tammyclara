@@ -18,10 +18,12 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ TROCADO PARA TCP: Libera o domínio tammysstore.com.br instantaneamente
+  # ✅ TROCADO PARA TCP E NOMEADO: Isso obriga o Fly Proxy a liberar o tráfego 
+  # assim que o Gunicorn abrir a porta, sem esperar o Django processar nada.
   [[http_service.checks]]
+    name = "tcp_check"
     type = "tcp"
-    interval = "15s"
+    interval = "10s"
     timeout = "2s"
     grace_period = "30s"
 
