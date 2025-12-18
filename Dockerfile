@@ -1,9 +1,7 @@
 FROM python:3.11-slim
 
-# Definir diretório de trabalho
 WORKDIR /app
 
-# Variáveis de ambiente para Python
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -15,22 +13,20 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copia o código do projeto
+# Copia o código completo
 COPY . .
 
-# ✅ CRIAÇÃO DO USUÁRIO E PASTAS (Resolve o erro do log)
+# Cria usuário e garante permissões
 RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/data /app/staticfiles /app/data/media && \
     chown -R appuser:appuser /app /app/data
 
-# Coleta arquivos estáticos durante o build
+# Coleta estáticos no build para acelerar o boot
 RUN python manage.py collectstatic --noinput
 
-# Define o usuário de execução
 USER appuser
 
-# Exposição da porta
 EXPOSE 8000
 
-# Comando para iniciar o Gunicorn
+# Inicialização com Gthread para lidar com a carga do Django
 CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]

@@ -18,15 +18,16 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ CHECK TCP: Rápido e evita timeouts de boot
+  # ✅ VERIFICAÇÃO SIMPLIFICADA: Dá tempo total para o Django subir
   [[http_service.checks]]
-    type = "tcp"
-    interval = "15s"
-    timeout = "2s"
-    grace_period = "30s"
+    grace_period = "300s"
+    interval = "30s"
+    timeout = "10s"
+    method = "GET"
+    path = "/healthz/"
 
 [deploy]
-  # ✅ RELEASE COMMAND LIMPO: Apenas migrações (as permissões já estão no Dockerfile)
+  # ✅ RELEASE COMMAND: Apenas migrações (estáticos já vão no build)
   release_command = "python manage.py migrate --noinput"
 
 [[vm]]
