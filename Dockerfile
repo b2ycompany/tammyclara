@@ -5,25 +5,26 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Instala dependências de sistema essenciais
+# Instala dependências de sistema
 RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
-# Instala bibliotecas Python
+# Instala dependências Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia o código completo respeitando a estrutura do projeto
+# Copia o código completo
 COPY . .
 
-# Cria usuário e garante permissões em volumes e estáticos
+# Cria usuário e garante permissões
 RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/data /app/staticfiles /app/data/media && \
     chown -R appuser:appuser /app /app/data
 
 USER appuser
 
-# Exposição da porta para o Fly Proxy
+# ✅ EXPOSE: Porta 8000 para Django e 8081 para Health Check
 EXPOSE 8000
+EXPOSE 8081
 
-# ✅ COMANDO DEFINITIVO: Aponta para o módulo WSGI correto conforme seu diretório
-CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]
+# ✅ CMD: Inicia o servidor de saúde em background e o Gunicorn em foreground
+CMD sh -c "python health.py & gunicorn tammysclara_project.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4 --timeout 120"

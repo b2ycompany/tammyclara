@@ -18,16 +18,17 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ HEALTH CHECK: Rota cega para garantir que o proxy libere o site
+  # ✅ HEALTH CHECK INDEPENDENTE: Bate na porta 8081 do health.py
   [[http_service.checks]]
-    interval = "20s"
-    timeout = "10s"
-    grace_period = "1m"
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "5s"
     method = "GET"
-    path = "/healthz/"
+    path = "/"
+    port = 8081
 
 [deploy]
-  # ✅ PERMISSÕES: Shell script obrigatório executado com sucesso nos logs
+  # ✅ PERMISSÕES: Shell script garantindo o banco antes do boot
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]
