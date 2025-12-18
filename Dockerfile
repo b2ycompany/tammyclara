@@ -4,8 +4,9 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PORT=8000
 
-# Instala dependências do sistema
+# Instala dependências de sistema
 RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
 # Instala dependências Python
@@ -16,17 +17,18 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copia o código completo
 COPY . .
 
-# Cria usuário e garante permissões
+# Garante permissões e usuário
 RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/data /app/staticfiles /app/data/media && \
     chown -R appuser:appuser /app /app/data
 
-# Coleta estáticos no build para acelerar o boot
+# Estáticos no Build
 RUN python manage.py collectstatic --noinput
 
 USER appuser
 
+# ✅ EXPOSE explícito
 EXPOSE 8000
 
-# Inicialização com Gthread para lidar com a carga do Django
-CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]
+# ✅ COMANDO DE FORÇA BRUTA: Bind em todas as interfaces (0.0.0.0)
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120", "tammysclara_project.wsgi:application"]

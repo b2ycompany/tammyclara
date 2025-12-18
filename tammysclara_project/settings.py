@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,13 +8,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-# ✅ DOMÍNIOS OFICIAIS: Configurados para tammysstore.com.br
+# ✅ ALLOWED HOSTS COMPLETO
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',
     'tammyclara-store-b2y.fly.dev',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    '0.0.0.0'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -24,7 +24,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://tammyclara-store-b2y.fly.dev'
 ]
 
-# Configurações de Segurança e Sessão para o Domínio Próprio
+# Configurações de Segurança para Domínio Próprio
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -100,6 +100,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Redirecionamento após login para o Pipeline de Vendas
 LOGIN_REDIRECT_URL = '/crm-dashboard/sales-pipeline/'
