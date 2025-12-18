@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed')
 DEBUG = False
 
-# ✅ ALLOWED HOSTS: Inclui wildcard para o domínio interno do Fly e o seu domínio oficial
+# ✅ ALLOWED HOSTS: Essencial para o Health Check passar
 ALLOWED_HOSTS = [
     'tammysstore.com.br',
     'www.tammysstore.com.br',

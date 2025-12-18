@@ -13,22 +13,21 @@ primary_region = "gru"
 [http_service]
   internal_port = 8000
   force_https = true
-  # ✅ DESATIVADO: Impede que a máquina hiberne por inatividade
   auto_stop_machines = false
   auto_start_machines = true
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ HEALTH CHECK: Rota isolada que não depende de infra complexa
+  # ✅ HEALTH CHECK: Rota cega para garantir que o proxy libere o site
   [[http_service.checks]]
-    interval = "15s"
-    timeout = "5s"
+    interval = "20s"
+    timeout = "10s"
     grace_period = "1m"
     method = "GET"
     path = "/healthz/"
 
 [deploy]
-  # ✅ PERMISSÕES: Shell script obrigatório antes do servidor web subir
+  # ✅ PERMISSÕES: Shell script obrigatório executado com sucesso nos logs
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]

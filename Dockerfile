@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/li
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia o código completo respeitando a estrutura do print
+# Copia o código completo respeitando a estrutura do projeto
 COPY . .
 
 # Cria usuário e garante permissões em volumes e estáticos
@@ -22,6 +22,8 @@ RUN adduser --disabled-password --gecos "" appuser && \
 
 USER appuser
 
-# ✅ EXPOSE E CMD CORRIGIDOS: Aponta para tammysclara_project.wsgi
+# Exposição da porta para o Fly Proxy
 EXPOSE 8000
+
+# ✅ COMANDO DEFINITIVO: Aponta para o módulo WSGI correto conforme seu diretório
 CMD ["gunicorn", "tammysclara_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120"]
