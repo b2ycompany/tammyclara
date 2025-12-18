@@ -18,7 +18,8 @@ primary_region = "gru"
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ CHECK TCP: Mais robusto para liberar o domínio rapidamente
+  # ✅ CHECK TCP: Único que garante que o domínio oficial seja liberado
+  # independente da demora do Django para carregar templates.
   [[http_service.checks]]
     type = "tcp"
     interval = "15s"
