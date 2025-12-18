@@ -13,21 +13,22 @@ primary_region = "gru"
 [http_service]
   internal_port = 8000
   force_https = true
+  # ✅ DESATIVADO: Impede que a máquina hiberne por falta de uso
   auto_stop_machines = false
   auto_start_machines = true
   min_machines_running = 1
   processes = ["app"]
 
-  # ✅ HEALTH CHECK ROBUSTO: Testa a página de login do admin que sempre responde
+  # ✅ HEALTH CHECK BLINDADO: Testa apenas se o processo Python está vivo
   [[http_service.checks]]
-    interval = "20s"
-    timeout = "10s"
-    grace_period = "2m"
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "1m"
     method = "GET"
-    path = "/admin/login/"
+    path = "/healthz/"
 
 [deploy]
-  # ✅ PERMISSÕES: Shell script garante acesso antes do boot do servidor
+  # ✅ PERMISSÕES: Shell script garante acesso ao banco e estáticos antes do boot
   release_command = "/bin/sh -c 'chown -R appuser:appuser /app/data && python manage.py collectstatic --noinput && python manage.py migrate --noinput'"
 
 [[vm]]

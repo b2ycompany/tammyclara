@@ -11,9 +11,10 @@ urlpatterns = [
     # 2. Pipeline de Vendas (CRM)
     path('crm-dashboard/', crm_admin_site.urls), 
     
-    # 3. Todo o restante (Site, PDV e APIs) vem do arquivo store/urls.py
+    # 3. Todo o restante (Site, PDV, APIs e Healthz) vem de store/urls.py
     path('', include('store.urls')),
 ]
 
+# Servir mídia em ambiente de desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

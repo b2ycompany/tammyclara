@@ -1,25 +1,28 @@
 from django.urls import path
-from .views import (
-    home_view, products_view, cart_view, 
-    order_success_view, pos_view, ProductList, 
-    SaleCreate, CustomerSearchByPhone
-)
-from rest_framework.urlpatterns import format_suffix_patterns
+from django.http import HttpResponse
+from . import views
+
+# Função simples para health check que não depende de infraestrutura complexa
+def healthz(request):
+    return HttpResponse("ok")
 
 urlpatterns = [
-    # Rotas de Navegação (Site)
-    path('', home_view, name='home'),
-    path('products/', products_view, name='products'),
-    path('cart/', cart_view, name='cart'),
-    path('order-success/', order_success_view, name='order-success'),
+    # Endpoint de saúde para o Fly.io
+    path('healthz/', healthz, name='healthz'),
     
-    # Rota do PDV (Frente de Caixa)
-    path('pdv/', pos_view, name='pos-view'),
-
-    # Rotas de API
-    path('api/products/', ProductList.as_view(), name='product-list'),
-    path('api/checkout/', SaleCreate.as_view(), name='checkout-create'),
-    path('api/customer/search/<str:phone_number>/', CustomerSearchByPhone.as_view(), name='customer-search'),
+    # Rota Principal (E-commerce)
+    path('', views.home, name='home'),
+    
+    # Produtos e API
+    path('produtos/', views.product_list, name='products'),
+    path('api/products/', views.api_product_list, name='api_products'),
+    
+    # Carrinho e Checkout
+    path('carrinho/', views.cart_view, name='cart'),
+    path('api/checkout/', views.api_checkout, name='api_checkout'),
+    path('order-success/', views.order_success, name='order_success'),
+    
+    # CRM e PDV
+    path('pdv/', views.pos_view, name='pos'),
+    path('api/customer/search/<str:phone_number>/', views.api_customer_search, name='api_customer_search'),
 ]
-
-urlpatterns = format_suffix_patterns(urlpatterns)
