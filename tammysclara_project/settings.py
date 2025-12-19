@@ -2,8 +2,13 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Carrega variáveis de ambiente
 load_dotenv()
+
+# Caminho base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# SEGURANÇA
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed-tammys')
 DEBUG = False
 
@@ -26,9 +31,10 @@ INSTALLED_APPS = [
     'store',
 ]
 
+# ✅ MIDDLEWARE: WhiteNoise deve ser o segundo da lista
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ ATIVA O VISUAL
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O VISUAL
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -43,7 +49,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True, # ✅ Procura templates dentro de store/templates/
+        'APP_DIRS': True, # ✅ Faz o Django achar o sales_pipeline.html em store/templates/admin/
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -64,21 +70,22 @@ DATABASES = {
     }
 }
 
-# ✅ CONFIGURAÇÃO DE ESTÁTICOS (Ajustada para os logs anteriores)
+# ✅ CONFIGURAÇÃO DE ESTÁTICOS (Logo e CSS)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # ✅ Onde estão suas imagens no PC
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+# ✅ STORAGE SIMPLIFICADO: Desativa a compactação GZ para evitar erro de leitura do navegador
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage", # Mantém nomes originais
+        "BACKEND": "whitenoise.storage.StaticFilesStorage", 
     },
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
 }
 
-# ✅ CONFIGURAÇÃO DE MEDIA (Para fotos de produtos do Admin)
+# ✅ CONFIGURAÇÃO DE MEDIA (Fotos do Admin)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
