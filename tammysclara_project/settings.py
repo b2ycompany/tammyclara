@@ -28,7 +28,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O VISUAL
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ ATIVA O VISUAL
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -42,8 +42,8 @@ ROOT_URLCONF = 'tammysclara_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')], # Onde estão index.html, pos.html
-        'APP_DIRS': True, # ✅ CRÍTICO: Faz o Django achar o sales_pipeline em store/templates/
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True, # ✅ Procura templates dentro de store/templates/
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -64,21 +64,21 @@ DATABASES = {
     }
 }
 
-# ✅ CONFIGURAÇÃO DE ESTÁTICOS (Para as imagens da Home aparecerem)
+# ✅ CONFIGURAÇÃO DE ESTÁTICOS (Ajustada para os logs anteriores)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # ✅ Onde estão suas imagens no PC
 
-# Armazenamento simplificado para manter nomes originais (ex: logo_tammy_clara.png)
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage", 
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage", # Mantém nomes originais
     },
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
 }
 
+# ✅ CONFIGURAÇÃO DE MEDIA (Para fotos de produtos do Admin)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
