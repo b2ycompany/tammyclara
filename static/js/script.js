@@ -1,983 +1,279 @@
+/**
+ * TAMMY'S STORE - CORE SCRIPT
+ * Versão: 2.5 (Boutique Edition)
+ * Funcionalidades: Splash Screen, E-commerce, PDV, CRM Integration
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 🌟 CORREÇÃO ESSENCIAL: Garante o uso do caminho relativo /api para compatibilidade DEV/PROD
+    // --- 1. CONFIGURAÇÕES E ESTADO GLOBAL ---
     const API_BASE_URL = '/api'; 
-    
-    // URL base do seu servidor Django (usada para construção de URLs de mídia)
     const DJANGO_BASE_URL = window.location.origin.replace(/\/$/, ''); 
     
-    // Variáveis globais para o Modal e Produtos
     let currentGalleryImages = [];
     let currentImageIndex = 0;
-    let availableProducts = {}; 
-
-    // --- VARIÁVEIS PDV (Novas) ---
-    let posCart = []; // Carrinho específico para o PDV (não usa localStorage por padrão)
+    let availableProducts = {}; // Cache de produtos carregados
+    let allProducts = [];       // Cache para busca rápida no PDV
+    let posCart = [];           // Carrinho específico do PDV
     let selectedPayment = 'PIX'; 
-    let allProducts = []; // Cache de todos os produtos para a busca rápida do PDV
-    // --- FIM VARIÁVEIS PDV ---
-
-    // Garante que o corpo do site esteja visível por padrão
-    const mainBody = document.getElementById('main-body');
-    if (mainBody) {
-        mainBody.style.opacity = 1; 
-        mainBody.style.overflow = 'auto';
-    }
-
-    // --- FUNÇÃO AUXILIAR PARA LIMPAR E CONSTRUIR A URL DE MÍDIA ---
-    function buildMediaUrl(relativePath) {
-        if (!relativePath) {
-            // Caminho estático seguro para placeholder
-            return '/static/img/placeholder-produto.png';
-        }
-        
-        // Se a URL já for absoluta, retorna-a.
-        if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
-            return relativePath;
-        }
-
-        // Remove a barra inicial do relativePath se existir, e prefixa com /media/
-        const cleanedPath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
-        
-        return '/media/' + cleanedPath; 
-    }
-
-    // --- FUNÇÃO AUXILIAR PARA CSRF TOKEN (CRÍTICO PARA POST) ---
-    function getCsrfToken() {
-        // Tenta obter o token do input oculto injetado pelo Django
-        const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
-        return csrfInput ? csrfInput.value : null;
-    }
-    
-    // --- FUNÇÕES AUXILIARES DE INTERATIVIDADE E-COMMERCE ---
-
-    function attachAddToCartListeners() {
-        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const productId = e.target.dataset.id;
-                const product = availableProducts[productId]; 
-                if (product) {
-                    addToCart(product); 
-                } else {
-                    alert('Erro: Produto não encontrado no catálogo.');
-                }
-            });
-        });
-    }
-
-    function attachGalleryListeners() {
-        // 1. Liga o evento para as miniaturas no grid principal
-        document.querySelectorAll('.gallery-thumb').forEach(thumb => {
-            thumb.addEventListener('click', (e) => {
-                const newImageUrl = e.target.dataset.fullImg;
-                const productId = e.target.dataset.productId;
-                
-                openImageModal(productId, newImageUrl); 
-            });
-        });
-        
-        // 2. Liga o evento para a IMAGEM PRINCIPAL (para abrir o modal)
-        document.querySelectorAll('.product-image-container img').forEach(mainImg => {
-            const productId = mainImg.id.replace('main-image-', ''); 
-            if (productId) {
-                mainImg.style.cursor = 'pointer'; 
-                mainImg.addEventListener('click', () => {
-                    let fullUrl = mainImg.src; 
-                    openImageModal(productId, fullUrl);
-                });
-            }
-        });
-    }
-
-    // --- LÓGICA DE PRODUTOS (products.html) ---
-    
-    const productsGrid = document.querySelector('.products-grid#products-container');
-
-    if (productsGrid) {
-        
-        async function loadProducts() {
-            try {
-                const apiUrl = `${API_BASE_URL}/products/`;
-                const response = await fetch(apiUrl); 
-                
-                if (!response.ok) {
-                    throw new Error(`Erro ao carregar produtos do servidor. Status: ${response.status}`);
-                }
-                const products = await response.json();
-                
-                // ✅ Cache para uso geral (PDV e E-commerce)
-                allProducts = products; 
-                
-                if (!products || products.length === 0) {
-                    productsGrid.innerHTML = '<p style="text-align:center;">Nenhum produto encontrado. Cadastre no Admin!</p>';
-                    return;
-                }
-
-                productsGrid.innerHTML = '';
-                
-                products.forEach(product => {
-                    if (!product || !product.id) {
-                        return; 
-                    }
-                    
-                    availableProducts[product.id] = product; 
-
-                    let initialImageUrl = '/static/img/placeholder-produto.png';
-                    
-                    // --- 1. LÓGICA DE GERAÇÃO DA LISTA DE IMAGENS ---
-                    let allImages = []; 
-                    let mainImageUrl = product.main_image; 
-                    const addedUrls = new Set();
-                    
-                    if (mainImageUrl) {
-                        allImages.push({ url: mainImageUrl, is_main: true });
-                        addedUrls.add(mainImageUrl);
-                    }
-                    
-                    if (product.images && product.images.length > 0) {
-                        product.images.forEach(img => {
-                            if (!addedUrls.has(img.image)) { 
-                                allImages.push({ url: img.image, is_main: img.is_cover });
-                                addedUrls.add(img.image);
-                            }
-                        });
-                    }
-
-
-                    if (allImages.length > 0) {
-                        initialImageUrl = buildMediaUrl(allImages[0].url);
-                    }
-                    
-                    // --- 2. CONSTRUÇÃO DA GALERIA DE MINIATURAS (HTML) ---
-                    let galleryHtml = '';
-                    
-                    if (allImages.length > 1) { 
-                        galleryHtml = '<div class="product-gallery">';
-                        allImages.forEach((img, index) => {
-                            
-                            const thumbUrl = buildMediaUrl(img.url);
-
-                            galleryHtml += 
-                                '<img ' + 
-                                    'src="' + thumbUrl + '" ' + 
-                                    'alt="' + product.name + ' miniatura ' + (index + 1) + '" ' + 
-                                    'class="gallery-thumb" ' + 
-                                    'data-full-img="' + thumbUrl + '"' + 
-                                    'data-product-id="' + product.id + '"' +
-                                '/>';
-                        });
-                        galleryHtml += '</div>';
-                    }
-                    
-                    // --- 3. CONSTRUÇÃO DO ELEMENTO PRINCIPAL ---
-                    
-                    const productItem = document.createElement('div');
-                    productItem.classList.add('product-item');
-
-                    productItem.innerHTML = 
-                        '<div class="product-image-container">' +
-                            '<img src="' + initialImageUrl + '" alt="' + product.name + '" id="main-image-' + product.id + '">' +
-                        '</div>' +
-                        galleryHtml + 
-                        '<h3>' + product.name + '</h3>' +
-                        '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
-                        '<button ' + 
-                            'class="btn primary-btn add-to-cart-btn" ' + 
-                            'data-id="' + product.id + '">' +
-                            'Adicionar ao Carrinho' +
-                        '</button>';
-                    
-                    productsGrid.appendChild(productItem);
-                });
-                
-                attachAddToCartListeners(); 
-                attachGalleryListeners(); 
-                
-            } catch (error) {
-                console.error('Falha ao buscar produtos:', error);
-                productsGrid.innerHTML = `<p class="error-msg" style="text-align:center; color:red;">Erro ao carregar produtos: ${error.message}</p>`;
-            }
-        }
-        
-        loadProducts(); 
-    }
-    
-    // --- LÓGICA DA HOME PAGE: Destaques (Injetar Conteúdo na Home) ---
-    
-    const featuredProductsContainer = document.getElementById('featured-products-container');
-
-    if (featuredProductsContainer) {
-        
-        async function loadFeaturedProducts() {
-             // Reusa a função loadProducts, mas limita a 4 itens
-             try {
-                // Se allProducts já foi carregado, usa o cache
-                const products = allProducts.length > 0 ? allProducts : await fetch(`${API_BASE_URL}/products/`).then(res => res.json()); 
-                
-                if (!products || products.length === 0) {
-                    featuredProductsContainer.innerHTML = '<p>Nenhum produto em destaque no momento.</p>';
-                    return;
-                }
-                
-                featuredProductsContainer.innerHTML = '';
-                
-                // Exibir apenas os primeiros 4 produtos (os destaques)
-                products.slice(0, 4).forEach(product => {
-                    if (!product || !product.id) return;
-                    
-                    availableProducts[product.id] = product; // Adiciona ao cache
-
-                    let initialImageUrl = buildMediaUrl(product.main_image);
-                    
-                    // --- Injeção simplificada (reutilizando o layout do product-item) ---
-                    const productItem = document.createElement('div');
-                    productItem.classList.add('product-item'); // Reusa a classe CSS
-
-                    productItem.innerHTML = 
-                        '<div class="product-image-container">' +
-                            '<img src="' + initialImageUrl + '" alt="' + product.name + '">' +
-                        '</div>' +
-                        '<h3>' + product.name + '</h3>' +
-                        '<p>R$ ' + parseFloat(product.price).toFixed(2) + '</p>' +
-                        '<button ' + 
-                            'class="btn primary-btn add-to-cart-btn" ' + 
-                            'data-id="' + product.id + '">' +
-                            'Adicionar ao Carrinho' +
-                        '</button>';
-                    
-                    featuredProductsContainer.appendChild(productItem);
-                });
-                
-                // Os listeners de carrinho precisam ser re-anexados
-                attachAddToCartListeners(); 
-                
-            } catch (error) {
-                console.error('Falha ao buscar destaques:', error);
-                featuredProductsContainer.innerHTML = `<p class="error-msg" style="color:red;">Erro ao carregar destaques: ${error.message}</p>`;
-            }
-        }
-        
-        loadFeaturedProducts();
-    }
-    
-    // --- LÓGICA DO MODAL/LIGHTBOX (Interatividade UX/UI) ---
-
-    function openImageModal(productId, initialUrl) {
-        const product = availableProducts[productId];
-        if (!product) return;
-
-        // 1. Constrói a lista de imagens completa
-        currentGalleryImages = [];
-        const mainImageUrl = product.main_image;
-        
-        const addedUrls = new Set();
-        
-        if (mainImageUrl) {
-            let fullUrl = buildMediaUrl(mainImageUrl);
-            currentGalleryImages.push(fullUrl);
-            addedUrls.add(fullUrl);
-        }
-        
-        if (product.images) {
-            product.images.forEach(img => {
-                let fullUrl = buildMediaUrl(img.image);
-                if (!addedUrls.has(fullUrl)) {
-                    currentGalleryImages.push(fullUrl);
-                }
-            });
-        }
-        
-        // 2. Define o índice inicial
-        const initialIndex = currentGalleryImages.findIndex(url => url === initialUrl);
-        currentImageIndex = initialIndex !== -1 ? initialIndex : 0;
-        
-        // 3. Injeta e abre o modal
-        injectModalThumbnails(currentGalleryImages);
-        updateModalDisplay(currentImageIndex);
-        document.getElementById('image-modal').style.display = 'flex';
-    }
-
-    function updateModalDisplay(index) {
-        if (currentGalleryImages.length === 0) return;
-        
-        const fullUrl = currentGalleryImages[index];
-
-        document.getElementById('modal-main-image').src = fullUrl;
-        currentImageIndex = index;
-
-        // Marca a miniatura ativa (melhoria UX)
-        document.querySelectorAll('#modal-thumbnails-container img').forEach((img, i) => {
-            img.classList.remove('active');
-            if (i === index) {
-                img.classList.add('active');
-            }
-        });
-    }
-
-    function injectModalThumbnails(images) {
-        const container = document.getElementById('modal-thumbnails-container');
-        container.innerHTML = '';
-        
-        images.forEach((fullUrl, index) => {
-            const thumb = document.createElement('img');
-            thumb.src = fullUrl;
-            thumb.classList.add('modal-thumb');
-            thumb.addEventListener('click', () => updateModalDisplay(index));
-            container.appendChild(thumb);
-        });
-    }
-
-
-    // --- 5. LIGAÇÃO DE EVENTOS DO MODAL ---
-    
-    const modal = document.getElementById('image-modal');
-    if (modal) {
-        // Fechar com o 'X'
-        document.querySelector('#image-modal .close-btn').addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-        
-        // Fechar clicando fora do modal
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-        
-        // Navegação (Prev e Next)
-        document.querySelector('#image-modal .prev-btn').addEventListener('click', () => {
-            let newIndex = currentImageIndex - 1;
-            if (newIndex < 0) {
-                newIndex = currentGalleryImages.length - 1; // Volta para o final
-            }
-            updateModalDisplay(newIndex);
-        });
-
-        document.querySelector('#image-modal .next-btn').addEventListener('click', () => {
-            let newIndex = currentImageIndex + 1;
-            if (newIndex >= currentGalleryImages.length) {
-                newIndex = 0; // Vai para o início
-            }
-            updateModalDisplay(newIndex);
-        });
-    }
-
-
-    // --- LÓGICA DO CARRINHO E INTERATIVIDADE (RESTANTE DO CÓDIGO) ---
-    
-    // --- LÓGICA DA INTERATIVIDADE DE FUSÃO (Leia Mais) ---
-    const toggleButton = document.getElementById('toggle-story');
-    const storyDetail = document.querySelector('.story-detail');
-
-    if (toggleButton && storyDetail) {
-        toggleButton.addEventListener('click', () => {
-            if (storyDetail.style.display === 'none') {
-                storyDetail.style.display = 'block';
-                toggleButton.textContent = 'Leia Menos';
-            } else {
-                storyDetail.style.display = 'none';
-                toggleButton.textContent = 'Leia Mais';
-            }
-        });
-    }
-
-    // --- Lógica para o Carrinho de Compras (Frontend Simplificado) ---
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
 
-    function saveCart() {
-        localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
-    }
+    // --- 2. 🚀 INTERFACE PROFISSIONAL (Splash & UI Effects) ---
+    const handleInterface = () => {
+        try {
+            const splash = document.getElementById('splash-screen');
+            const heroCard = document.getElementById('heroCard');
+            const mainHeader = document.getElementById('main-header');
+            const mainBody = document.getElementById('main-body');
 
-    function addToCart(product) {
-        const existingItem = cart.find(item => item.id === product.id);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            // Cria um objeto de item simples com os dados necessários
-            cart.push({
-                id: product.id,
-                name: product.name,
-                price: parseFloat(product.price),
-                quantity: 1,
-                main_image: product.main_image,
-                sku: product.sku
-            });
-        }
-        saveCart();
-        updateCartDisplay();
-        alert(`${product.name} adicionado ao carrinho!`);
-    }
-
-    function removeFromCart(productId) {
-        cart = cart.filter(item => item.id != productId);
-        saveCart();
-        updateCartDisplay();
-    }
-
-    function updateCartDisplay() {
-        const cartItemsContainer = document.querySelector('.cart-items');
-        const cartTotalSpan = document.getElementById('cart-total');
-
-        if (cartItemsContainer) {
-            cartItemsContainer.innerHTML = '';
-            let total = 0;
-
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="empty-cart-message">Seu carrinho está vazio.</p>';
-            } else {
-                cart.forEach(item => {
-                    const itemTotal = item.price * item.quantity;
-                    total += itemTotal;
-                    
-                    const imageUrl = buildMediaUrl(item.main_image);
-
-                    const itemHtml = `
-                        <div class="cart-item" data-product-id="${item.id}">
-                            <img src="${imageUrl}" alt="${item.name}" class="cart-item-image">
-                            <div class="cart-item-details">
-                                <h4>${item.name} (${item.sku})</h4>
-                                <p>Preço: R$ ${item.price.toFixed(2).replace('.', ',')}</p>
-                                <div class="cart-quantity-controls">
-                                    <button class="qty-btn qty-minus-btn" data-id="${item.id}" data-action="decrease">—</button>
-                                    <span class="qty-count">${item.quantity}</span>
-                                    <button class="qty-btn qty-plus-btn" data-id="${item.id}" data-action="increase">+</button>
-                                </div>
-                                <p class="cart-item-total">Subtotal: R$ ${itemTotal.toFixed(2).replace('.', ',')}</p>
-                                <button class="btn-remove btn secondary-btn" data-id="${item.id}">Remover</button>
-                            </div>
-                        </div>
-                    `;
-                    cartItemsContainer.innerHTML += itemHtml;
-                });
-            }
-
-            // Atualiza o total
-            if (cartTotalSpan) {
-                cartTotalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            }
-
-            // Re-anexa os listeners para os botões do carrinho
-            attachCartListeners();
-        } else if (cartTotalSpan) {
-             let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-             cartTotalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        }
-    }
-
-    function attachCartListeners() {
-        // Lógica para botões de Quantidade (+ e -)
-        document.querySelectorAll('.qty-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const id = parseInt(e.currentTarget.getAttribute('data-id'));
-                const action = e.currentTarget.getAttribute('data-action');
-                
-                const item = cart.find(i => i.id === id);
-                if (!item) return;
-
-                if (action === 'increase') {
-                    item.quantity += 1;
-                } else if (action === 'decrease') {
-                    item.quantity -= 1;
-                    if (item.quantity < 1) {
-                        // Remove se a quantidade for zero
-                        cart = cart.filter(i => i.id !== id);
-                    }
+            // Timer da Splash Screen
+            setTimeout(() => {
+                if (splash) {
+                    splash.style.opacity = '0';
+                    splash.style.visibility = 'hidden';
+                    splash.style.transform = 'translateY(-100%)';
                 }
                 
-                saveCart();
-                updateCartDisplay();
-            });
-        });
-
-        // Lógica para botão Remover
-        document.querySelectorAll('.btn-remove').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const id = parseInt(e.currentTarget.getAttribute('data-id'));
-                cart = cart.filter(i => i.id !== id);
-                saveCart();
-                updateCartDisplay();
-            });
-        });
-    }
-
-    // Inicializa a exibição do carrinho ao carregar a página
-    updateCartDisplay();
-    
-
-    // --- Lógica de CHECKOUT E-COMMERCE (CRM/Venda Pendente) ---
-    const checkoutBtn = document.getElementById('checkout-whatsapp-btn');
-    if (checkoutBtn) {
-        // Altera o texto do botão para melhor UX (Se o botão tiver o ID correto)
-        checkoutBtn.textContent = 'FINALIZAR PEDIDO'; 
-        
-        checkoutBtn.addEventListener('click', async () => {
-            if (cart.length === 0) {
-                alert('Seu carrinho está vazio. Adicione itens antes de finalizar.');
-                return;
-            }
-            
-            // Requisita dados do cliente
-            const customerInfo = {
-                first_name: prompt("Seu nome (obrigatório):"),
-                email: prompt("Seu e-mail:"),
-                phone_number: prompt("Seu WhatsApp (obrigatório, ex: 5511987654321):") 
-            };
-
-            if (!customerInfo.first_name || !customerInfo.phone_number) {
-                 alert('Nome e WhatsApp são obrigatórios para a venda ser registrada.');
-                 return;
-            }
-
-            // Obtém o token CSRF
-            const csrfToken = getCsrfToken();
-            if (!csrfToken) {
-                alert('Erro de segurança: Token CSRF não encontrado. Recarregue a página.');
-                return;
-            }
-
-            const payload = {
-                customer_info: customerInfo,
-                items: cart.map(item => ({
-                    id: item.id,
-                    quantity: item.quantity,
-                    price: item.price 
-                }))
-            };
-
-            try {
-                // CHAMADA CORRIGIDA: Usa o caminho relativo '/api/checkout/'
-                const response = await fetch(`${API_BASE_URL}/checkout/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken 
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    // Exibe a mensagem amigável do backend 
-                    throw new Error(errorData.error || `Erro ao registrar pedido. Status: ${response.status}`);
+                if (mainBody) {
+                    mainBody.style.opacity = '1';
+                    mainBody.style.overflow = 'auto';
                 }
-
-                const result = await response.json();
                 
-                // Limpa o carrinho e redireciona para a página de sucesso
-                cart = [];
-                saveCart();
-                window.location.href = `/order-success/?id=${result.sale_id}`;
+                if (heroCard) {
+                    setTimeout(() => heroCard.classList.add('show'), 500);
+                }
+            }, 2500);
 
-
-            } catch (error) {
-                console.error("Erro no checkout:", error);
-                // Exibe a mensagem de estoque mais amigável 
-                alert(`⚠️ Atenção: ${error.message}`);
-            }
-        });
-    }
-
-
-    // =========================================================================
-    // 🛒 LÓGICA DO PONTO DE VENDA (PDV)
-    // =========================================================================
-
-    if (document.getElementById('pos-product-search')) {
-        
-        // Inicia carregando todos os produtos para a busca rápida
-        if (allProducts.length === 0) {
-             fetch(`${API_BASE_URL}/products/`)
-                .then(res => res.json())
-                .then(products => {
-                    allProducts = products;
-                    displaySearchResults(allProducts);
-                })
-                .catch(error => {
-                    document.getElementById('product-results').innerHTML = `<p style="color:red;">Falha ao carregar catálogo: ${error.message}</p>`;
-                });
-        } else {
-             displaySearchResults(allProducts);
-        }
-        
-        // Adiciona listeners para os botões de pagamento
-        document.querySelectorAll('.payment-option-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Remove 'active' de todos
-                document.querySelectorAll('.payment-option-btn').forEach(b => b.classList.remove('active'));
-                // Adiciona 'active' ao clicado
-                e.currentTarget.classList.add('active');
-                selectedPayment = e.currentTarget.dataset.type;
+            // Efeito de Header no Scroll
+            window.addEventListener('scroll', () => {
+                if (mainHeader) {
+                    window.scrollY > 50 ? mainHeader.classList.add('scrolled') : mainHeader.classList.remove('scrolled');
+                }
             });
-        });
-    }
-
-    // Função auxiliar para lidar com Enter no campo de busca
-    window.handleSearchEnter = function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            searchProducts();
+        } catch (e) {
+            console.warn("Erro ao carregar elementos de interface, forçando exibição.");
+            const s = document.getElementById('splash-screen');
+            if (s) s.style.display = 'none';
+            document.body.style.opacity = '1';
         }
-    }
-    
-    // 1. FUNÇÃO DE BUSCA E EXIBIÇÃO DE PRODUTOS
-    window.searchProducts = function() {
-        const query = document.getElementById('pos-product-search').value.toLowerCase();
-        
-        if (allProducts.length === 0) {
-            document.getElementById('product-results').innerHTML = '<p>Catálogo não carregado. Tente recarregar a página.</p>';
-            return;
-        }
+    };
 
-        const filteredProducts = allProducts.filter(p => 
-            p.name.toLowerCase().includes(query) || 
-            (p.sku && p.sku.toLowerCase().includes(query))
-        );
-        
-        displaySearchResults(filteredProducts);
-    }
-    
-    function displaySearchResults(products) {
-        const resultsContainer = document.getElementById('product-results');
-        resultsContainer.innerHTML = '';
-        
-        if (products.length === 0) {
-            resultsContainer.innerHTML = '<p>Nenhum produto encontrado.</p>';
-            return;
-        }
+    // --- 3. 🛠️ FUNÇÕES AUXILIARES ---
+    const buildMediaUrl = (path) => {
+        if (!path) return '/static/img/placeholder-produto.png';
+        if (path.startsWith('http')) return path;
+        const cleaned = path.startsWith('/') ? path.substring(1) : path;
+        return '/media/' + cleaned;
+    };
 
-        products.forEach(product => {
-            const card = document.createElement('div');
-            card.classList.add('product-card');
-            card.dataset.id = product.id;
-            
-            card.innerHTML = `
-                <img src="${buildMediaUrl(product.main_image)}" alt="${product.name}">
-                <h4>${product.name}</h4>
-                <p>SKU: ${product.sku || 'N/A'}</p>
-                <p>R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
-            `;
-            
-            card.addEventListener('click', () => addProductToPOSCart(product));
-            resultsContainer.appendChild(card);
-        });
-    }
-    
-    // 2. FUNÇÃO PARA ADICIONAR AO CARRINHO PDV
-    function addProductToPOSCart(product, quantity = 1) {
-        const existingItem = posCart.find(item => item.id === product.id);
-        
-        if (existingItem) {
-            existingItem.quantity += quantity;
-        } else {
-            posCart.push({
-                id: product.id,
-                name: product.name,
-                price: parseFloat(product.price),
-                quantity: quantity,
-                sku: product.sku
-            });
-        }
-        updatePOSCartDisplay();
-    }
-    
-    // 3. FUNÇÃO PARA ATUALIZAR EXIBIÇÃO DO CARRINHO PDV
-    window.updatePOSCartDisplay = function() {
-        const container = document.getElementById('pos-cart-items');
-        let subtotal = 0;
-        
-        container.innerHTML = '';
+    const getCsrfToken = () => {
+        const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        return input ? input.value : null;
+    };
 
-        if (posCart.length === 0) {
-            container.innerHTML = '<p>Carrinho vazio.</p>';
-            updatePosTotal();
-            return;
-        }
+    const saveCart = () => localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
 
-        posCart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
-            subtotal += itemTotal;
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.classList.add('cart-item');
-            itemDiv.innerHTML = `
-                <h4>${item.name}</h4>
-                <div style="text-align: right;">
-                    <p style="font-size:0.8em; color:#8c735d; margin:0;">R$ ${itemTotal.toFixed(2).replace('.', ',')}</p>
-                    <div class="item-controls">
-                        <button class="qty-btn" onclick="updatePOSQuantity(${item.id}, -1)">—</button>
-                        <span>${item.quantity}</span>
-                        <button class="qty-btn" onclick="updatePOSQuantity(${item.id}, 1)">+</button>
-                        <i class="fas fa-trash" style="cursor:pointer; color:#dc3545; font-size:0.9em; margin-left:10px;" onclick="removePOSItem(${item.id})"></i>
+    // --- 4. 🛒 LÓGICA DO E-COMMERCE (Catálogo e Modal) ---
+    async function loadProducts() {
+        const grid = document.querySelector('.products-grid#products-container');
+        const homeGrid = document.getElementById('featured-products-container');
+        
+        const target = grid || homeGrid;
+        if (!target) return;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/products/`);
+            if (!res.ok) throw new Error("Erro API");
+            const data = await res.json();
+            allProducts = data;
+
+            target.innerHTML = '';
+            const limit = homeGrid ? 4 : data.length;
+
+            data.slice(0, limit).forEach(p => {
+                availableProducts[p.id] = p;
+                const img = buildMediaUrl(p.main_image);
+                
+                const card = document.createElement('div');
+                card.className = homeGrid ? 'product-item' : 'product-card';
+                card.innerHTML = `
+                    <div class="product-image-container product-img-wrapper">
+                        <img src="${img}" alt="${p.name}" id="main-image-${p.id}">
                     </div>
-                </div>
-            `;
-            container.appendChild(itemDiv);
-        });
-        
-        updatePosTotal(subtotal);
-    }
-    
-    // 4. FUNÇÕES DE CONTROLE DO CARRINHO PDV
-    window.updatePOSQuantity = function(productId, delta) {
-        const item = posCart.find(i => i.id === productId);
-        if (item) {
-            item.quantity += delta;
-            if (item.quantity < 1) {
-                removePOSItem(productId);
-            } else {
-                updatePOSCartDisplay();
-            }
-        }
-    }
-
-    window.removePOSItem = function(productId) {
-        posCart = posCart.filter(i => i.id !== productId);
-        updatePOSCartDisplay();
-    }
-
-    window.clearPosCart = function() {
-        if (confirm("Tem certeza que deseja limpar todo o carrinho?")) {
-            posCart = [];
-            updatePOSCartDisplay();
-            
-            // Limpa também os dados do cliente ao limpar o carrinho
-            document.getElementById('client-name').value = '';
-            document.getElementById('client-phone').value = '';
-            document.getElementById('client-email').value = '';
-        }
-    }
-    
-    // 5. FUNÇÃO PARA ATUALIZAR TOTAIS (com Desconto)
-    window.updatePosTotal = function(currentSubtotal) {
-        const subtotalCalc = currentSubtotal !== undefined ? currentSubtotal : posCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
-        const discountPercent = parseFloat(document.getElementById('discount-input').value) || 0;
-        
-        // Aplica desconto (Limite 100%)
-        const effectiveDiscount = Math.min(Math.max(discountPercent, 0), 100) / 100; 
-        const total = subtotalCalc * (1 - effectiveDiscount);
-        
-        document.getElementById('pos-subtotal').textContent = `R$ ${subtotalCalc.toFixed(2).replace('.', ',')}`;
-        document.getElementById('pos-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        
-        // Retorna o total para uso na finalização
-        return total; 
-    }
-    
-    // ✅ NOVO: FUNÇÃO PARA BUSCAR CLIENTE
-    window.searchCustomerByPhone = async function() {
-        const phoneInput = document.getElementById('client-phone');
-        const phone_number = phoneInput.value.trim();
-        
-        const nameInput = document.getElementById('client-name');
-        const emailInput = document.getElementById('client-email');
-
-        nameInput.value = '';
-        emailInput.value = '';
-        
-        if (!phone_number) {
-            alert("Por favor, digite o WhatsApp do cliente para buscar.");
-            phoneInput.focus();
-            return;
-        }
-
-        try {
-            // Remove o foco para não atrapalhar a digitação
-            phoneInput.blur(); 
-            
-            const apiUrl = `${API_BASE_URL}/customer/search/${phone_number}/`;
-            const response = await fetch(apiUrl);
-
-            if (response.status === 404) {
-                alert(`Cliente não encontrado com o WhatsApp ${phone_number}. Por favor, complete o cadastro manualmente.`);
-                nameInput.focus();
-                return;
-            }
-
-            if (!response.ok) {
-                 throw new Error(`Erro ao buscar cliente. Status: ${response.status}`);
-            }
-
-            const customerData = await response.json();
-            
-            // Preenche os campos
-            nameInput.value = customerData.first_name || '';
-            emailInput.value = customerData.email || '';
-            
-            alert(`✅ Cliente "${customerData.first_name}" encontrado e dados preenchidos.`);
-
-        } catch (error) {
-            console.error("Erro na busca de cliente:", error);
-            alert(`⚠️ Erro ao tentar buscar cliente: ${error.message}`);
-        }
-    }
-
-
-    // 6. FUNÇÃO FINALIZAR VENDA (API CALL)
-    window.finalizePosSale = async function() {
-        if (posCart.length === 0) {
-            alert('Adicione itens ao carrinho para finalizar a venda.');
-            return;
-        }
-
-        const clientPhone = document.getElementById('client-phone').value;
-        const clientName = document.getElementById('client-name').value;
-        const clientEmail = document.getElementById('client-email').value;
-        const totalAmount = updatePosTotal();
-        
-        if (!clientPhone) {
-            alert('O WhatsApp do cliente é obrigatório para registrar a venda no CRM.');
-            document.getElementById('client-phone').focus();
-            return;
-        }
-
-        if (!confirm(`Confirmar venda de R$ ${totalAmount.toFixed(2).replace('.', ',')} com ${selectedPayment}? Isso dará baixa no estoque.`)) {
-            return; 
-        }
-        
-        // Obtém o token CSRF
-        const csrfToken = getCsrfToken();
-        if (!csrfToken) {
-            alert('Erro de segurança: Token CSRF não encontrado. Recarregue a página.');
-            return;
-        }
-        
-        const payload = {
-            customer_info: {
-                first_name: clientName || "Cliente Loja Física",
-                email: clientEmail,
-                phone_number: clientPhone 
-            },
-            items: posCart.map(item => ({
-                id: item.id,
-                quantity: item.quantity,
-                price: item.price // Preço já com desconto, se aplicado
-            })),
-            // ✅ MELHORIA: Incluir forma de pagamento/promoções nos detalhes da venda para o CRM
-            payment_info: {
-                method: selectedPayment,
-                details: document.getElementById('payment-details').value,
-                discount_percent: parseFloat(document.getElementById('discount-input').value) || 0,
-            }
-        };
-
-        try {
-             // Desabilita o botão para evitar cliques duplos
-            document.getElementById('finalize-sale-btn').disabled = true;
-
-            const response = await fetch(`${API_BASE_URL}/checkout/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken 
-                },
-                body: JSON.stringify(payload)
+                    <div class="product-info">
+                        <h3 style="font-family: 'Playfair Display';">${p.name}</h3>
+                        <p class="price" style="color: #d4af37; font-weight: 600;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
+                        <button class="btn-gold-outline add-to-cart-btn" data-id="${p.id}" style="width:100%; margin-top:10px;">
+                            ADICIONAR AO CARRINHO
+                        </button>
+                    </div>
+                `;
+                target.appendChild(card);
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Erro ao registrar pedido. Status: ${response.status}`);
-            }
-
-            // Venda finalizada com sucesso!
-            const result = await response.json();
-            
-            alert(`✅ Venda PDV Nº ${result.sale_id} finalizada! Estoque atualizado.`);
-            
-            // ✅ Ação de UX/UI: Enviar nota pelo WhatsApp/E-mail (Feedback para o funcionário)
-            if (clientEmail || clientPhone) {
-                alert(`Lembre-se de enviar a Nota/Recibo (Invoice) para o cliente via WhatsApp/E-mail.`);
-            }
-
-            // Limpa o PDV para a próxima venda
-            clearPosCart();
-            document.getElementById('client-name').value = '';
-            document.getElementById('client-phone').value = '';
-            document.getElementById('client-email').value = '';
-            document.getElementById('discount-input').value = '0';
-
-
-        } catch (error) {
-            console.error("Erro na finalização PDV:", error);
-            alert(`⚠️ Falha na Transação: ${error.message}`);
-        } finally {
-            document.getElementById('finalize-sale-btn').disabled = false;
-        }
+            attachListeners();
+        } catch (e) { console.error("Falha ao carregar catálogo:", e); }
     }
 
-    // =====================================================
-// 🔥 CHECKOUT COMO LEAD – VENDA FEITA NO DJANGO ADMIN
-// =====================================================
+    function attachListeners() {
+        // Carrinho
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                const p = availableProducts[e.target.dataset.id];
+                if (p) {
+                    const exist = cart.find(i => i.id === p.id);
+                    exist ? exist.quantity++ : cart.push({...p, quantity: 1, price: parseFloat(p.price)});
+                    saveCart();
+                    updateCartDisplay();
+                    alert(`${p.name} adicionado!`);
+                }
+            };
+        });
 
-(function () {
+        // Modal de Imagens
+        document.querySelectorAll('.product-image-container img').forEach(img => {
+            img.style.cursor = 'pointer';
+            img.onclick = () => {
+                const id = img.id.replace('main-image-', '');
+                const p = availableProducts[id];
+                if (!p) return;
 
-    const API_BASE_URL = '/api';
+                currentGalleryImages = [buildMediaUrl(p.main_image)];
+                if (p.images) p.images.forEach(i => currentGalleryImages.push(buildMediaUrl(i.image)));
+                
+                currentImageIndex = 0;
+                const modal = document.getElementById('image-modal');
+                const mainImg = document.getElementById('modal-main-image');
+                const thumbs = document.getElementById('modal-thumbnails-container');
 
-    function getCart() {
-        return JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
+                if (modal && mainImg) {
+                    mainImg.src = currentGalleryImages[0];
+                    thumbs.innerHTML = currentGalleryImages.map((src, i) => 
+                        `<img src="${src}" class="modal-thumb ${i===0?'active':''}" onclick="document.getElementById('modal-main-image').src='${src}'">`
+                    ).join('');
+                    modal.style.display = 'flex';
+                }
+            };
+        });
     }
 
-    async function processCheckoutLead() {
+    // --- 5. 🏦 LÓGICA DO PDV (PONTO DE VENDA) ---
+    window.searchProducts = () => {
+        const q = document.getElementById('pos-product-search').value.toLowerCase();
+        const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)));
+        const res = document.getElementById('product-results');
+        if (!res) return;
+        res.innerHTML = filtered.map(p => `
+            <div class="product-card" onclick="addToPOS(${p.id})">
+                <img src="${buildMediaUrl(p.main_image)}" style="width:100px; height:100px; object-fit:cover;">
+                <h4>${p.name}</h4>
+                <p>R$ ${p.price}</p>
+            </div>
+        `).join('');
+    };
 
-        const cart = getCart();
+    window.addToPOS = (id) => {
+        const p = allProducts.find(i => i.id === id);
+        const exist = posCart.find(i => i.id === id);
+        exist ? exist.quantity++ : posCart.push({...p, quantity: 1, price: parseFloat(p.price)});
+        updatePOSDisplay();
+    };
 
-        if (!cart.length) {
-            alert('Carrinho vazio.');
-            return;
-        }
+    function updatePOSDisplay() {
+        const container = document.getElementById('pos-cart-items');
+        if (!container) return;
+        container.innerHTML = posCart.map(i => `
+            <div class="cart-item">
+                <h4>${i.name}</h4>
+                <p>${i.quantity}x - R$ ${(i.price * i.quantity).toFixed(2)}</p>
+            </div>
+        `).join('') || '<p>Vazio</p>';
+        
+        const sub = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
+        const disc = parseFloat(document.getElementById('discount-input')?.value || 0) / 100;
+        const total = sub * (1 - disc);
+        
+        if (document.getElementById('pos-subtotal')) document.getElementById('pos-subtotal').innerText = `R$ ${sub.toFixed(2)}`;
+        if (document.getElementById('pos-total')) document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
+    }
 
-        const name = prompt('Nome do cliente:');
-        const phone = prompt('WhatsApp (DDD):');
-        const email = prompt('E-mail (opcional):');
+    window.searchCustomerByPhone = async () => {
+        const phone = document.getElementById('client-phone').value;
+        try {
+            const res = await fetch(`${API_BASE_URL}/customer/search/${phone}/`);
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('client-name').value = data.first_name;
+                document.getElementById('client-email').value = data.email || '';
+                alert("Cliente encontrado!");
+            } else { alert("Não encontrado."); }
+        } catch (e) { console.error(e); }
+    };
 
-        if (!name || !phone) {
-            alert('Nome e WhatsApp são obrigatórios.');
-            return;
-        }
+    // --- 6. 📝 FINALIZAÇÃO DE VENDA (E-commerce Lead p/ Admin) ---
+    window.processCheckoutLead = async () => {
+        if (cart.length === 0) return alert("Carrinho vazio.");
+        const name = prompt("Nome completo:");
+        const phone = prompt("WhatsApp (com DDD):");
+        if (!name || !phone) return alert("Nome e WhatsApp são obrigatórios.");
 
         const payload = {
-            customer_info: {
-                first_name: name,
-                phone_number: phone,
-                email: email || ''
-            },
-            items: cart.map(item => ({
-                id: item.id,
-                quantity: item.quantity
-            })),
-            origin: 'SITE',
-            status: 'LEAD'
+            customer_info: { first_name: name, phone_number: phone, email: "" },
+            items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
+            origin: 'SITE'
         };
 
         try {
             const res = await fetch(`${API_BASE_URL}/checkout/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
                 body: JSON.stringify(payload)
             });
-
-            if (!res.ok) {
+            if (res.ok) {
+                const r = await res.json();
+                localStorage.removeItem('tammyClaraCart');
+                window.location.href = `/order-success/?id=${r.sale_id}`;
+            } else {
                 const err = await res.json();
-                throw new Error(err.error || 'Erro ao enviar pedido');
+                alert(err.error || "Erro ao processar.");
             }
+        } catch (e) { console.error(e); }
+    };
 
-            localStorage.removeItem('tammyClaraCart');
-            alert('Pedido enviado para atendimento. Entraremos em contato.');
-            window.location.href = '/order-success/';
+    // --- 7. 🔃 INICIALIZAÇÃO ---
+    handleInterface();
+    loadProducts();
+    
+    // Carrinho Display
+    function updateCartDisplay() {
+        const cont = document.querySelector('.cart-items');
+        if (!cont) return;
+        cont.innerHTML = cart.map(i => `
+            <div class="cart-item">
+                <img src="${buildMediaUrl(i.main_image)}" style="width:60px;">
+                <div class="cart-item-details">
+                    <h4>${i.name}</h4>
+                    <p>${i.quantity}x R$ ${i.price.toFixed(2)}</p>
+                </div>
+            </div>
+        `).join('') || '<p>Carrinho vazio.</p>';
+        const total = cart.reduce((a, b) => a + (b.price * b.quantity), 0);
+        if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2)}`;
+    }
+    updateCartDisplay();
 
-        } catch (e) {
-            console.error(e);
-            alert(e.message);
-        }
+    // Botão Checkout
+    const checkoutBtn = document.getElementById('checkout-whatsapp-btn');
+    if (checkoutBtn) {
+        checkoutBtn.textContent = 'FINALIZAR E ENVIAR PARA ATENDIMENTO';
+        checkoutBtn.onclick = window.processCheckoutLead;
     }
 
-    const btn = document.getElementById('checkout-whatsapp-btn');
-    if (btn) {
-        btn.textContent = 'ENVIAR PEDIDO PARA ATENDIMENTO';
-        btn.onclick = processCheckoutLead;
+    // Modal Close
+    const modal = document.getElementById('image-modal');
+    if (modal) {
+        document.querySelector('.close-btn').onclick = () => modal.style.display = 'none';
+        window.onclick = (e) => { if(e.target === modal) modal.style.display = 'none'; };
     }
 
-})();
-
-});
+}); // FIM DO DOMCONTENTLOADED
