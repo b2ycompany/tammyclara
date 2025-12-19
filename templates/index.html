@@ -4,92 +4,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tammy's Store | Elegância e Estilo</title>
-
-    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
-
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=6">
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Tammy's Store | Boutique Exclusiva</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    
     <style>
-        /* Movendo o CSS complexo para fora da tag para evitar erros do editor */
-        .hero-section {
-            background-image: url("{% static 'img/placeholder-capa.png' %}");
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-size: cover;
-            min-height: 70vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        :root {
+            --gold: #c5a059;
+            --dark: #1a1a1a;
+            --light: #f9f9f9;
+            --glass: rgba(255, 255, 255, 0.85);
         }
-        .hero-content {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 30px;
-            border-radius: 8px;
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--light); overflow-x: hidden; }
+
+        /* --- SPLASH SCREEN --- */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        #splash-screen img {
+            width: 180px;
+            filter: brightness(0) invert(1);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- HEADER & NAV --- */
+        header {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: transparent;
+            transition: 0.4s;
+        }
+        header.scrolled {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 10px 50px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+        }
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--dark);
+            letter-spacing: 2px;
+        }
+        nav ul { display: flex; list-style: none; gap: 30px; }
+        nav a { text-decoration: none; color: var(--dark); font-weight: 400; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        nav a:hover { color: var(--gold); }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url("{% static 'img/placeholder-capa.png' %}") center/cover no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             text-align: center;
         }
-        .products-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 25px;
-            margin-top: 30px;
+        .hero-card {
+            background: var(--glass);
+            padding: 60px;
+            backdrop-filter: blur(5px);
+            border-radius: 2px;
+            border: 1px solid rgba(255,255,255,0.3);
+            max-width: 600px;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: 1.2s all ease;
         }
+        .hero-card.show { transform: translateY(0); opacity: 1; }
+        .hero-card img { width: 120px; margin-bottom: 20px; }
+        .hero-card h1 { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 15px; color: var(--dark); }
+        .hero-card p { font-style: italic; color: #555; margin-bottom: 30px; letter-spacing: 1px; }
+        
+        .btn-gold {
+            background: var(--gold);
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .btn-gold:hover { background: var(--dark); letter-spacing: 3px; }
+
+        /* --- PRODUCTS GRID --- */
+        .section-title {
+            text-align: center;
+            padding: 80px 0 40px;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+        .product-item {
+            background: white;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .product-item:hover { transform: translateY(-10px); }
+        .product-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            transition: 0.6s;
+        }
+        .product-item:hover .product-img { transform: scale(1.05); }
+        .product-info { padding: 20px; text-align: center; }
+        .product-info h3 { font-size: 1rem; margin-bottom: 10px; font-weight: 400; }
+        .product-info .price { color: var(--gold); font-weight: 600; }
+
+        /* --- FOOTER --- */
+        footer { background: var(--dark); color: white; padding: 60px 20px; text-align: center; }
+        .footer-logo { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 20px; }
+        .pay-icons { font-size: 1.5rem; gap: 20px; display: flex; justify-content: center; margin-top: 30px; opacity: 0.7; }
+
     </style>
 </head>
-<body id="main-body" style="opacity: 0; transition: opacity 0.5s ease-in-out;">
+<body>
 
-    <header class="header">
-        <nav class="navbar">
-            <div class="logo">Tammy's Store</div>
-            <ul class="nav-links">
+    <div id="splash-screen">
+        <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Loading...">
+    </div>
+
+    <header id="main-header">
+        <div class="logo-text">Tammy's</div>
+        <nav>
+            <ul>
                 <li><a href="/">Home</a></li>
                 <li><a href="{% url 'products' %}">Coleção</a></li>
                 <li><a href="{% url 'cart' %}">Carrinho</a></li>
-                <li><a href="/crm-dashboard/sales-pipeline/">CRM</a></li>
                 <li><a href="/admin/">Painel</a></li>
             </ul>
         </nav>
+        <div class="icons">
+            <a href="#"><i class="fas fa-search" style="margin-right: 15px; color: var(--dark);"></i></a>
+            <a href="{% url 'cart' %}"><i class="fas fa-shopping-bag" style="color: var(--dark);"></i></a>
+        </div>
     </header>
 
-    <section class="hero-section" id="home">
-        <div class="hero-content">
-            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy's Store" style="max-width: 220px; margin-bottom: 20px;">
-            <h1 style="color: #333; font-family: 'Playfair Display', serif;">Tammy's Store</h1>
-            <p style="color: #666; font-size: 1.1rem;">Elegância e Atendimento Personalizado!</p>
-            <a href="{% url 'products' %}" class="btn primary-btn" style="margin-top: 20px; display: inline-block;">Ver a Coleção</a>
+    <section class="hero">
+        <div class="hero-card" id="heroCard">
+            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo">
+            <h1>TAMMY'S STORE</h1>
+            <p>Elegância que inspira. Destino para sua peça favorita.</p>
+            <a href="{% url 'products' %}" class="btn-gold">Ver Coleção</a>
         </div>
     </section>
 
-    <section class="featured-products-section" style="padding: 60px 20px; text-align: center; background-color: #f9f9f9;">
-        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 40px;">🌟 Destaques da Semana</h2>
-        
-        <div class="products-grid" id="featured-products-container">
-            <p>Carregando coleções exclusivas...</p>
+    <div class="container">
+        <h2 class="section-title">Destaques da Semana</h2>
+        <div class="grid" id="featured-products-container">
+            <div class="product-item">
+                <img src="{% static 'img/placeholder-destaque-1.png' %}" class="product-img">
+                <div class="product-info">
+                    <h3>Nova Coleção Primavera</h3>
+                    <p class="price">Consulte Preços</p>
+                </div>
+            </div>
+            <div class="product-item">
+                <img src="{% static 'img/placeholder-destaque-2.png' %}" class="product-img">
+                <div class="product-info">
+                    <h3>Vestidos de Seda</h3>
+                    <p class="price">R$ 299,90</p>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <section class="promo-banners" style="display: flex; gap: 10px; padding: 20px; justify-content: center; flex-wrap: wrap;">
-        <img src="{% static 'img/placeholder-destaque-1.png' %}" alt="Destaque 1" style="width: 100%; max-width: 500px; border-radius: 5px;">
-        <img src="{% static 'img/placeholder-destaque-2.png' %}" alt="Destaque 2" style="width: 100%; max-width: 500px; border-radius: 5px;">
-    </section>
-
-    <footer class="footer" style="padding: 40px 20px; background: #222; color: #fff; text-align: center; margin-top: 50px;">
-        <p>© 2024 Tammy's Store — Todos os direitos reservados.</p>
-        <div class="social-links" style="margin-top: 15px;">
-            <a href="#" style="color: #fff; margin: 0 10px;"><i class="fab fa-instagram"></i></a>
-            <a href="#" style="color: #fff; margin: 0 10px;"><i class="fab fa-whatsapp"></i></a>
+    <footer>
+        <div class="footer-logo">Tammy's Store</div>
+        <p>Acompanhe nossas novidades nas redes sociais</p>
+        <div class="pay-icons">
+            <i class="fab fa-cc-visa"></i>
+            <i class="fab fa-cc-mastercard"></i>
+            <i class="fab fa-pix"></i>
         </div>
+        <p style="margin-top: 40px; font-size: 0.7rem; opacity: 0.5;">© 2024 Tammy's Store — Todos os direitos reservados.</p>
     </footer>
 
-    <script src="{% static 'js/script.js' %}?v=6"></script>
     <script>
-        window.addEventListener('load', function() {
-            document.getElementById('main-body').style.opacity = '1';
+        // 1. Efeito de Splash Screen
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash-screen');
+            const heroCard = document.getElementById('heroCard');
+            
+            setTimeout(() => {
+                splash.style.transform = 'translateY(-100%)';
+                // Mostra o card da hero com animação após a splash sair
+                setTimeout(() => {
+                    heroCard.classList.add('show');
+                }, 500);
+            }, 2000); // Fica 2 segundos na tela
+        });
+
+        // 2. Efeito de Header no Scroll
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
     </script>
+    
+    <script src="{% static 'js/script.js' %}?v=10"></script>
 </body>
 </html>
