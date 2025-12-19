@@ -5,45 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tammy's Store | Boutique de Luxo</title>
-
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
     <style>
-        :root {
-            --gold: #d4af37;
-            --dark: #0f0f0f;
-            --white: #ffffff;
-            --glass: rgba(15, 15, 15, 0.85);
-        }
-
+        :root { --gold: #d4af37; --dark: #0f0f0f; --white: #ffffff; --glass: rgba(15, 15, 15, 0.85); }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfd; color: var(--dark); overflow-x: hidden; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfd; color: var(--dark); overflow-x: hidden; opacity: 0; transition: opacity 0.5s; }
 
-        /* --- SPLASH SCREEN LUXO --- */
+        /* SPLASH SCREEN PROFISSIONAL */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10000; transition: all 1s cubic-bezier(0.9, 0, 0.1, 1);
+            z-index: 10000; transition: all 0.8s cubic-bezier(0.9, 0, 0.1, 1);
         }
         .splash-logo-container {
             position: relative; width: 200px; height: 200px; border-radius: 50%; padding: 5px;
             background: linear-gradient(45deg, transparent, var(--gold), transparent);
             animation: rotateBorder 2s linear infinite; display: flex; justify-content: center; align-items: center;
         }
-        #splash-screen img {
-            width: 180px; border-radius: 50%; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
-        }
+        #splash-screen img { width: 180px; border-radius: 50%; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
         @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- HEADER & NAV (ALTO CONTRASTE) --- */
-        header {
-            position: fixed; top: 0; width: 100%; padding: 25px 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 1000; transition: 0.5s;
-        }
+        /* HEADER ALTO CONTRASTE */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
         header.scrolled { background: var(--dark); padding: 15px 5%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .logo-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--white); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
         header.scrolled .logo-text { color: var(--gold); }
@@ -51,32 +37,35 @@
         nav a { text-decoration: none; color: var(--white); font-weight: 500; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
         nav a:hover { color: var(--gold); }
 
-        /* --- HERO SECTION --- */
+        /* HERO SECTION */
         .hero {
-            height: 100vh;
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("{% static 'img/placeholder-capa.png' %}") center/cover no-repeat fixed;
+            height: 100vh; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+            url("{% static 'img/placeholder-capa.png' %}") center/cover no-repeat fixed;
             display: flex; justify-content: center; align-items: center; text-align: center;
         }
         .hero-content-box {
             padding: 60px; border: 1px solid rgba(212, 175, 55, 0.4);
             background: var(--glass); backdrop-filter: blur(15px); border-radius: 4px;
-            max-width: 800px; transform: scale(0.9); opacity: 0; transition: 1.5s all cubic-bezier(0.19, 1, 0.22, 1);
+            max-width: 800px; transform: scale(0.9); opacity: 0; transition: 1.5s all ease;
         }
         .hero-content-box.show { transform: scale(1); opacity: 1; }
-        .hero h1 { font-family: 'Playfair Display', serif; font-size: 4rem; color: var(--gold); margin-bottom: 20px; }
-        .btn-gold-outline { display: inline-block; border: 1px solid var(--gold); color: var(--gold); padding: 15px 45px; text-decoration: none; letter-spacing: 4px; font-size: 0.8rem; transition: 0.4s; margin-top: 30px; }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: var(--gold); margin-bottom: 20px; }
+
+        /* GRID DE PRODUTOS */
+        .section-title { text-align: center; padding: 100px 0 50px; font-family: 'Playfair Display', serif; font-size: 2.5rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 0 10%; margin-bottom: 100px; }
+        .product-card { background: white; padding: 15px; border: 1px solid #eee; transition: 0.5s; text-align: center; }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+        .product-img-wrapper { height: 450px; overflow: hidden; margin-bottom: 20px; background: #f4f4f4; }
+        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1s ease; }
+
+        .btn-gold-outline { display: inline-block; border: 1px solid var(--gold); color: var(--gold); padding: 12px 35px; text-decoration: none; letter-spacing: 3px; font-size: 0.8rem; transition: 0.4s; background: transparent; cursor: pointer; }
         .btn-gold-outline:hover { background: var(--gold); color: var(--dark); }
 
-        /* --- GRID DESTAQUES --- */
-        .section-title { text-align: center; padding: 100px 0 50px; font-family: 'Playfair Display', serif; font-size: 3rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 0 10%; margin-bottom: 100px; }
-        .product-item { background: white; padding: 15px; border: 1px solid #eee; transition: 0.5s; text-align: center; }
-        .product-item:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-        .product-image-container { height: 450px; overflow: hidden; margin-bottom: 20px; background: #f4f4f4; }
-        .product-image-container img { width: 100%; height: 100%; object-fit: cover; transition: 1s ease; }
+        footer { background: var(--dark); padding: 80px 10%; color: white; text-align: center; }
     </style>
 </head>
-<body id="main-body" style="opacity: 0;">
+<body id="main-body">
 
     <div id="splash-screen">
         <div class="splash-logo-container">
@@ -102,17 +91,17 @@
             <p style="color: var(--gold); letter-spacing: 5px; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 20px;">Exclusividade & Estilo</p>
             <h1>Onde a Moda encontra a Arte</h1>
             <p style="color: #ccc; font-weight: 300;">Coleções curadas para mulheres que definem sua própria elegância.</p>
-            <a href="{% url 'products' %}" class="btn-gold-outline">EXPLORAR COLEÇÃO</a>
+            <a href="{% url 'products' %}" class="btn-gold-outline" style="margin-top: 30px;">EXPLORAR COLEÇÃO</a>
         </div>
     </section>
 
     <div class="container">
         <h2 class="section-title">Destaques da Temporada</h2>
         <div class="grid" id="featured-products-container">
-             </div>
+            </div>
     </div>
 
-    <footer style="background: var(--dark); padding: 80px 10%; color: white; text-align: center;">
+    <footer>
         <h2 style="font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold);">Tammy's Store</h2>
         <div style="font-size: 1.5rem; gap: 30px; display: flex; justify-content: center; margin: 40px 0;">
             <i class="fab fa-instagram"></i><i class="fab fa-whatsapp"></i>
@@ -120,6 +109,12 @@
         <p style="font-size: 0.7rem; opacity: 0.3;">© 2024 Tammy's Store — Todos os direitos reservados.</p>
     </footer>
 
-    <script src="{% static 'js/script.js' %}?v=25"></script>
+    <script src="{% static 'js/script.js' %}?v=30"></script>
+    <script>
+        window.addEventListener('scroll', () => {
+            const h = document.getElementById('main-header');
+            window.scrollY > 100 ? h.classList.add('scrolled') : h.classList.remove('scrolled');
+        });
+    </script>
 </body>
 </html>
