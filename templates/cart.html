@@ -7,7 +7,6 @@
     <title>Meu Carrinho | Tammy's Store</title>
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
-    
     <style>
         :root { --gold: #d4af37; --dark: #0f0f0f; --white: #ffffff; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -18,21 +17,18 @@
         
         .cart-wrapper { padding: 60px 10%; max-width: 1000px; margin: 0 auto; min-height: 70vh; }
         .cart-item { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-bottom: 1px solid #eee; }
-        .cart-item img { width: 100px; height: 120px; object-fit: cover; }
-        .cart-details { flex-grow: 1; }
-        .cart-total-box { margin-top: 40px; padding: 30px; background: #f9f9f9; text-align: right; }
-        
-        .btn-checkout { background: var(--gold); color: white; padding: 15px 40px; border: none; letter-spacing: 2px; cursor: pointer; transition: 0.3s; font-family: 'Montserrat'; font-weight: 600; }
+        .cart-item img { width: 100px; height: 130px; object-fit: cover; }
+        .btn-checkout { width: 100%; background: var(--gold); color: white; padding: 20px; border: none; letter-spacing: 2px; cursor: pointer; transition: 0.3s; font-weight: 600; margin-top: 30px; }
         .btn-checkout:hover { background: var(--dark); }
     </style>
 </head>
 <body>
     {% csrf_token %}
     <header>
-        <a href="/" class="logo-text">Tammy's</a>
+        <a href="{% url 'home' %}" class="logo-text">Tammy's</a>
         <nav>
             <ul style="display: flex; list-style: none; gap: 30px;">
-                <li><a href="/" style="color: white; text-decoration: none; font-size: 0.8rem; text-transform: uppercase;">Home</a></li>
+                <li><a href="{% url 'home' %}" style="color: white; text-decoration: none; font-size: 0.8rem; text-transform: uppercase;">Home</a></li>
                 <li><a href="{% url 'products' %}" style="color: white; text-decoration: none; font-size: 0.8rem; text-transform: uppercase;">Coleção</a></li>
             </ul>
         </nav>
@@ -40,14 +36,13 @@
 
     <div class="cart-wrapper">
         <h1 style="font-family: 'Playfair Display'; margin-bottom: 40px;">Seu Carrinho</h1>
-        <div class="cart-items">
-            </div>
-        <div class="cart-total-box">
-            <h3 style="margin-bottom: 20px;">Total: <span id="cart-total">R$ 0,00</span></h3>
-            <button id="checkout-whatsapp-btn" class="btn-checkout">FINALIZAR PEDIDO NO WHATSAPP</button>
+        <div class="cart-items"></div>
+        <div style="margin-top: 40px; text-align: right;">
+            <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
+            <button id="checkout-admin-btn" class="btn-checkout">FINALIZAR E ENVIAR PARA CONSULTORIA (ADMIN)</button>
         </div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=12"></script>
+    <script src="{% static 'js/script.js' %}?v=50"></script>
 </body>
 </html>
