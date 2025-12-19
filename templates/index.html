@@ -10,107 +10,105 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root { --gold: #d4af37; --dark: #0f0f0f; --white: #ffffff; --glass: rgba(15, 15, 15, 0.85); }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfd; color: var(--dark); overflow: hidden; opacity: 0; transition: opacity 0.5s; }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); opacity: 0; }
 
-        /* SPLASH SCREEN - VELOCIDADE AJUSTADA */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10000; transition: all 1.2s cubic-bezier(0.9, 0, 0.1, 1);
-        }
-        .splash-logo-container {
-            position: relative; width: 220px; height: 220px; border-radius: 50%; padding: 5px;
-            background: linear-gradient(45deg, transparent, var(--gold), transparent);
-            animation: rotateBorder 3s linear infinite; display: flex; justify-content: center; align-items: center;
-        }
-        #splash-screen img { width: 190px; border-radius: 50%; box-shadow: 0 0 40px rgba(212, 175, 55, 0.3); }
+        /* SPLASH */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: 1.2s all cubic-bezier(0.9, 0, 0.1, 1); }
+        .splash-logo-container { position: relative; width: 220px; height: 220px; border-radius: 50%; padding: 5px; background: linear-gradient(45deg, transparent, var(--gold), transparent); animation: rotateBorder 3s linear infinite; display: flex; justify-content: center; align-items: center; }
+        #splash-screen img { width: 190px; border-radius: 50%; }
         @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* HEADER & NAVIGATION */
+        /* NAV ONE PAGE */
         header { position: fixed; top: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
-        header.scrolled { background: var(--dark); padding: 15px 5%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        header.scrolled { background: var(--dark); padding: 15px 5%; }
         .logo-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--white); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
-        header.scrolled .logo-text { color: var(--gold); }
-        nav ul { display: flex; list-style: none; gap: 40px; }
-        nav a { text-decoration: none; color: var(--white); font-weight: 500; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        nav ul { display: flex; list-style: none; gap: 35px; }
+        nav a { text-decoration: none; color: var(--white); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; }
         nav a:hover { color: var(--gold); }
 
-        .hero {
-            height: 100vh; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
-            url("{% static 'img/placeholder-capa.png' %}") center/cover no-repeat fixed;
-            display: flex; justify-content: center; align-items: center; text-align: center;
-        }
-        .hero-content-box {
-            padding: 60px; border: 1px solid rgba(212, 175, 55, 0.4);
-            background: var(--glass); backdrop-filter: blur(15px); border-radius: 4px;
-            max-width: 800px; transform: scale(0.9); opacity: 0; transition: 1.5s all ease;
-        }
-        .hero-content-box.show { transform: scale(1); opacity: 1; }
-        .hero h1 { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: var(--gold); margin-bottom: 20px; }
-        .btn-gold-outline { display: inline-block; border: 1px solid var(--gold); color: var(--gold); padding: 12px 35px; text-decoration: none; letter-spacing: 3px; font-size: 0.8rem; transition: 0.4s; background: transparent; cursor: pointer; }
-        .btn-gold-outline:hover { background: var(--gold); color: var(--dark); }
+        /* SECTIONS */
+        section { padding: 100px 10%; min-height: 100vh; }
+        .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("{% static 'img/placeholder-capa.png' %}") center/cover no-repeat fixed; display: flex; justify-content: center; align-items: center; }
+        .hero-card { background: var(--glass); backdrop-filter: blur(15px); padding: 60px; border: 1px solid rgba(212, 175, 55, 0.4); text-align: center; opacity: 0; transform: scale(0.9); transition: 1.5s all; }
+        .hero-card.show { opacity: 1; transform: scale(1); }
+        
+        /* GRID */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 50px; }
+        .product-card { background: #fff; border: 1px solid #eee; padding: 15px; text-align: center; }
+        .product-img-wrapper { height: 400px; overflow: hidden; background: #f4f4f4; cursor: pointer; }
+        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; margin-top: 15px; cursor: pointer; background: transparent; }
 
-        .section-title { text-align: center; padding: 100px 0 50px; font-family: 'Playfair Display', serif; font-size: 2.5rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 0 10%; margin-bottom: 100px; }
-        .product-card { background: white; padding: 15px; border: 1px solid #eee; transition: 0.5s; text-align: center; }
-        .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-        .product-img-wrapper { height: 450px; overflow: hidden; margin-bottom: 20px; background: #f4f4f4; }
-        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1s ease; }
+        /* CARRINHO ONE PAGE */
+        .cart-section { background: #f9f9f9; }
+        .cart-item { display: flex; gap: 20px; padding: 15px 0; border-bottom: 1px solid #ddd; align-items: center; }
+        .btn-checkout { background: var(--gold); color: #fff; width: 100%; padding: 20px; border: none; margin-top: 30px; cursor: pointer; font-weight: 600; }
 
-        footer { background: var(--dark); padding: 80px 10%; color: white; text-align: center; }
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; flex-direction: column; }
+        .modal-thumb { width: 60px; height: 60px; margin: 5px; cursor: pointer; border: 2px solid transparent; }
+        .modal-thumb.active { border-color: var(--gold); }
     </style>
 </head>
-<body id="main-body">
-
+<body>
+    {% csrf_token %}
     <div id="splash-screen">
         <div class="splash-logo-container">
-            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Tammy's Store">
+            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Tammy's">
         </div>
-        <h2 style="color: white; margin-top: 30px; font-weight: 200; letter-spacing: 10px; font-family: 'Playfair Display';">TAMMY'S</h2>
+        <h2 style="color:#fff; margin-top:30px; letter-spacing:10px;">TAMMY'S</h2>
     </div>
 
     <header id="main-header">
-        <a href="{% url 'home' %}" class="logo-text">Tammy's</a>
+        <a href="#home" class="logo-text">Tammy's</a>
         <nav>
             <ul>
-                <li><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="{% url 'products' %}">Coleção</a></li>
-                <li><a href="{% url 'cart' %}">Carrinho</a></li>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#colecao">Coleção</a></li>
+                <li><a href="#sacola">Sacola</a></li>
+                <li><a href="#loja">Loja</a></li>
                 <li><a href="/admin/">Painel</a></li>
             </ul>
         </nav>
     </header>
 
-    <section class="hero">
-        <div class="hero-content-box" id="heroCard">
-            <p style="color: var(--gold); letter-spacing: 5px; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 20px;">Exclusividade & Estilo</p>
-            <h1>Onde a Moda encontra a Arte</h1>
-            <p style="color: #ccc; font-weight: 300;">Coleções curadas para mulheres que definem sua própria elegância.</p>
-            <a href="{% url 'products' %}" class="btn-gold-outline">EXPLORAR COLEÇÃO</a>
+    <section class="hero" id="home">
+        <div class="hero-card" id="heroCard">
+            <h1 style="color:var(--gold); font-size: 3.5rem; font-family:'Playfair Display'">Exclusividade & Arte</h1>
+            <p style="color:#ccc; margin: 20px 0;">Curadoria de luxo para mulheres extraordinárias.</p>
+            <a href="#colecao" class="btn-gold-outline" style="text-decoration:none">CONHECER AGORA</a>
         </div>
     </section>
 
-    <div class="container">
-        <h2 class="section-title">Destaques da Temporada</h2>
-        <div class="grid" id="featured-products-container"></div>
+    <section id="colecao">
+        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.5rem;">Nossa Coleção</h2>
+        <div class="grid" id="products-container"></div>
+    </section>
+
+    <section id="sacola" class="cart-section">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:40px;">Sua Sacola</h2>
+        <div class="cart-items"></div>
+        <div style="margin-top:40px; text-align:right;">
+            <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
+            <button id="checkout-admin-btn" class="btn-checkout">FINALIZAR E ENVIAR PARA ADMIN</button>
+        </div>
+    </section>
+
+    <section id="loja" style="text-align:center;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Visite nossa Boutique</h2>
+        <p>R. Prof. José Barreto, 1253 - Cotia, SP</p>
+        <div style="margin-top:30px; height:400px; border-radius:10px; overflow:hidden;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.876796472483!2d-46.92095942475479!3d-23.53580526017169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf983d582f342b%3A0x1d5d1c5d9a9b7a42!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+    </section>
+
+    <div id="image-modal" class="modal">
+        <span class="close-modal" style="position:absolute; top:20px; right:40px; color:#fff; font-size:40px; cursor:pointer;">×</span>
+        <img id="modal-main-image" style="max-height:70%; max-width:90%;">
+        <div id="modal-thumbnails-container" style="display:flex; margin-top:20px;"></div>
     </div>
 
-    <footer>
-        <h2 style="font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold);">Tammy's Store</h2>
-        <div style="font-size: 1.5rem; gap: 30px; display: flex; justify-content: center; margin: 40px 0;">
-            <i class="fab fa-instagram"></i><i class="fab fa-whatsapp"></i>
-        </div>
-        <p style="font-size: 0.7rem; opacity: 0.3;">© 2024 Tammy's Store — Todos os direitos reservados.</p>
-    </footer>
-
-    <script src="{% static 'js/script.js' %}?v=50"></script>
-    <script>
-        window.addEventListener('scroll', () => {
-            const h = document.getElementById('main-header');
-            window.scrollY > 100 ? h.classList.add('scrolled') : h.classList.remove('scrolled');
-        });
-    </script>
+    <script src="{% static 'js/script.js' %}?v=60"></script>
 </body>
 </html>
