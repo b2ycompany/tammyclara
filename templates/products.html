@@ -1,118 +1,92 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coleção | Tammy´s Store</title>
-    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}"> 
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Nossa Coleção | Tammy's Store</title>
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body id="main-body"> 
 
-    <header class="header">
-        <div class="logo">
-            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy">
-        </div>
+    <style>
+        :root { --gold: #d4af37; --dark: #0f0f0f; --white: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfd; color: var(--dark); overflow-x: hidden; }
+
+        /* HEADER PADRONIZADO */
+        header { position: sticky; top: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: var(--dark); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
+        nav ul { display: flex; list-style: none; gap: 30px; }
+        nav a { text-decoration: none; color: var(--white); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        nav a:hover { color: var(--gold); }
+
+        /* GRID DE PRODUTOS */
+        .page-title { text-align: center; padding: 60px 0 20px; font-family: 'Playfair Display', serif; font-size: 2.5rem; }
+        .products-container { padding: 0 10% 80px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+        
+        .product-card { background: white; padding: 15px; border: 1px solid #eee; transition: 0.5s; cursor: pointer; text-align: center; }
+        .product-card:hover { box-shadow: 0 15px 30px rgba(0,0,0,0.05); transform: translateY(-5px); }
+        .product-img-wrapper { height: 400px; overflow: hidden; margin-bottom: 15px; background: #f9f9f9; }
+        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 1s ease; }
+        .btn-buy { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; text-decoration: none; letter-spacing: 2px; font-size: 0.75rem; margin-top: 15px; transition: 0.4s; background: transparent; }
+        .btn-buy:hover { background: var(--gold); color: var(--dark); }
+
+        /* MODAL DE IMAGENS */
+        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content { max-width: 90%; max-height: 80%; }
+        .modal-content img { width: 100%; height: 100%; object-fit: contain; }
+        .modal-thumbs { display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; padding: 10px; }
+        .modal-thumb { width: 60px; height: 60px; object-fit: cover; cursor: pointer; border: 2px solid transparent; }
+        .modal-thumb.active { border-color: var(--gold); }
+        .close-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
+
+        /* SEÇÕES FIXAS */
+        .info-section { padding: 80px 10%; background: #f9f9f9; text-align: center; }
+        footer { background: var(--dark); padding: 60px 10%; color: white; text-align: center; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo-text">Tammy's</a>
         <nav>
-            <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'products' %}">Coleção</a>
-            
-            <a href="{% url 'home' %}#novidades">Novidades</a>
-            <a href="{% url 'home' %}#lojas">Lojas</a>
-            <a href="{% url 'home' %}#contato">Contato</a>
-            
-            <a href="{% url 'cart' %}" class="icon-link" aria-label="Carrinho de Compras">
-                <i class="fas fa-shopping-bag"></i>
-            </a>
-            </nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="{% url 'products' %}">Coleção</a></li>
+                <li><a href="{% url 'cart' %}">Carrinho</a></li>
+                <li><a href="/admin/">Painel</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <main class="products-page-main">
-        <h1>Nossa Coleção</h1>
-        
-        <div class="products-grid" id="products-container">
-             <p style="text-align:center;">Carregando produtos...</p>
+    <h1 class="page-title">Nossa Coleção</h1>
+    <div class="products-container" id="products-container">
         </div>
-    </main>
-    
-    <section class="feature-section" id="novidades" style="text-align: center; padding: 50px;">
-        <h2>✨ Novidades | Coleção Primavera/Verão 2026</h2>
-        <p>
-            **Aguarde!** Nossa nova coleção 'Aurora' chega em breve com tecidos fluidos, cores vibrantes e peças exclusivas para celebrar o seu estilo. 
-            Siga-nos nas redes sociais para sneak peeks diários!
-        </p>
-    </section>
-    
-    <section class="store-location" id="lojas" style="text-align: center; padding: 50px; background-color: #f8f8f8;">
-        <h2>🛍️ Visite-nos em Cotia!</h2>
-        <p class="address-line">
-            Endereço: <strong>R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP, 06703-000</strong>
-        </p>
-        <p style="margin-top: 10px; color: #555;">
-            *Atendimento presencial com consultoria de moda exclusiva. Estacionamento gratuito.*
-        </p>
 
-        <div class="map-container" style="margin-top: 25px; max-width: 800px; margin-left: auto; margin-right: auto;">
-            <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.876796472483!2d-46.92095942475479!3d-23.53580526017169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf983d582f342b%3A0x1d5d1c5d9a9b7a42!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" 
-                width="100%" 
-                height="350" 
-                style="border:0; border-radius: 8px;" 
-                allowfullscreen="" 
-                loading="lazy" 
-                referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
+    <section class="info-section">
+        <h2 style="font-family: 'Playfair Display'; margin-bottom: 20px;">🛍️ Visite-nos em Cotia</h2>
+        <p>R. Prof. José Barreto, 1253 - Loja 10 - Jardim Dinorah, Cotia - SP</p>
+        <div style="margin-top: 30px; border-radius: 15px; overflow: hidden; height: 350px;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.876796472483!2d-46.92095942475479!3d-23.53580526017169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf983d582f342b%3A0x1d5d1c5d9a9b7a42!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
         </div>
-        
-        <a href="https://maps.google.com" target="_blank" class="btn primary-btn" style="margin-top: 20px;">
-            Obter Rotas no Google Maps
-        </a>
     </section>
 
-    <section class="call-to-action" id="contato" style="padding: 50px;">
-        <h2>Fale Conosco | Atendimento Personalizado</h2>
-        <p>Para dúvidas, trocas ou consultoria online, entre em contato:</p>
-
-        <p class="mt-3 contact-info">
-            **WhatsApp (Agendamentos e Suporte):**
-            <a href="tel:+5511998765432"><strong>(11) 99876-5432</strong></a>
-        </p>
-
-        <p class="mt-3 contact-info">
-            **E-mail (Geral):**
-            <a href="mailto:contato@tammysstore.com">contato@tammysstore.com</a>
-        </p>
-        
-        <form class="newsletter-form" style="margin-top: 30px;">
-            <input type="email" placeholder="Inscreva-se para receber novidades por e-mail" required>
-            <button type="submit" class="btn primary-btn">Inscrever-se</button>
-        </form>
-    </section>
-    
-    <footer class="footer">
-        <p>© 2024 Tammy´s Store Todos os direitos reservados.</p>
-        <div class="social-links">
-            <a href="#" aria-label="Instagram">Instagram</a> | 
-            <a href="#" aria-label="Facebook">Facebook</a> |
-            <a href="#" aria-label="WhatsApp">WhatsApp</a>
-        </div>
-    </footer>
-    
     <div id="image-modal" class="modal">
-        <span class="close-btn">×</span>
+        <span class="close-modal">&times;</span>
         <div class="modal-content">
-            <img id="modal-main-image" src="" alt="Imagem Ampliada">
-            <div class="modal-thumbnails" id="modal-thumbnails-container">
-                </div>
-            <a class="prev-btn">❮</a>
-            <a class="next-btn">❯</a>
+            <img id="modal-main-image" src="">
         </div>
+        <div class="modal-thumbs" id="modal-thumbnails-container"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}"></script> 
+    <footer>
+        <h2 style="font-family: 'Playfair Display'; color: var(--gold);">Tammy's Store</h2>
+        <div style="margin: 30px 0; font-size: 1.5rem; gap: 20px; display: flex; justify-content: center;">
+            <i class="fab fa-instagram"></i><i class="fab fa-whatsapp"></i>
+        </div>
+        <p style="font-size: 0.7rem; opacity: 0.4;">© 2024 Tammy's Store — Elegância e Atendimento Personalizado</p>
+    </footer>
+
+    <script src="{% static 'js/script.js' %}?v=12"></script>
 </body>
 </html>
