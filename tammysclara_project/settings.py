@@ -2,13 +2,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Carrega variáveis de ambiente
 load_dotenv()
-
-# Caminho base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SEGURANÇA
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prod-key-fixed-tammys')
 DEBUG = False
 
@@ -31,7 +26,6 @@ INSTALLED_APPS = [
     'store',
 ]
 
-# ✅ MIDDLEWARE: WhiteNoise deve ser o segundo da lista
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ LIGA O VISUAL
@@ -49,7 +43,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True, # ✅ Faz o Django achar o sales_pipeline.html em store/templates/admin/
+        'APP_DIRS': True, # ✅ CRÍTICO: Procura templates em store/templates/
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -75,7 +69,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# ✅ STORAGE SIMPLIFICADO: Desativa a compactação GZ para evitar erro de leitura do navegador
+# Usamos o armazenamento mais básico para não estourar a memória (RAM)
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.StaticFilesStorage", 
@@ -85,7 +79,7 @@ STORAGES = {
     },
 }
 
-# ✅ CONFIGURAÇÃO DE MEDIA (Fotos do Admin)
+# ✅ CONFIGURAÇÃO DE MEDIA (Fotos que você cadastra no ADMIN)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/data/media'
 
