@@ -12,23 +12,16 @@
     
     <style>
         :root { --gold: #d4af37; --dark: #0b0b0b; --white: #ffffff; --glass: rgba(10, 10, 10, 0.85); }
-        
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         
-        /* ✅ CORREÇÃO 1: Body visível imediatamente para evitar tela branca */
-        body { 
-            font-family: 'Montserrat', sans-serif; 
-            background-color: #fff; 
-            color: var(--dark); 
-            overflow-x: hidden;
-        }
+        /* ✅ Body visível imediatamente para eliminar ecrã branco */
+        body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
 
-        /* --- 🚀 SPLASH SCREEN (OTIMIZADO) --- */
+        /* --- SPLASH SCREEN (2.5s) --- */
         #splash-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #000; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; z-index: 10000; 
-            /* ✅ CORREÇÃO 2: Transição mais rápida e moderna */
             transition: opacity 0.8s ease, transform 0.8s ease;
         }
         .splash-logo-container { 
@@ -43,61 +36,37 @@
         header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
         header.scrolled { background: var(--dark); padding: 12px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
         .logo-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--white); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
-        
         nav ul { display: flex; list-style: none; gap: 25px; }
-        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
-        nav a:hover { color: var(--gold); }
+        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* --- HERO --- */
+        /* --- HERO (Responsivo) --- */
         .hero { 
-            height: 100vh; 
-            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); 
-            background-size: cover; 
-            background-position: top center; 
-            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); 
+            background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; 
         }
-        
-        /* ✅ Responsividade do Hero */
-        @media (min-width: 1025px) { .hero { background-attachment: fixed; } }
-        @media (max-width: 1024px) { .hero { background-attachment: scroll; } }
-
         .hero-card { 
-            background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); 
-            padding: 40px; text-align: center; backdrop-filter: blur(15px); 
-            width: 90%; max-width: 600px;
-            opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; 
+            background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; 
+            backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; 
         }
         .hero-card.show { opacity: 1; transform: translateY(0); }
-        .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 15px; }
 
-        /* --- PRODUTOS --- */
+        /* --- GRID DE PRODUTOS --- */
         section { padding: 80px 5%; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-        
         .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 15px; transition: 0.4s; text-align: center; }
-        .product-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
         .product-img-wrapper { height: 380px; overflow: hidden; background: #f9f9f9; cursor: pointer; }
         .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; margin-top: 15px; text-decoration: none; font-size: 0.75rem; letter-spacing: 2px; background: transparent; cursor: pointer; transition: 0.3s; }
-        .btn-gold-outline:hover { background: var(--gold); color: #000; }
+        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; margin-top: 15px; background: transparent; cursor: pointer; }
 
         /* --- MOBILE --- */
         @media (max-width: 768px) {
-            header { padding: 15px 5%; flex-direction: column; gap: 15px; }
-            nav ul { gap: 15px; }
-            .hero h1 { font-size: 2rem; }
+            header { padding: 15px 5%; flex-direction: column; gap: 10px; }
+            .grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.8rem; }
         }
-
-        /* --- SACOLA --- */
-        .cart-section { background: #fafafa; }
-        .cart-item { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #eee; align-items: center; }
-        .btn-checkout { background: var(--gold); color: #000; width: 100%; padding: 20px; border: none; font-size: 0.9rem; letter-spacing: 3px; cursor: pointer; font-weight: 600; margin-top: 40px; }
 
         /* --- MODAL --- */
         .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; }
-        .modal-thumb { width: 60px; height: 80px; object-fit: cover; cursor: pointer; border: 1px solid #444; }
-        .modal-thumb.active { border-color: var(--gold); }
     </style>
 </head>
 <body>
@@ -105,9 +74,9 @@
 
     <div id="splash-screen">
         <div class="splash-logo-container">
-            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Tammy's Store">
+            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo">
         </div>
-        <h2 style="color:#fff; margin-top:30px; letter-spacing:10px; font-family:'Playfair Display'; font-weight: 200;">TAMMY'S</h2>
+        <h2 style="color:#fff; margin-top:30px; letter-spacing:10px; font-family:'Playfair Display';">TAMMY'S</h2>
     </div>
 
     <header id="main-header">
@@ -124,46 +93,39 @@
 
     <section class="hero" id="home">
         <div class="hero-card" id="heroCard">
-            <p style="color:var(--gold); letter-spacing: 5px; font-size: 0.6rem; margin-bottom: 15px;">ESTILO EXCLUSIVO</p>
-            <h1>Arte em Vestir</h1>
-            <p style="color:#ddd; font-weight: 300; font-size: 0.9rem; margin-bottom: 25px;">Descubra a curadoria de luxo Tammy's Store.</p>
-            <a href="#colecao" class="btn-gold-outline">VER COLEÇÃO</a>
+            <h1 style="color:var(--gold); font-family:'Playfair Display'; font-size: 2.5rem;">Arte em Vestir</h1>
+            <p style="color:#ddd; margin: 20px 0;">Descubra a curadoria de luxo Tammy's Store.</p>
+            <a href="#colecao" class="btn-gold-outline" style="text-decoration:none">VER COLEÇÃO</a>
         </div>
     </section>
 
     <section id="colecao">
-        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 50px;">A Coleção</h2>
+        <h2 style="text-align:center; font-family:'Playfair Display'; margin-bottom: 50px;">A Coleção</h2>
         <div class="grid" id="products-container"></div>
     </section>
 
-    <section id="sacola" class="cart-section">
-        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 40px;">Sua Sacola</h2>
+    <section id="sacola" style="background:#fafafa;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom: 40px;">Sua Sacola</h2>
         <div class="cart-items"></div>
         <div style="margin-top:40px; text-align:right;">
-            <p style="font-size: 0.8rem; letter-spacing: 2px; opacity: 0.6;">TOTAL</p>
-            <h3 style="font-size: 2rem;"> <span id="cart-total">R$ 0,00</span></h3>
-            <button id="checkout-admin-btn" class="btn-checkout">CONFIRMAR PEDIDO</button>
+            <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
+            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer;">CONFIRMAR PEDIDO</button>
         </div>
     </section>
 
-    <section id="loja" style="text-align:center; background: #fff;">
-        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 30px;">Boutique Cotia</h2>
-        <p style="margin-bottom: 30px;">R. Prof. José Barreto, 1253 - Cotia - SP</p>
-        <div style="height:400px; border-radius:4px; overflow:hidden; border: 1px solid #eee;">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.123!2d-46.9!3d-23.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDM2JzAwLjAiUyA0NsKwNTQnMDAuMCJX!5e0!3m2!1spt-BR!2sbr!4v1" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    <section id="loja" style="text-align:center;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom: 30px;">Boutique Cotia</h2>
+        <div style="height:400px; border:1px solid #eee;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.876796472483!2d-46.92095942475479!3d-23.53580526017169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf983d582f342b%3A0x1d5d1c5d9a9b7a42!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-" width="100%" height="100%" style="border:0;" loading="lazy"></iframe>
         </div>
     </section>
-
-    <footer style="background: var(--dark); color: #fff; padding: 40px 10%; text-align: center;">
-        <p style="letter-spacing: 3px; opacity: 0.4; font-size: 0.6rem;">© 2024 TAMMY'S STORE — BOUTIQUE DE LUXO</p>
-    </footer>
 
     <div id="image-modal" class="modal">
         <span class="close-modal" style="position:absolute; top:30px; right:30px; color:#fff; font-size:40px; cursor:pointer;">×</span>
         <img id="modal-main-image" style="max-height:75%; max-width:90%; object-fit: contain;">
-        <div id="modal-thumbnails-container" style="display:flex; margin-top:20px; gap: 10px; overflow-x: auto; max-width: 90%;"></div>
+        <div id="modal-thumbnails-container" style="display:flex; margin-top:20px; gap:10px;"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=110"></script>
+    <script src="{% static 'js/script.js' %}?v=120"></script>
 </body>
 </html>
