@@ -6,76 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tammy's Store | Boutique de Luxo</title>
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
-    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <style>
         :root { --gold: #d4af37; --dark: #0b0b0b; --white: #ffffff; --glass: rgba(10, 10, 10, 0.85); }
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        
-        /* ✅ Body visível imediatamente para eliminar ecrã branco */
         body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
 
-        /* --- SPLASH SCREEN (2.5s) --- */
-        #splash-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; z-index: 10000; 
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        .splash-logo-container { 
-            position: relative; width: 200px; height: 200px; border-radius: 50%; padding: 5px; 
-            background: linear-gradient(45deg, transparent, var(--gold), transparent); 
-            animation: rotateBorder 4s linear infinite; display: flex; justify-content: center; align-items: center; 
-        }
-        #splash-screen img { width: 170px; border-radius: 50%; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.3)); }
+        /* SPLASH SCREEN 2.5s */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.8s ease, transform 0.8s ease; }
+        .splash-logo-container { position: relative; width: 200px; height: 200px; border-radius: 50%; padding: 5px; background: linear-gradient(45deg, transparent, var(--gold), transparent); animation: rotateBorder 4s linear infinite; display: flex; justify-content: center; align-items: center; }
+        #splash-screen img { width: 170px; border-radius: 50%; }
         @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- HEADER --- */
+        /* HEADER & HERO */
         header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
         header.scrolled { background: var(--dark); padding: 12px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
-        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--white); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--white); text-transform: uppercase; text-decoration: none; }
         nav ul { display: flex; list-style: none; gap: 25px; }
-        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; }
+        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; }
 
-        /* --- HERO (Responsivo) --- */
-        .hero { 
-            height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); 
-            background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; 
-        }
-        .hero-card { 
-            background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; 
-            backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; 
-        }
+        .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; }
+        .hero-card { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; }
         .hero-card.show { opacity: 1; transform: translateY(0); }
 
-        /* --- GRID DE PRODUTOS --- */
+        /* GRID & CARDS */
         section { padding: 80px 5%; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 15px; transition: 0.4s; text-align: center; }
+        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 15px; text-align: center; }
         .product-img-wrapper { height: 380px; overflow: hidden; background: #f9f9f9; cursor: pointer; }
         .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; margin-top: 15px; background: transparent; cursor: pointer; }
 
-        /* --- MOBILE --- */
-        @media (max-width: 768px) {
-            header { padding: 15px 5%; flex-direction: column; gap: 10px; }
-            .grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 1.8rem; }
-        }
-
-        /* --- MODAL --- */
-        .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; }
+        @media (max-width: 768px) { header { padding: 15px 5%; flex-direction: column; gap: 10px; } .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     {% csrf_token %}
-
     <div id="splash-screen">
-        <div class="splash-logo-container">
-            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo">
-        </div>
+        <div class="splash-logo-container"><img src="{% static 'img/logo_tammy_clara.png' %}" alt="Tammy's"></div>
         <h2 style="color:#fff; margin-top:30px; letter-spacing:10px; font-family:'Playfair Display';">TAMMY'S</h2>
     </div>
 
@@ -109,23 +78,16 @@
         <div class="cart-items"></div>
         <div style="margin-top:40px; text-align:right;">
             <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
-            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer;">CONFIRMAR PEDIDO</button>
+            <button id="checkout-admin-btn" class="btn-gold-outline" style="background:var(--gold); color:#000; font-weight:600; padding:20px;">CONFIRMAR PEDIDO</button>
         </div>
     </section>
 
-    <section id="loja" style="text-align:center;">
-        <h2 style="font-family:'Playfair Display'; margin-bottom: 30px;">Boutique Cotia</h2>
-        <div style="height:400px; border:1px solid #eee;">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.876796472483!2d-46.92095942475479!3d-23.53580526017169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf983d582f342b%3A0x1d5d1c5d9a9b7a42!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-" width="100%" height="100%" style="border:0;" loading="lazy"></iframe>
-        </div>
-    </section>
-
-    <div id="image-modal" class="modal">
+    <div id="image-modal" class="modal" style="display:none; position:fixed; z-index:10001; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.95); flex-direction:column; justify-content:center; align-items:center;">
         <span class="close-modal" style="position:absolute; top:30px; right:30px; color:#fff; font-size:40px; cursor:pointer;">×</span>
-        <img id="modal-main-image" style="max-height:75%; max-width:90%; object-fit: contain;">
+        <img id="modal-main-image" style="max-height:75%; max-width:90%; object-fit:contain;">
         <div id="modal-thumbnails-container" style="display:flex; margin-top:20px; gap:10px;"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=120"></script>
+    <script src="{% static 'js/script.js' %}?v=125"></script>
 </body>
 </html>

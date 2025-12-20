@@ -1,8 +1,3 @@
-/**
- * TAMMY'S STORE - SISTEMA UNIFICADO 100% COMPLETO
- * Lógica: Splash 2.5s + E-commerce + Admin Checkout
- */
-
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
     let availableProducts = {}; 
@@ -11,19 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
 
-    // ✅ Splash Profissional (2.5s) - Não bloqueia o body visível
+    // Splash 2.5s
     setTimeout(() => {
         if (splash) {
             splash.style.opacity = '0';
             splash.style.transform = 'translateY(-100%)';
             setTimeout(() => splash.remove(), 900);
         }
-        if (heroCard) {
-            setTimeout(() => heroCard.classList.add('show'), 400);
-        }
+        if (heroCard) setTimeout(() => heroCard.classList.add('show'), 400);
     }, 2500); 
 
-    // Header Scroll
     window.addEventListener('scroll', () => {
         const header = document.getElementById('main-header');
         if (header) window.scrollY > 60 ? header.classList.add('scrolled') : header.classList.remove('scrolled');
@@ -31,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const buildUrl = (p) => p ? (p.startsWith('http') ? p : `/media/${p.startsWith('/') ? p.substring(1) : p}`) : '/static/img/placeholder-produto.png';
 
-    // ✅ Carregamento API paralelo
     async function loadProducts() {
         const cont = document.getElementById('products-container');
         if (!cont) return;
@@ -45,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
                         <img src="${buildUrl(p.main_image)}" alt="${p.name}">
                     </div>
-                    <h3 style="font-family:'Playfair Display'; margin-top:15px;">${p.name}</h3>
+                    <h3>${p.name}</h3>
                     <p style="color:#d4af37; font-weight:600;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
                     <button class="btn-gold-outline add-cart" data-id="${p.id}">ADICIONAR</button>
                 </div>`;
@@ -57,12 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 exist ? exist.quantity++ : cart.push({...p, quantity: 1, price: parseFloat(p.price)});
                 localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
                 updateUI();
-                alert("Adicionado!");
             });
-        } catch (e) { console.error("Erro API", e); }
+        } catch (e) { console.error(e); }
     }
 
-    // ✅ Checkout Robusto (Tratamento de Erros)
     window.updateUI = () => {
         const cont = document.querySelector('.cart-items');
         if (!cont) return;
@@ -90,31 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!cart.length) return alert("Sacola vazia.");
             const n = prompt("Nome:"), p = prompt("WhatsApp:");
             if (!n || !p) return alert("Dados obrigatórios.");
-
-            checkoutBtn.disabled = true;
-            checkoutBtn.innerText = "PROCESSANDO...";
-
-            try {
-                const res = await fetch(`${API_BASE_URL}/checkout/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
-                    body: JSON.stringify({
-                        customer_info: { first_name: n, phone_number: p, email: "" },
-                        items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
-                        origin: 'SITE'
-                    })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    localStorage.removeItem('tammyClaraCart');
-                    window.location.href = `/order-success/?id=${data.sale_id}`;
-                } else { throw new Error("Erro no servidor"); }
-            } catch (e) { 
-                alert("Falha na rede. Tente confirmar novamente."); 
-                checkoutBtn.disabled = false;
-                checkoutBtn.innerText = "CONFIRMAR PEDIDO";
-            }
+            const res = await fetch(`${API_BASE_URL}/checkout/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
+                body: JSON.stringify({
+                    customer_info: { first_name: n, phone_number: p, email: "" },
+                    items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
+                    origin: 'SITE'
+                })
+            });
+            if (res.ok) { localStorage.removeItem('tammyClaraCart'); window.location.href = '/order-success/'; }
         };
     }
 
