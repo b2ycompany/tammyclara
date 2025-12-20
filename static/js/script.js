@@ -1,6 +1,6 @@
 /**
  * TAMMY'S STORE - SISTEMA ONE PAGE BOUTIQUE
- * Código Completo 100% íntegro - Splash Screen 10s
+ * Versão Corrigida: Renderização Paralela e Performance
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,24 +8,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let availableProducts = {}; 
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
 
-    // --- 🚀 INTERFACE LUXO (10 SEGUNDOS) ---
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
-    const mainBody = document.body;
 
-    window.addEventListener('load', () => {
-        // Delay estendido para 10 segundos para luxo total e carregamento mobile
-        setTimeout(() => {
-            if (splash) {
-                splash.style.opacity = '0';
-                splash.style.transform = 'translateY(-100%)';
-                setTimeout(() => { splash.style.visibility = 'hidden'; }, 1800);
-            }
-            if (mainBody) mainBody.style.opacity = '1';
-            if (heroCard) setTimeout(() => heroCard.classList.add('show'), 1000);
-        }, 10000); 
-    });
+    // --- ✅ CORREÇÃO 3: Lógica Profissional de Splash (2.5s) ---
+    setTimeout(() => {
+        if (splash) {
+            splash.style.opacity = '0';
+            splash.style.transform = 'translateY(-100%)';
 
+            // Remove do DOM após a animação para liberar memória
+            setTimeout(() => {
+                splash.remove();
+            }, 900);
+        }
+
+        // Anima o Hero Card logo após o splash sair
+        if (heroCard) {
+            setTimeout(() => heroCard.classList.add('show'), 400);
+        }
+    }, 2500); 
+
+    // --- HEADER SCROLL ---
     window.addEventListener('scroll', () => {
         const header = document.getElementById('main-header');
         if (header) {
@@ -33,10 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 🛠️ SUPORTE MÍDIA ---
+    // --- AUXILIARES ---
     const buildUrl = (p) => p ? (p.startsWith('http') ? p : `/media/${p.startsWith('/') ? p.substring(1) : p}`) : '/static/img/placeholder-produto.png';
 
-    // --- 🛒 CARREGAMENTO DINÂMICO ---
+    // --- CARREGAMENTO API (Rodando em paralelo ao splash) ---
     async function loadProducts() {
         const cont = document.getElementById('products-container');
         if (!cont) return;
@@ -66,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateCartUI();
                 alert("Peça reservada com sucesso!");
             });
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Erro API:", e); }
     }
 
-    // --- 📝 CHECKOUT ADMIN (LEADS) ---
+    // --- SACOLA ---
     window.updateCartUI = () => {
         const cont = document.querySelector('.cart-items');
         const totalDisp = document.getElementById('cart-total');
@@ -101,13 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartUI();
     };
 
+    // --- CHECKOUT ---
     const checkoutBtn = document.getElementById('checkout-admin-btn');
     if (checkoutBtn) {
         checkoutBtn.onclick = async () => {
             if (!cart.length) return alert("Sua sacola está vazia.");
             const n = prompt("Nome completo:"), p = prompt("WhatsApp (DDD):");
             if (!n || !p) return alert("Dados obrigatórios.");
-
             try {
                 const res = await fetch(`${API_BASE_URL}/checkout/`, {
                     method: 'POST',
@@ -119,15 +123,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                 });
                 if (res.ok) {
-                    const data = await res.json();
                     localStorage.removeItem('tammyClaraCart');
-                    window.location.href = `/order-success/?id=${data.sale_id}`;
+                    window.location.href = '/order-success/';
                 }
-            } catch (e) { alert("Erro ao processar lead."); }
+            } catch (e) { alert("Erro ao processar."); }
         };
     }
 
-    // --- 🎞️ GALERIA MODAL ---
+    // --- GALERIA ---
     window.openGallery = (id) => {
         const p = availableProducts[id];
         if (!p) return;
@@ -145,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = document.querySelector('.close-modal');
     if (closeModal) closeModal.onclick = () => { document.getElementById('image-modal').style.display = 'none'; };
 
+    // Inicia processos
     loadProducts();
     updateCartUI();
 });
