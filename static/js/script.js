@@ -1,139 +1,75 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO (ONE PAGE + PDV)
- * Versão: Boutique Luxury Final (Sem Abreviações)
+ * TAMMY'S STORE - SISTEMA ONE PAGE BOUTIQUE
+ * Código Completo 100% íntegro - Splash Screen 10s
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- 1. CONFIGURAÇÕES E ESTADO GLOBAL ---
     const API_BASE_URL = '/api'; 
     let availableProducts = {}; 
-    let allProducts = []; 
-    let posCart = []; 
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
 
-    // --- 2. 🚀 INTERFACE E SPLASH SCREEN (8 SEGUNDOS) ---
-    const handleInterface = () => {
-        const splash = document.getElementById('splash-screen');
-        const heroCard = document.getElementById('heroCard');
-        const mainHeader = document.getElementById('main-header');
+    // --- 🚀 INTERFACE LUXO (10 SEGUNDOS) ---
+    const splash = document.getElementById('splash-screen');
+    const heroCard = document.getElementById('heroCard');
+    const mainBody = document.body;
 
-        // Apresentação lenta de 8 segundos para luxo total
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                if (splash) {
-                    splash.style.opacity = '0';
-                    splash.style.transform = 'translateY(-100%)';
-                    setTimeout(() => { splash.style.visibility = 'hidden'; }, 1500);
-                }
-                // Mostra o corpo do site suavemente
-                document.body.style.opacity = '1';
-                document.body.style.overflow = 'auto';
-                
-                if (heroCard) {
-                    setTimeout(() => heroCard.classList.add('show'), 800);
-                }
-            }, 8000); 
-        });
-
-        // Efeito do Menu ao rolar
-        window.addEventListener('scroll', () => {
-            if (mainHeader) {
-                window.scrollY > 80 ? mainHeader.classList.add('scrolled') : mainHeader.classList.remove('scrolled');
+    window.addEventListener('load', () => {
+        // Delay estendido para 10 segundos para luxo total e carregamento mobile
+        setTimeout(() => {
+            if (splash) {
+                splash.style.opacity = '0';
+                splash.style.transform = 'translateY(-100%)';
+                setTimeout(() => { splash.style.visibility = 'hidden'; }, 1800);
             }
-        });
-    };
+            if (mainBody) mainBody.style.opacity = '1';
+            if (heroCard) setTimeout(() => heroCard.classList.add('show'), 1000);
+        }, 10000); 
+    });
 
-    // --- 3. 🛠️ FUNÇÕES DE APOIO ---
-    function buildUrl(path) {
-        if (!path) return '/static/img/placeholder-produto.png';
-        if (path.startsWith('http')) return path;
-        const cleaned = path.startsWith('/') ? path.substring(1) : path;
-        return '/media/' + cleaned;
-    }
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('main-header');
+        if (header) {
+            window.scrollY > 60 ? header.classList.add('scrolled') : header.classList.remove('scrolled');
+        }
+    });
 
-    const getCsrf = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    // --- 🛠️ SUPORTE MÍDIA ---
+    const buildUrl = (p) => p ? (p.startsWith('http') ? p : `/media/${p.startsWith('/') ? p.substring(1) : p}`) : '/static/img/placeholder-produto.png';
 
-    // --- 4. 🛒 CARREGAMENTO DA COLEÇÃO ONE PAGE ---
-    async function loadContent() {
-        const container = document.getElementById('products-container');
-        if (!container) return;
-
+    // --- 🛒 CARREGAMENTO DINÂMICO ---
+    async function loadProducts() {
+        const cont = document.getElementById('products-container');
+        if (!cont) return;
         try {
             const res = await fetch(`${API_BASE_URL}/products/`);
-            if (!res.ok) throw new Error("Erro API");
+            if (!res.ok) throw new Error("API Offline");
             const products = await res.json();
-            allProducts = products;
-
-            container.innerHTML = products.map(p => {
+            
+            cont.innerHTML = products.map(p => {
                 availableProducts[p.id] = p;
                 return `
                 <div class="product-card">
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
                         <img src="${buildUrl(p.main_image)}" alt="${p.name}">
                     </div>
-                    <div class="product-info">
-                        <h3 style="font-family:'Playfair Display'; font-size: 1.4rem; margin-top:15px;">${p.name}</h3>
-                        <p style="color:#d4af37; letter-spacing:2px; font-weight:600; margin-top:10px;">
-                            R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}
-                        </p>
-                        <button class="btn-gold-outline add-to-cart-btn" data-id="${p.id}" style="width:100%;">
-                            ADICIONAR À SACOLA
-                        </button>
-                    </div>
+                    <h3 style="font-family:'Playfair Display'; margin-top:15px;">${p.name}</h3>
+                    <p style="color:#d4af37; font-weight:600; margin:10px 0;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
+                    <button class="btn-gold-outline add-cart" data-id="${p.id}">ADICIONAR À SACOLA</button>
                 </div>`;
             }).join('');
 
-            // Ativa os botões de compra
-            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    const id = e.target.dataset.id;
-                    const p = availableProducts[id];
-                    if (!p) return;
-                    const exist = cart.find(i => i.id === p.id);
-                    if (exist) {
-                        exist.quantity++;
-                    } else {
-                        cart.push({ ...p, quantity: 1, price: parseFloat(p.price) });
-                    }
-                    localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
-                    updateCartUI();
-                    alert("Peça reservada com sucesso!");
-                };
+            document.querySelectorAll('.add-cart').forEach(b => b.onclick = (e) => {
+                const p = availableProducts[e.target.dataset.id];
+                const exist = cart.find(i => i.id === p.id);
+                exist ? exist.quantity++ : cart.push({...p, quantity: 1, price: parseFloat(p.price)});
+                localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
+                updateCartUI();
+                alert("Peça reservada com sucesso!");
             });
-        } catch (e) { console.error("Erro no catálogo:", e); }
+        } catch (e) { console.error(e); }
     }
 
-    // --- 5. 🎞️ MODAL DE GALERIA ---
-    window.openGallery = (id) => {
-        const p = availableProducts[id];
-        if (!p) return;
-        const images = [buildUrl(p.main_image), ...(p.images || []).map(i => buildUrl(i.image))];
-        const modal = document.getElementById('image-modal');
-        const modalImg = document.getElementById('modal-main-image');
-        const thumbs = document.getElementById('modal-thumbnails-container');
-
-        if (modal && modalImg) {
-            modalImg.src = images[0];
-            if (thumbs) {
-                thumbs.innerHTML = images.map((src, i) => `
-                    <img src="${src}" class="modal-thumb ${i===0?'active':''}" 
-                         onclick="document.getElementById('modal-main-image').src='${src}';
-                                  document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active'));
-                                  this.classList.add('active');">
-                `).join('');
-            }
-            modal.style.display = 'flex';
-        }
-    };
-
-    // Fechar Modal
-    const closeBtn = document.querySelector('.close-modal') || document.querySelector('.close-btn');
-    if (closeBtn) {
-        closeBtn.onclick = () => { document.getElementById('image-modal').style.display = 'none'; };
-    }
-
-    // --- 6. 📝 CHECKOUT PARA O ADMIN (LEADS) ---
+    // --- 📝 CHECKOUT ADMIN (LEADS) ---
     window.updateCartUI = () => {
         const cont = document.querySelector('.cart-items');
         const totalDisp = document.getElementById('cart-total');
@@ -141,21 +77,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let total = 0;
         cont.innerHTML = cart.map(item => {
-            const sub = item.price * item.quantity;
-            total += sub;
+            total += item.price * item.quantity;
             return `
             <div class="cart-item">
-                <img src="${buildUrl(item.main_image)}" width="80" height="110" style="object-fit:cover;">
-                <div style="flex-grow:1; padding:0 20px;">
-                    <h4 style="font-family:'Playfair Display';">${item.name}</h4>
-                    <p style="font-size:0.8rem; opacity:0.5;">${item.quantity} un.</p>
+                <img src="${buildUrl(item.main_image)}" width="60" height="80" style="object-fit:cover;">
+                <div style="flex-grow:1;">
+                    <h4 style="font-family:'Playfair Display'; font-size:0.9rem;">${item.name}</h4>
+                    <p style="font-size:0.7rem; opacity:0.5;">${item.quantity} un.</p>
                 </div>
                 <div style="text-align:right;">
-                    <p style="font-weight:600;">R$ ${sub.toFixed(2).replace('.', ',')}</p>
-                    <button onclick="remove(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem;">REMOVER</button>
+                    <p style="font-size:0.9rem;">R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</p>
+                    <button onclick="remove(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.6rem; margin-top:5px;">REMOVER</button>
                 </div>
             </div>`;
-        }).join('') || '<p style="text-align:center; padding:40px; opacity:0.5;">Sua sacola está vazia.</p>';
+        }).join('') || '<p style="text-align:center; padding:30px; opacity:0.5;">Sacola vazia.</p>';
         
         if (totalDisp) totalDisp.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
     };
@@ -169,14 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutBtn = document.getElementById('checkout-admin-btn');
     if (checkoutBtn) {
         checkoutBtn.onclick = async () => {
-            if (cart.length === 0) return alert("Sua sacola está vazia.");
+            if (!cart.length) return alert("Sua sacola está vazia.");
             const n = prompt("Nome completo:"), p = prompt("WhatsApp (DDD):");
             if (!n || !p) return alert("Dados obrigatórios.");
 
             try {
                 const res = await fetch(`${API_BASE_URL}/checkout/`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
                     body: JSON.stringify({
                         customer_info: { first_name: n, phone_number: p, email: "" },
                         items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
@@ -188,12 +123,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.removeItem('tammyClaraCart');
                     window.location.href = `/order-success/?id=${data.sale_id}`;
                 }
-            } catch (e) { alert("Erro ao processar pedido."); }
+            } catch (e) { alert("Erro ao processar lead."); }
         };
     }
 
-    // --- 🔃 INICIALIZAÇÃO ---
-    handleInterface();
-    loadContent();
+    // --- 🎞️ GALERIA MODAL ---
+    window.openGallery = (id) => {
+        const p = availableProducts[id];
+        if (!p) return;
+        const imgs = [buildUrl(p.main_image), ...(p.images || []).map(i => buildUrl(i.image))];
+        const modal = document.getElementById('image-modal');
+        document.getElementById('modal-main-image').src = imgs[0];
+        document.getElementById('modal-thumbnails-container').innerHTML = imgs.map((s, i) => `
+            <img src="${s}" class="modal-thumb ${i===0?'active':''}" 
+                 onclick="document.getElementById('modal-main-image').src='${s}';
+                          document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active'));
+                          this.classList.add('active');">`).join('');
+        modal.style.display = 'flex';
+    };
+
+    const closeModal = document.querySelector('.close-modal');
+    if (closeModal) closeModal.onclick = () => { document.getElementById('image-modal').style.display = 'none'; };
+
+    loadProducts();
     updateCartUI();
 });
