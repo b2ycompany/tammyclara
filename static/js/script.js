@@ -1,9 +1,10 @@
 /**
  * TAMMY'S STORE - CORE SCRIPT UNIFICADO
- * Versão Final: Galeria Navegável e Estabilidade de Mídia
+ * Versão: Galeria Navegável, Anti-Looping e Estabilidade Full-Time
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- ESTADO GLOBAL ---
     const API_BASE_URL = '/api'; 
     let availableProducts = {}; 
     let allProducts = []; 
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
 
-    // Splash 2.5s
+    // Splash Screen 2.5s
     setTimeout(() => {
         if (splash) {
             splash.style.opacity = '0';
@@ -33,16 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (header) window.scrollY > 60 ? header.classList.add('scrolled') : header.classList.remove('scrolled');
     });
 
-    // ✅ RESOLUÇÃO DE CAMINHOS DE IMAGEM (Garante que pegue a foto do Admin)
+    // ✅ RESOLUÇÃO DE CAMINHOS DE IMAGEM (Anti-404 e Anti-Looping)
     const buildUrl = (path) => {
-        if (!path) return 'https://placehold.co/400x600?text=Foto+Indisponivel';
+        if (!path) return 'https://placehold.co/400x600?text=Sem+Foto';
         if (path.startsWith('http')) return path;
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-        // Força o prefixo /media/ que é onde o Django salva as fotos
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- CARREGAMENTO DO CATÁLOGO ---
+    // --- CARREGAMENTO DO CATÁLOGO (SITE E PDV) ---
     async function loadProducts() {
         const container = document.getElementById('products-container') || document.getElementById('product-results');
         if (!container) return;
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const imgSource = buildUrl(p.main_image);
                 
                 if (document.getElementById('product-results')) {
-                    // Layout PDV
+                    // Layout PDV Mobile
                     return `
                     <div class="product-card" onclick="addToPOS(${p.id})">
                         <img src="${imgSource}" onerror="this.onerror=null; this.src='https://placehold.co/150x150?text=Sem+Foto';">
@@ -66,38 +66,40 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
                     </div>`;
                 }
-                // Layout Boutique Site
+
+                // Layout Boutique Site (Grid Alinhado)
                 return `
                 <div class="product-card">
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
                         <img src="${imgSource}" alt="${p.name}" 
-                             onerror="this.onerror=null; this.src='https://placehold.co/400x600?text=Aguardando+Sincronizacao';">
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x600?text=Sincronizando...';">
                     </div>
                     <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
-                        <h3 style="font-family:'Playfair Display'; margin-top:10px; font-size: 1.2rem;">${p.name}</h3>
+                        <h3 style="font-family:'Playfair Display'; font-size: 1.2rem; margin-top:10px;">${p.name}</h3>
                         <p style="color:#d4af37; font-weight:600; margin:10px 0;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
                     </div>
-                    <button class="btn-gold-outline add-cart" data-id="${p.id}">ADICIONAR À SACOLA</button>
+                    <button class="btn-gold-outline add-cart-btn" data-id="${p.id}">ADICIONAR À SACOLA</button>
                 </div>`;
             }).join('');
 
-            document.querySelectorAll('.add-cart').forEach(b => b.onclick = (e) => {
-                const pId = e.target.dataset.id;
-                const prod = availableProducts[pId];
+            document.querySelectorAll('.add-cart-btn').forEach(b => b.onclick = (e) => {
+                const prod = availableProducts[e.target.dataset.id];
                 if (!prod) return;
                 const exist = cart.find(i => i.id === prod.id);
                 exist ? exist.quantity++ : cart.push({...prod, quantity: 1, price: parseFloat(prod.price)});
                 localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
                 updateUI();
-                alert("Adicionado!");
+                alert("Peça adicionada!");
             });
         } catch (e) { console.error("Erro Catálogo:", e); }
     }
 
-    // --- GESTÃO DE SACOLA ---
+    // --- SACOLA / CARRINHO SITE ---
     window.updateUI = () => {
         const cont = document.querySelector('.cart-items');
+        const totalDisp = document.getElementById('cart-total');
         if (!cont) return;
+
         let total = 0;
         cont.innerHTML = cart.map(item => {
             total += item.price * item.quantity;
@@ -110,8 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <button onclick="remove(${item.id})" style="color:red; background:none; border:none; cursor:pointer;">&times;</button>
             </div>`;
-        }).join('') || '<p>Sacola vazia.</p>';
-        const totalDisp = document.getElementById('cart-total');
+        }).join('') || '<p style="text-align:center; opacity:0.5;">Sua sacola está vazia.</p>';
         if (totalDisp) totalDisp.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
     };
 
@@ -121,16 +122,88 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     };
 
+    // ✅ CHECKOUT SITE (ADMIN LEADS) - Corrigido Erro Null
+    const checkoutBtn = document.getElementById('checkout-admin-btn');
+    if (checkoutBtn) {
+        checkoutBtn.onclick = async () => {
+            if (!cart.length) return alert("Sua sacola está vazia.");
+            const n = prompt("Nome completo:"), p = prompt("WhatsApp:");
+            if (!n || !p) return alert("Dados obrigatórios.");
+            try {
+                const res = await fetch(`${API_BASE_URL}/checkout/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
+                    body: JSON.stringify({ customer_info: { first_name: n, phone_number: p }, items: cart.map(i => ({ id: i.id, quantity: i.quantity })), origin: 'SITE' })
+                });
+                if (res.ok) { localStorage.removeItem('tammyClaraCart'); window.location.href = '/order-success/'; }
+            } catch (e) { alert("Erro ao processar."); }
+        };
+    }
+
+    // --- PDV (100% FUNCIONAL) ---
+    window.addToPOS = (id) => {
+        const p = allProducts.find(i => i.id === id);
+        if (!p) return;
+        const exist = posCart.find(i => i.id === id);
+        exist ? exist.quantity++ : posCart.push({...p, quantity: 1, price: parseFloat(p.price)});
+        updatePOSUI();
+    };
+
+    window.updatePOSUI = () => {
+        const cont = document.getElementById('pos-cart-items');
+        if (!cont) return;
+        cont.innerHTML = posCart.map(i => `<div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${i.name} (${i.quantity}x)</span><button onclick="removeFromPOS(${i.id})" style="color:red; background:none; border:none;">&times;</button></div>`).join('') || 'Vazio';
+        const sub = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
+        const total = sub * (1 - (parseFloat(document.getElementById('discount-input')?.value || 0) / 100));
+        if (document.getElementById('pos-total')) document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
+    };
+
+    window.removeFromPOS = (id) => { posCart = posCart.filter(i => i.id !== id); updatePOSUI(); };
+
+    window.setPayment = (type, btn) => {
+        selectedPayment = type;
+        document.querySelectorAll('.payment-option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    };
+
+    window.finalizePosSale = async () => {
+        if (!posCart.length) return alert("Carrinho vazio!");
+        try {
+            const res = await fetch(`${API_BASE_URL}/checkout/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
+                body: JSON.stringify({
+                    customer_info: { first_name: document.getElementById('client-name')?.value || "Consumidor", phone_number: document.getElementById('client-phone')?.value },
+                    items: posCart.map(i => ({ id: i.id, quantity: i.quantity })),
+                    payment_info: { method: selectedPayment },
+                    origin: 'POS'
+                })
+            });
+            if (res.ok) { alert("Venda Finalizada!"); posCart = []; updatePOSUI(); }
+        } catch (e) { alert("Erro ao finalizar."); }
+    };
+
+    window.searchCustomerByPhone = async () => {
+        const phone = document.getElementById('client-phone')?.value;
+        if(!phone) return alert("WhatsApp necessário.");
+        try {
+            const res = await fetch(`${API_BASE_URL}/customer/search/${phone}/`);
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('client-name').value = data.first_name;
+                alert("Cliente localizado!");
+            }
+        } catch (e) { console.log("Erro CRM"); }
+    };
+
     // ✅ LÓGICA DE GALERIA NAVEGÁVEL
     window.openGallery = (id) => {
         const p = availableProducts[id];
         if (!p) return;
-
         currentGalleryImages = [buildUrl(p.main_image)];
         if (p.images && p.images.length > 0) {
             p.images.forEach(imgObj => currentGalleryImages.push(buildUrl(imgObj.image)));
         }
-
         currentImageIndex = 0;
         updateGalleryUI();
         document.getElementById('image-modal').style.display = 'flex';
@@ -157,39 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.jumpToImage = (i) => { currentImageIndex = i; updateGalleryUI(); };
     window.closeGallery = () => { document.getElementById('image-modal').style.display = 'none'; document.body.style.overflow = 'auto'; };
-
-    // --- PDV (100% FUNCIONAL) ---
-    window.addToPOS = (id) => {
-        const p = allProducts.find(i => i.id === id);
-        if (!p) return;
-        const exist = posCart.find(i => i.id === id);
-        exist ? exist.quantity++ : posCart.push({...p, quantity: 1, price: parseFloat(p.price)});
-        updatePOSUI();
-    };
-
-    window.updatePOSUI = () => {
-        const cont = document.getElementById('pos-cart-items');
-        if (!cont) return;
-        cont.innerHTML = posCart.map(i => `<div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${i.name} (${i.quantity}x)</span><button onclick="removeFromPOS(${i.id})" style="color:red; background:none; border:none;">&times;</button></div>`).join('') || 'Vazio';
-        const sub = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
-        const total = sub * (1 - (parseFloat(document.getElementById('discount-input')?.value || 0) / 100));
-        if (document.getElementById('pos-total')) document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
-    };
-
-    window.removeFromPOS = (id) => { posCart = posCart.filter(i => i.id !== id); updatePOSUI(); };
-
-    window.searchCustomerByPhone = async () => {
-        const phone = document.getElementById('client-phone')?.value;
-        if(!phone) return alert("Digite o WhatsApp.");
-        try {
-            const res = await fetch(`${API_BASE_URL}/customer/search/${phone}/`);
-            if (res.ok) {
-                const data = await res.json();
-                document.getElementById('client-name').value = data.first_name;
-                alert("Cliente encontrado!");
-            } else { alert("Não cadastrado."); }
-        } catch (e) { console.log("Erro CRM"); }
-    };
 
     loadProducts();
     updateUI();
