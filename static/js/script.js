@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V9
- * Foco: Máscaras de Input, Correção de Erro 500 e Estabilidade CRM
+ * TAMMY'S STORE - SISTEMA UNIFICADO V9.1
+ * Foco: Correção de Erro 400 (Bad Request), Máscaras e Validação de Dados
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- 🎭 MÁSCARAS DE ENTRADA (MUITO IMPORTANTE) ---
+    // --- 🎭 MÁSCARAS DE ENTRADA ---
     const maskCPF = (value) => {
         return value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
     };
@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
     };
 
-    // Aplica as máscaras nos inputs se eles existirem
     const cpfInput = document.getElementById('client-cpf');
     const phoneInput = document.getElementById('client-phone');
     if (cpfInput) cpfInput.addEventListener('input', (e) => e.target.value = maskCPF(e.target.value));
@@ -70,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 👥 CRM E BUSCA ---
     window.searchCustomer = async () => {
-        const query = document.getElementById('client-search-input')?.value.replace(/\D/g, ''); // Busca pelo número limpo
+        const query = document.getElementById('client-search-input')?.value;
         if (!query) return alert("Digite algo para buscar.");
         try {
             const res = await fetch(`${API_BASE_URL}/customer/search/${query}/`);
@@ -85,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { alert("Erro no CRM."); }
     };
 
-    // --- 🏦 FINALIZAÇÃO (CORREÇÃO DO ERRO 500) ---
+    // --- 🏦 FINALIZAÇÃO (CORREÇÃO DO ERRO 400/500) ---
     window.setPayment = (method, btn) => {
         selectedPayment = method;
         document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
@@ -95,21 +94,24 @@ document.addEventListener('DOMContentLoaded', () => {
     window.finalizePosSale = async () => {
         if (!posCart.length) return alert("Carrinho vazio!");
         
-        const cName = document.getElementById('client-name').value;
+        const cName = document.getElementById('client-name').value.trim();
         const cPhoneRaw = document.getElementById('client-phone').value.replace(/\D/g, '');
         const cCpfRaw = document.getElementById('client-cpf').value.replace(/\D/g, '');
         const cBirth = document.getElementById('client-birth').value;
 
-        if (!cName || cPhoneRaw.length < 10) return alert("Nome e Telefone válido são obrigatórios.");
+        if (!cName || cPhoneRaw.length < 10) return alert("Nome e Telefone válido (DDD + Número) são obrigatórios.");
 
-        // Formatação do Payload para aceitação do Django
+        // Construção do objeto de cliente limpando campos vazios para evitar Erro 400
+        const customer_info = { 
+            first_name: cName, 
+            phone_number: cPhoneRaw 
+        };
+        
+        if (cCpfRaw) customer_info.cpf = cCpfRaw;
+        if (cBirth) customer_info.birth_date = cBirth;
+
         const payload = {
-            customer_info: { 
-                first_name: cName, 
-                phone_number: cPhoneRaw, 
-                cpf: cCpfRaw || null, // Envia null se vazio para evitar erro de validação
-                birth_date: cBirth || null 
-            },
+            customer_info: customer_info,
             items: posCart.map(i => ({ id: i.id, quantity: i.quantity })),
             payment_info: { method: selectedPayment },
             origin: 'POS'
@@ -125,9 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(payload)
             });
 
+            const data = await res.json();
+
             if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.message || "Erro de validação no servidor");
+                // Se o servidor retornar erro, mostramos o que ele rejeitou especificamente
+                console.error("Erro da API:", data);
+                throw new Error(data.message || data.detail || "Dados inválidos (Verifique CPF ou Data)");
             }
 
             // Sucesso
@@ -143,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (e) {
             console.error("Erro no Checkout:", e);
-            alert("ERRO: " + e.message);
+            alert("ERRO NO CHECKOUT: " + e.message);
         }
     };
 

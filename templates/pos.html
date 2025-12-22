@@ -32,7 +32,8 @@
     </style>
 </head>
 <body>
-    {% csrf_token %} <div style="background:#000; color:#d4af37; padding:15px; display: flex; justify-content: space-between; align-items: center;">
+    {% csrf_token %}
+    <div style="background:#000; color:#d4af37; padding:15px; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin:0; letter-spacing:2px; font-weight: 700;">TAMMY'S PDV PROFISSIONAL</h3>
         <a href="/pdv/" style="color:white; text-decoration:none;"><i class="fas fa-sync"></i> Recarregar</a>
     </div>
@@ -45,7 +46,7 @@
 
         <div class="cart-panel panel">
             <h4><i class="fas fa-user-check"></i> CRM Inteligente</h4>
-            <input type="text" id="client-search-input" placeholder="Buscar por Nome, CPF ou Telefone...">
+            <input type="text" id="client-search-input" placeholder="Nome, CPF ou Telefone...">
             <button onclick="searchCustomer()" style="background:#2c3e50; color:white; border:none; padding:12px; width:100%; cursor:pointer; border-radius:4px; font-weight:bold;">LOCALIZAR</button>
             
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
