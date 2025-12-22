@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V11
- * Foco: Correção de UNIQUE constraint (Email) e campos obrigatórios (Nome/Celular)
+ * TAMMY'S STORE - SISTEMA UNIFICADO V12
+ * Foco: UX/UI (Remoção de itens), Correção de Erros 400/500 e CRM
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -20,13 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (heroCard) heroCard.classList.add('show');
     }, 2500); 
-
-    const buildUrl = (path) => {
-        if (!path) return 'https://placehold.co/400x600?text=Sem+Foto';
-        if (path.startsWith('http')) return path;
-        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-        return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
-    };
 
     // --- 🎭 MÁSCARAS DE ENTRADA ---
     const maskCPF = (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
@@ -48,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 availableProducts[p.id] = p;
                 return `
                 <div class="product-card" onclick="addToPOS(${p.id})">
-                    <img src="${buildUrl(p.main_image)}" onerror="this.src='https://placehold.co/150x150'">
+                    <img src="${p.main_image ? (p.main_image.startsWith('http') ? p.main_image : '/media/'+p.main_image) : 'https://placehold.co/150x150'}" onerror="this.src='https://placehold.co/150x150'">
                     <h4>${p.name}</h4>
                     <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
                 </div>`;
@@ -73,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { alert("Erro no CRM."); }
     };
 
-    // --- 🏦 FINALIZAÇÃO (CORREÇÃO UNIQUE CONSTRAINT EMAIL) ---
+    // --- 🏦 FINALIZAÇÃO ---
     window.setPayment = (method, btn) => {
         selectedPayment = method;
         document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
@@ -88,18 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const cCpfRaw = document.getElementById('client-cpf').value.replace(/\D/g, '');
         const cBirth = document.getElementById('client-birth').value;
 
-        // Apenas Nome e Celular são obrigatórios
-        if (!cName || cPhoneRaw.length < 10) {
-            return alert("Nome e WhatsApp são obrigatórios para finalizar a venda.");
-        }
+        if (!cName || cPhoneRaw.length < 10) return alert("Nome e WhatsApp são obrigatórios.");
 
-        // Criamos o objeto enviando APENAS o que foi preenchido.
-        // O e-mail foi removido para evitar o erro de 'UNIQUE constraint failed'.
-        const customer_info = { 
-            first_name: cName, 
-            phone_number: cPhoneRaw 
-        };
-        
+        const customer_info = { first_name: cName, phone_number: cPhoneRaw };
         if (cCpfRaw) customer_info.cpf = cCpfRaw;
         if (cBirth && cBirth !== "") customer_info.birth_date = cBirth;
 
@@ -121,32 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await res.json();
+            if (!res.ok) throw new Error(data.error || data.message || "Erro no servidor");
 
-            if (!res.ok) {
-                console.error("Erro detalhado da API:", data);
-                throw new Error(data.error || data.message || "Erro ao processar venda");
-            }
-
-            // Sucesso: Preencher cupom e imprimir
             document.getElementById('print-client').innerText = cName;
             document.getElementById('print-total').innerText = document.getElementById('pos-total').innerText;
             window.print();
             
-            alert("Venda realizada com sucesso!");
-            posCart = []; 
-            updatePOSUI();
-            
-            // Limpar campos
+            alert("Venda realizada!");
+            posCart = []; updatePOSUI();
             ['client-name', 'client-phone', 'client-cpf', 'client-birth', 'client-search-input'].forEach(id => {
                 if(document.getElementById(id)) document.getElementById(id).value = '';
             });
-        } catch (e) {
-            console.error("Erro no Checkout:", e);
-            alert("ERRO NO CHECKOUT: " + e.message);
-        }
+        } catch (e) { alert("ERRO: " + e.message); }
     };
 
-    // --- 🛒 LÓGICA AUXILIAR ---
+    // --- 🛒 LÓGICA DO CARRINHO (COM REMOÇÃO) ---
     window.addToPOS = (id) => {
         const p = allProducts.find(i => i.id === id);
         if (p) {
@@ -156,14 +129,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.removeFromPOS = (id) => {
+        posCart = posCart.filter(item => item.id !== id);
+        updatePOSUI();
+    };
+
     window.updatePOSUI = () => {
         const cont = document.getElementById('pos-cart-items');
         if (cont) {
             cont.innerHTML = posCart.map(i => `
-                <div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee;">
-                    <span>${i.name} (x${i.quantity})</span>
-                    <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
-                </div>`).join('') || 'Vazio';
+                <div class="cart-item-row" style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee;">
+                    <div style="flex-grow:1;">
+                        <span style="font-weight:600;">${i.name}</span><br>
+                        <small style="color:#666;">${i.quantity}x R$ ${i.price.toFixed(2)}</small>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-weight:700;">R$ ${(i.price * i.quantity).toFixed(2)}</span>
+                        <button onclick="removeFromPOS(${i.id})" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:1.1rem;" title="Remover item">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>`).join('') || '<p style="color:#999; text-align:center;">Carrinho vazio</p>';
+            
             const total = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
             document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
         }
