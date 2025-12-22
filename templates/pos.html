@@ -4,15 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frente de Caixa (PDV) | Tammy´s Store</title>
+    <title>PDV | Tammy´s Store</title>
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #f4f7f6; margin: 0; }
         .pos-header { background: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* PDV RESPONSIVO */
         .pos-container { display: flex; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; }
         .panel { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
         .products-panel { flex: 2; }
@@ -24,12 +22,30 @@
             #product-results { grid-template-columns: repeat(2, 1fr) !important; }
         }
 
-        #product-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+        #product-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
         .product-card { border: 1px solid #eee; padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; }
         .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
         
         .primary-btn { background: #8c735d; color: white; border: none; padding: 15px; border-radius: 4px; width: 100%; font-weight: 700; cursor: pointer; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+
+        /* ✅ CONFIGURAÇÃO DE IMPRESSÃO DO CUPOM */
+        #receipt-print { display: none; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-print, #receipt-print * { visibility: visible; }
+            #receipt-print { 
+                display: block !important; 
+                position: absolute; 
+                left: 0; top: 0; 
+                width: 80mm; /* Ajuste para 58mm se sua impressora for menor */
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 12px;
+                color: #000;
+            }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -57,6 +73,24 @@
             </div>
         </div>
     </div>
+
+    <div id="receipt-print">
+        <center>
+            <h2 style="margin-bottom:5px;">TAMMY'S STORE</h2>
+            <p>Boutique de Luxo</p>
+            <p>--------------------------------</p>
+        </center>
+        <div id="print-items"></div>
+        <p>--------------------------------</p>
+        <p>TOTAL: <span id="print-total"></span></p>
+        <p>DATA: <span id="print-date"></span></p>
+        <p>CLIENTE: <span id="print-client"></span></p>
+        <center>
+            <p>--------------------------------</p>
+            <p>Obrigado pela preferência!</p>
+        </center>
+    </div>
+
     <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>

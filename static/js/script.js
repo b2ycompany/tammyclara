@@ -1,6 +1,6 @@
 /**
  * TAMMY'S STORE - CORE SCRIPT UNIFICADO
- * Versão: Full Restoration + Navigable Gallery
+ * Versão: Full Restoration + Navigable Gallery + POS Printing
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allProducts = []; 
     let posCart = []; 
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
+    let selectedPayment = 'DINHEIRO'; // Valor padrão para evitar erros
     
     let currentGalleryImages = [];
     let currentImageIndex = 0;
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
 
-    // ✅ SEU SPLASH SCREEN E HERO CARD ORIGINAIS
+    // --- SPLASH SCREEN E HERO CARD ---
     setTimeout(() => {
         if (splash) {
             splash.style.opacity = '0';
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
+    // --- CARREGAMENTO DE PRODUTOS ---
     async function loadProducts() {
         const container = document.getElementById('products-container') || document.getElementById('product-results');
         if (!container) return;
@@ -61,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="color:#d4af37; font-weight:600; margin:10px 0;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p></div>
                     <button class="btn-gold-outline add-cart-btn" data-id="${p.id}">ADICIONAR À SACOLA</button></div>`;
             }).join('');
+
             document.querySelectorAll('.add-cart-btn').forEach(b => b.onclick = (e) => {
                 const prod = availableProducts[e.target.dataset.id];
                 const exist = cart.find(i => i.id === prod.id);
@@ -72,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.error(e); }
     }
 
+    // --- INTERFACE DA SACOLA (SITE) ---
     window.updateUI = () => {
         const cont = document.querySelector('.cart-items');
         const totalDisp = document.getElementById('cart-total');
@@ -89,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.remove = (id) => { cart = cart.filter(i => i.id !== id); localStorage.setItem('tammyClaraCart', JSON.stringify(cart)); updateUI(); };
 
+    // --- CHECKOUT SITE ---
     const checkoutBtn = document.getElementById('checkout-admin-btn');
     if (checkoutBtn) {
         checkoutBtn.onclick = async () => {
@@ -105,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // ✅ LÓGICA DE GALERIA NAVEGÁVEL
+    // --- LÓGICA DE GALERIA ---
     window.openGallery = (id) => {
         const p = availableProducts[id];
         if (!p) return;
@@ -137,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.jumpToImage = (i) => { currentImageIndex = i; updateGalleryUI(); };
     window.closeGallery = () => { document.getElementById('image-modal').style.display = 'none'; document.body.style.overflow = 'auto'; };
 
-    // --- PDV (100% PRESERVADO) ---
+    // --- LÓGICA PDV ---
     window.addToPOS = (id) => {
         const p = allProducts.find(i => i.id === id);
         if (!p) return;
@@ -156,6 +161,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.removeFromPOS = (id) => { posCart = posCart.filter(i => i.id !== id); updatePOSUI(); };
 
+    // --- NOVA FUNÇÃO: FINALIZAÇÃO E IMPRESSÃO PDV ---
+    window.finalizePosSale = async () => {
+        if (!posCart.length) return alert("Carrinho vazio!");
+        
+        const clientName = document.getElementById('client-name')?.value || "Consumidor";
+        const clientPhone = document.getElementById('client-phone')?.value || "";
+        const totalValue = document.getElementById('pos-total').innerText;
+
+        // 1. Preenche os dados no Cupom de Impressão (HTML)
+        const printItems = document.getElementById('print-items');
+        if (printItems) {
+            printItems.innerHTML = posCart.map(i => `
+                <div style="display:flex; justify-content:space-between;">
+                    <span>${i.quantity}x ${i.name}</span>
+                    <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+        }
+        
+        if (document.getElementById('print-total')) document.getElementById('print-total').innerText = totalValue;
+        if (document.getElementById('print-client')) document.getElementById('print-client').innerText = clientName;
+        if (document.getElementById('print-date')) document.getElementById('print-date').innerText = new Date().toLocaleString('pt-BR');
+
+        // 2. Envia para o Banco de Dados
+        try {
+            const res = await fetch(`${API_BASE_URL}/checkout/`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value 
+                },
+                body: JSON.stringify({
+                    customer_info: { first_name: clientName, phone_number: clientPhone },
+                    items: posCart.map(i => ({ id: i.id, quantity: i.quantity })),
+                    payment_info: { method: selectedPayment },
+                    origin: 'POS'
+                })
+            });
+
+            if (res.ok) { 
+                // 3. Dispara a Impressora se a venda for confirmada no servidor
+                window.print(); 
+                
+                alert("Venda realizada e Cupom enviado para impressão!"); 
+                posCart = []; 
+                updatePOSUI();
+                // Limpa campos do cliente
+                if(document.getElementById('client-name')) document.getElementById('client-name').value = '';
+                if(document.getElementById('client-phone')) document.getElementById('client-phone').value = '';
+            } else {
+                alert("Ocorreu um problema ao salvar a venda no servidor.");
+            }
+        } catch (e) { 
+            console.error(e);
+            alert("Erro de conexão ao finalizar."); 
+        }
+    };
+
+    // Listener para o seletor de pagamento (caso exista no HTML)
+    const payMethod = document.getElementById('payment-method');
+    if (payMethod) {
+        payMethod.addEventListener('change', (e) => {
+            selectedPayment = e.target.value;
+        });
+    }
+
+    // Inicialização
     loadProducts();
     updateUI();
 });
