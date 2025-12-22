@@ -32,8 +32,7 @@
     </style>
 </head>
 <body>
-    {% csrf_token %}
-    <div style="background:#000; color:#d4af37; padding:15px; display: flex; justify-content: space-between; align-items: center;">
+    {% csrf_token %} <div style="background:#000; color:#d4af37; padding:15px; display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin:0; letter-spacing:2px; font-weight: 700;">TAMMY'S PDV PROFISSIONAL</h3>
         <a href="/pdv/" style="color:white; text-decoration:none;"><i class="fas fa-sync"></i> Recarregar</a>
     </div>
@@ -46,16 +45,16 @@
 
         <div class="cart-panel panel">
             <h4><i class="fas fa-user-check"></i> CRM Inteligente</h4>
-            <input type="text" id="client-search-input" placeholder="Nome, CPF ou Telefone...">
+            <input type="text" id="client-search-input" placeholder="Buscar por Nome, CPF ou Telefone...">
             <button onclick="searchCustomer()" style="background:#2c3e50; color:white; border:none; padding:12px; width:100%; cursor:pointer; border-radius:4px; font-weight:bold;">LOCALIZAR</button>
             
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
             <input type="text" id="client-name" placeholder="Nome Completo (Obrigatório)">
-            <input type="tel" id="client-phone" placeholder="WhatsApp (Obrigatório)">
-            <input type="text" id="client-cpf" placeholder="CPF">
+            <input type="tel" id="client-phone" placeholder="(00) 00000-0000">
+            <input type="text" id="client-cpf" placeholder="000.000.000-00">
             <input type="date" id="client-birth">
 
-            <h4><i class="fas fa-wallet"></i> Pagamento</h4>
+            <h4>Pagamento</h4>
             <div class="payment-grid">
                 <button class="pay-btn active" onclick="setPayment('PIX', this)">PIX</button>
                 <button class="pay-btn" onclick="setPayment('CARTÃO', this)">CARTÃO</button>
@@ -63,11 +62,9 @@
                 <button class="pay-btn" onclick="setPayment('DÉBITO', this)">DÉBITO</button>
             </div>
 
-            <h4><i class="fas fa-list-ul"></i> Resumo</h4>
-            <div id="pos-cart-items" style="min-height: 50px;"></div>
-            <h3 style="text-align:right; color: #8c735d; border-top: 2px solid #eee; padding-top: 10px;">
-                TOTAL: <span id="pos-total">R$ 0,00</span>
-            </h3>
+            <h4>Resumo</h4>
+            <div id="pos-cart-items"></div>
+            <h3 style="text-align:right; color: #8c735d;">TOTAL: <span id="pos-total">R$ 0,00</span></h3>
             
             <button class="finalize-btn" onclick="finalizePosSale()">CONCLUIR VENDA & IMPRIMIR</button>
         </div>

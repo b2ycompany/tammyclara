@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V8
- * Correção: Erro 500 Checkout e Busca Inteligente
+ * TAMMY'S STORE - SISTEMA UNIFICADO V9
+ * Foco: Máscaras de Input, Correção de Erro 500 e Estabilidade CRM
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -8,9 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let allProducts = []; 
     let posCart = []; 
     let selectedPayment = 'PIX';
-    let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
     
-    // --- 🚀 INTERFACE E SPLASH (2.5s) ---
+    // --- 🚀 INTERFACE E SPLASH ---
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
     setTimeout(() => {
@@ -28,6 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
+
+    // --- 🎭 MÁSCARAS DE ENTRADA (MUITO IMPORTANTE) ---
+    const maskCPF = (value) => {
+        return value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
+    };
+
+    const maskPhone = (value) => {
+        return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
+    };
+
+    // Aplica as máscaras nos inputs se eles existirem
+    const cpfInput = document.getElementById('client-cpf');
+    const phoneInput = document.getElementById('client-phone');
+    if (cpfInput) cpfInput.addEventListener('input', (e) => e.target.value = maskCPF(e.target.value));
+    if (phoneInput) phoneInput.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
 
     // --- 🛒 CARREGAMENTO DE PRODUTOS ---
     window.loadProducts = async () => {
@@ -51,27 +65,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${!isPDV ? `<button class="btn-gold-outline add-cart-btn" data-id="${p.id}">ADICIONAR</button>` : ''}
                 </div>`;
             }).join('');
-        } catch (e) { console.error("Falha ao carregar catálogo."); }
+        } catch (e) { console.error("Erro ao carregar catálogo."); }
     };
 
-    // --- 👥 CRM E BUSCA INTELIGENTE ---
+    // --- 👥 CRM E BUSCA ---
     window.searchCustomer = async () => {
-        const query = document.getElementById('client-search-input')?.value;
+        const query = document.getElementById('client-search-input')?.value.replace(/\D/g, ''); // Busca pelo número limpo
         if (!query) return alert("Digite algo para buscar.");
         try {
             const res = await fetch(`${API_BASE_URL}/customer/search/${query}/`);
             if (res.ok) {
                 const data = await res.json();
                 document.getElementById('client-name').value = data.first_name || '';
-                document.getElementById('client-phone').value = data.phone_number || '';
-                document.getElementById('client-cpf').value = data.cpf || '';
+                document.getElementById('client-phone').value = data.phone_number ? maskPhone(data.phone_number) : '';
+                document.getElementById('client-cpf').value = data.cpf ? maskCPF(data.cpf) : '';
                 document.getElementById('client-birth').value = data.birth_date || '';
                 alert("Cliente localizado!");
-            } else { alert("Cliente não encontrado. Cadastre os dados abaixo."); }
-        } catch (e) { alert("Erro na comunicação com o CRM."); }
+            } else { alert("Cliente não encontrado."); }
+        } catch (e) { alert("Erro no CRM."); }
     };
 
-    // --- 🏦 FINALIZAÇÃO (RESOLVE ERRO 500) ---
+    // --- 🏦 FINALIZAÇÃO (CORREÇÃO DO ERRO 500) ---
     window.setPayment = (method, btn) => {
         selectedPayment = method;
         document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
@@ -79,19 +93,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.finalizePosSale = async () => {
-        if (!posCart.length) return alert("Adicione produtos primeiro!");
+        if (!posCart.length) return alert("Carrinho vazio!");
         
         const cName = document.getElementById('client-name').value;
-        const cPhone = document.getElementById('client-phone').value;
-        if (!cName || !cPhone) return alert("Nome e WhatsApp são obrigatórios.");
+        const cPhoneRaw = document.getElementById('client-phone').value.replace(/\D/g, '');
+        const cCpfRaw = document.getElementById('client-cpf').value.replace(/\D/g, '');
+        const cBirth = document.getElementById('client-birth').value;
 
-        // ✅ Tratamento de dados para evitar Erro 500 no Banco de Dados
+        if (!cName || cPhoneRaw.length < 10) return alert("Nome e Telefone válido são obrigatórios.");
+
+        // Formatação do Payload para aceitação do Django
         const payload = {
             customer_info: { 
                 first_name: cName, 
-                phone_number: cPhone, 
-                cpf: document.getElementById('client-cpf').value || "", 
-                birth_date: document.getElementById('client-birth').value || null 
+                phone_number: cPhoneRaw, 
+                cpf: cCpfRaw || null, // Envia null se vazio para evitar erro de validação
+                birth_date: cBirth || null 
             },
             items: posCart.map(i => ({ id: i.id, quantity: i.quantity })),
             payment_info: { method: selectedPayment },
@@ -110,26 +127,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!res.ok) {
                 const errData = await res.json();
-                throw new Error(errData.message || "Erro interno do servidor");
+                throw new Error(errData.message || "Erro de validação no servidor");
             }
 
-            // Sucesso: Impressão e Limpeza
+            // Sucesso
             document.getElementById('print-client').innerText = cName;
             document.getElementById('print-total').innerText = document.getElementById('pos-total').innerText;
             window.print();
             
-            alert("Venda registrada com sucesso!");
+            alert("Venda realizada com sucesso!");
             posCart = []; 
             updatePOSUI();
-            
-            // Limpar formulário
             ['client-name', 'client-phone', 'client-cpf', 'client-birth', 'client-search-input'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.value = '';
+                if(document.getElementById(id)) document.getElementById(id).value = '';
             });
         } catch (e) {
-            console.error(e);
-            alert("ERRO AO FINALIZAR: " + e.message + ". Verifique o CPF ou conexão.");
+            console.error("Erro no Checkout:", e);
+            alert("ERRO: " + e.message);
         }
     };
 
