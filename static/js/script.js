@@ -1,48 +1,48 @@
 /**
  * TAMMY'S STORE - CORE SCRIPT UNIFICADO
- * Versão: Full Stability & Anti-Crash (Corrigido erro linha 104)
+ * Versão: Galeria Navegável, Anti-Looping & PDV Mobile
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. ESTADO GLOBAL ---
     const API_BASE_URL = '/api'; 
     let availableProducts = {}; 
     let allProducts = []; 
     let posCart = []; 
     let selectedPayment = 'PIX';
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
+    
+    // Estado da Galeria
+    let currentGalleryImages = [];
+    let currentImageIndex = 0;
 
+    // --- 2. INTERFACE E SPLASH (2.5s) ---
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
 
-    // --- 🚀 INTERFACE E APRESENTAÇÃO (SPLASH SCREEN 2.5s) ---
     setTimeout(() => {
         if (splash) {
             splash.style.opacity = '0';
             splash.style.transform = 'translateY(-100%)';
             setTimeout(() => splash.remove(), 900);
         }
-        if (heroCard) {
-            setTimeout(() => heroCard.classList.add('show'), 400);
-        }
+        if (heroCard) setTimeout(() => heroCard.classList.add('show'), 400);
     }, 2500); 
 
-    // Header fixo ao rolar
     window.addEventListener('scroll', () => {
         const header = document.getElementById('main-header');
-        if (header) {
-            window.scrollY > 60 ? header.classList.add('scrolled') : header.classList.remove('scrolled');
-        }
+        if (header) window.scrollY > 60 ? header.classList.add('scrolled') : header.classList.remove('scrolled');
     });
 
-    // ✅ Função de URL Robusta: Usa placeholder externo para quebrar loops de erro 404
+    // ✅ RESOLUÇÃO DE CAMINHOS DE IMAGEM (Anti-404)
     const buildUrl = (path) => {
-        if (!path) return 'https://placehold.co/400x600?text=Foto+Indisponivel'; 
+        if (!path) return 'https://placehold.co/400x600?text=Foto+Indisponivel';
         if (path.startsWith('http')) return path;
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- 🛍️ CARREGAMENTO DE PRODUTOS (SITE E PDV) ---
+    // --- 3. CARREGAMENTO DE PRODUTOS (SITE E PDV) ---
     async function loadProducts() {
         const container = document.getElementById('products-container') || document.getElementById('product-results');
         if (!container) return;
@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 availableProducts[p.id] = p;
                 const imgSource = buildUrl(p.main_image);
                 
-                // Layout PDV Mobile
                 if (document.getElementById('product-results')) {
+                    // Layout PDV
                     return `
                     <div class="product-card" onclick="addToPOS(${p.id})">
                         <img src="${imgSource}" onerror="this.onerror=null; this.src='https://placehold.co/150x150?text=Sem+Foto';">
@@ -66,22 +66,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
                     </div>`;
                 }
-
-                // Layout Boutique para Site
+                // Layout Boutique Site
                 return `
                 <div class="product-card">
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
-                        <img src="${imgSource}" 
-                             alt="${p.name}" 
-                             onerror="this.onerror=null; this.src='https://placehold.co/400x600?text=Foto+Indisponivel';">
+                        <img src="${imgSource}" alt="${p.name}" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x600?text=Aguardando+Upload';">
                     </div>
-                    <h3>${p.name}</h3>
-                    <p style="color:#d4af37; font-weight:600;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
+                    <div style="flex-grow:1;">
+                        <h3 style="font-family:'Playfair Display'; margin-top:10px;">${p.name}</h3>
+                        <p style="color:#d4af37; font-weight:600; margin:10px 0;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
+                    </div>
                     <button class="btn-gold-outline add-cart" data-id="${p.id}">ADICIONAR À SACOLA</button>
                 </div>`;
             }).join('');
 
-            // Ativa eventos para o Site
             document.querySelectorAll('.add-cart').forEach(b => b.onclick = (e) => {
                 const prod = availableProducts[e.target.dataset.id];
                 if (!prod) return;
@@ -89,27 +88,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 exist ? exist.quantity++ : cart.push({...prod, quantity: 1, price: parseFloat(prod.price)});
                 localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
                 updateUI();
-                alert("Peça reservada!");
+                alert("Peça adicionada!");
             });
-        } catch (e) { console.error("Erro de catálogo:", e); }
+        } catch (e) { console.error("Erro Catálogo:", e); }
     }
 
-    // --- 📝 GESTÃO DE SACOLA ---
+    // --- 4. GESTÃO DE SACOLA (SITE) ---
     window.updateUI = () => {
         const cont = document.querySelector('.cart-items');
+        const totalDisp = document.getElementById('cart-total');
         if (!cont) return;
+
         let total = 0;
         cont.innerHTML = cart.map(item => {
             total += item.price * item.quantity;
             return `
-            <div class="cart-item" style="display:flex; align-items:center; gap:15px; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
-                <img src="${buildUrl(item.main_image)}" width="50" height="70" style="object-fit:cover;" onerror="this.onerror=null; this.style.display='none';">
-                <div style="flex-grow:1;"><h4>${item.name}</h4><p>${item.quantity}x R$ ${item.price.toFixed(2)}</p></div>
+            <div class="cart-item" style="display:flex; align-items:center; gap:15px; margin-bottom:15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <img src="${buildUrl(item.main_image)}" width="60" height="80" style="object-fit:cover;">
+                <div style="flex-grow:1;">
+                    <h4 style="font-family:'Playfair Display'; font-size:0.9rem;">${item.name}</h4>
+                    <p style="font-size:0.7rem; opacity:0.5;">${item.quantity} un.</p>
+                </div>
                 <button onclick="remove(${item.id})" style="color:red; background:none; border:none; cursor:pointer;">&times;</button>
             </div>`;
         }).join('') || '<p>Sua sacola está vazia.</p>';
-        
-        const totalDisp = document.getElementById('cart-total');
         if (totalDisp) totalDisp.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
     };
 
@@ -119,14 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     };
 
-    // ✅ CORREÇÃO CRÍTICA: Verifica se o botão existe antes de atribuir clique (Linha 104 fix)
+    // ✅ FIX LINHA 104: Segurança contra Null no PDV
     const checkoutBtn = document.getElementById('checkout-admin-btn');
     if (checkoutBtn) {
         checkoutBtn.onclick = async () => {
-            if (!cart.length) return alert("Sacola vazia.");
+            if (!cart.length) return alert("Sua sacola está vazia.");
             const n = prompt("Nome completo:"), p = prompt("WhatsApp:");
             if (!n || !p) return alert("Dados obrigatórios.");
-            
+
             try {
                 const res = await fetch(`${API_BASE_URL}/checkout/`, {
                     method: 'POST',
@@ -137,15 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         origin: 'SITE'
                     })
                 });
-                if (res.ok) {
-                    localStorage.removeItem('tammyClaraCart');
-                    window.location.href = '/order-success/';
-                }
-            } catch (e) { alert("Erro ao processar pedido."); }
+                if (res.ok) { localStorage.removeItem('tammyClaraCart'); window.location.href = '/order-success/'; }
+            } catch (e) { alert("Erro ao processar."); }
         };
     }
 
-    // --- 🏦 LÓGICA DO PDV ---
+    // --- 5. LÓGICA PDV (100% PRESERVADA) ---
     window.addToPOS = (id) => {
         const p = allProducts.find(i => i.id === id);
         if (!p) return;
@@ -164,9 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`).join('') || '<p>Carrinho Vazio</p>';
         
         const sub = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
-        const desc = parseFloat(document.getElementById('discount-input')?.value || 0) / 100;
-        const total = sub * (1 - desc);
-        
+        const total = sub * (1 - (parseFloat(document.getElementById('discount-input')?.value || 0) / 100));
         if (document.getElementById('pos-subtotal')) document.getElementById('pos-subtotal').innerText = `R$ ${sub.toFixed(2)}`;
         if (document.getElementById('pos-total')) document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
     };
@@ -174,6 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.removeFromPOS = (id) => {
         posCart = posCart.filter(i => i.id !== id);
         updatePOSUI();
+    };
+
+    window.setPayment = (type, btn) => {
+        selectedPayment = type;
+        document.querySelectorAll('.payment-option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
     };
 
     window.finalizePosSale = async () => {
@@ -193,38 +196,59 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
                 body: JSON.stringify(payload)
             });
-            if (res.ok) { alert("Venda realizada!"); posCart = []; updatePOSUI(); }
-        } catch (e) { alert("Erro ao finalizar venda."); }
+            if (res.ok) { alert("Venda Finalizada!"); posCart = []; updatePOSUI(); }
+        } catch (e) { alert("Erro ao finalizar."); }
     };
 
-    // --- 🎞️ GALERIA MODAL ---
+    window.searchCustomerByPhone = async () => {
+        const phone = document.getElementById('client-phone')?.value;
+        if(!phone) return alert("Digite um WhatsApp.");
+        try {
+            const res = await fetch(`${API_BASE_URL}/customer/search/${phone}/`);
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('client-name').value = data.first_name;
+                alert("Cliente localizado!");
+            } else { alert("Cliente não encontrado."); }
+        } catch (e) { console.log("Erro busca cliente"); }
+    };
+
+    // --- 6. GALERIA NAVEGÁVEL ---
     window.openGallery = (id) => {
         const p = availableProducts[id];
         if (!p) return;
-        const imgs = [buildUrl(p.main_image), ...(p.images || []).map(i => buildUrl(i.image))];
-        const modal = document.getElementById('image-modal');
-        const mainImg = document.getElementById('modal-main-image');
-        const thumbCont = document.getElementById('modal-thumbnails-container');
 
-        if (modal && mainImg) {
-            mainImg.src = imgs[0];
-            if (thumbCont) {
-                thumbCont.innerHTML = imgs.map((s, i) => `
-                    <img src="${s}" class="modal-thumb ${i===0?'active':''}" 
-                         onclick="document.getElementById('modal-main-image').src='${s}';
-                                  document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active'));
-                                  this.classList.add('active');"
-                         onerror="this.style.display='none'">`).join('');
-            }
-            modal.style.display = 'flex';
+        currentGalleryImages = [buildUrl(p.main_image)];
+        if (p.images && p.images.length > 0) {
+            p.images.forEach(imgObj => currentGalleryImages.push(buildUrl(imgObj.image)));
         }
+
+        currentImageIndex = 0;
+        updateGalleryDisplay();
+        document.getElementById('image-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     };
 
-    const closeModal = document.querySelector('.close-modal');
-    if (closeModal) closeModal.onclick = () => {
-        const m = document.getElementById('image-modal');
-        if (m) m.style.display = 'none';
+    window.changeImage = (direction) => {
+        currentImageIndex += direction;
+        if (currentImageIndex < 0) currentImageIndex = currentGalleryImages.length - 1;
+        if (currentImageIndex >= currentGalleryImages.length) currentImageIndex = 0;
+        updateGalleryDisplay();
     };
+
+    function updateGalleryDisplay() {
+        const modalImg = document.getElementById('modal-main-image');
+        const thumbCont = document.getElementById('modal-thumbnails-container');
+        if (modalImg) modalImg.src = currentGalleryImages[currentImageIndex];
+        if (thumbCont) {
+            thumbCont.innerHTML = currentGalleryImages.map((src, i) => `
+                <img src="${src}" class="modal-thumb ${i === currentImageIndex ? 'active' : ''}" onclick="jumpToImage(${i})">
+            `).join('');
+        }
+    }
+
+    window.jumpToImage = (i) => { currentImageIndex = i; updateGalleryDisplay(); };
+    window.closeGallery = () => { document.getElementById('image-modal').style.display = 'none'; document.body.style.overflow = 'auto'; };
 
     loadProducts();
     updateUI();

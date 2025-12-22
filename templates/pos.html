@@ -8,129 +8,76 @@
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        /* Base */
         body { font-family: 'Montserrat', sans-serif; background-color: #e9ecef; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         .pos-header { background-color: #5d6d7e; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        .pos-header h1 { margin: 0; font-size: 1.5em; }
         .pos-container { display: flex; flex-grow: 1; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         
-        /* Painéis */
         .products-panel, .cart-panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); }
         .products-panel { flex: 2; overflow-y: auto; max-height: calc(100vh - 120px); } 
         .cart-panel { flex: 1; min-width: 350px; overflow-y: auto; max-height: calc(100vh - 120px); }
 
-        /* ✅ RESPONSIVIDADE MOBILE */
         @media (max-width: 900px) {
             .pos-container { flex-direction: column; }
-            .products-panel, .cart-panel { width: 100%; max-height: none; flex: none; }
+            .products-panel, .cart-panel { width: 100%; max-height: none; }
             #product-results { grid-template-columns: repeat(2, 1fr) !important; }
-            .pos-header h1 { font-size: 1.1em; }
         }
 
-        /* Busca */
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .input-group input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; font-size: 1em; }
-        
-        /* Resultados do Produto */
         #product-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .product-card { border: 1px solid #eee; padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .product-card:hover { box-shadow: 0 0 10px rgba(140, 115, 93, 0.5); transform: translateY(-2px); border-color: #d4af37; }
-        .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; }
-        .product-card h4 { font-size: 0.9em; margin: 5px 0; color: #333; }
-        .product-card p { font-size: 1em; color: #d4af37; font-weight: 700; margin: 0; }
-
-        /* Carrinho */
-        #pos-cart-items { border-top: 1px solid #ddd; padding-top: 15px; min-height: 50px; }
-        .cart-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; gap: 10px; }
-        .cart-item h4 { margin: 0; font-size: 0.85em; font-weight: 600; flex-grow: 1; }
-        .qty-btn { background: #f0f0f0; border: 1px solid #ddd; width: 25px; height: 25px; border-radius: 3px; cursor: pointer; }
-
-        /* Sumário e Pagamento */
-        .total-summary { text-align: right; padding: 10px 0; border-top: 2px solid #333; margin-top: 15px; }
-        .total-summary p { margin: 5px 0; font-size: 1.1em; }
-        .total-summary .final-total { font-size: 1.5em; font-weight: 700; color: #8c735d; }
+        .product-card { border: 1px solid #eee; padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
         
-        /* Pagamento e Cliente */
-        #payment-section, #client-section { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; background: #fdfdfd; }
-        .payment-option-btn { background-color: #f8f8f8; color: #333; border: 1px solid #ddd; padding: 10px; margin: 5px; width: calc(50% - 12px); border-radius: 4px; cursor: pointer; font-size: 0.8em; font-weight: 600; }
+        .payment-option-btn { background-color: #f8f8f8; border: 1px solid #ddd; padding: 10px; margin: 5px; width: calc(50% - 12px); border-radius: 4px; cursor: pointer; }
         .payment-option-btn.active { background-color: #d4af37; color: white; border-color: #d4af37; }
-        .payment-options-group { display: flex; flex-wrap: wrap; justify-content: space-between; }
-        
+        .primary-btn { background-color: #8c735d; color: white; border: none; padding: 15px; border-radius: 4px; width: 100%; margin-top: 15px; font-weight: 700; cursor: pointer; }
         #client-section input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-
-        .primary-btn { background-color: #8c735d; color: white; border: none; padding: 15px; border-radius: 4px; cursor: pointer; transition: background 0.3s; width: 100%; margin-top: 15px; font-weight: 700; letter-spacing: 1px; }
-        .primary-btn:hover { background-color: #725a47; }
-        .secondary-btn { background-color: #dc3545; margin-top: 10px; padding: 10px; font-size: 0.8em; }
     </style>
 </head>
 <body>
-    {% csrf_token %} 
-    
-    <div class="pos-header">
-        <h1>Frente de Caixa (PDV)</h1>
-        <a href="{% url 'home' %}" style="color: white; text-decoration: none; font-size: 0.9em;">
-             <i class="fas fa-home"></i> Voltar para o Site
-        </a>
-    </div>
+    {% csrf_token %}
+    <div class="pos-header"><h1>Frente de Caixa (PDV)</h1><a href="/" style="color:white; text-decoration:none;"><i class="fas fa-home"></i> Home</a></div>
 
     <div class="pos-container">
-        
         <div class="products-panel">
-            <h2>Catálogo de Produtos</h2>
+            <h2>Catálogo</h2>
             <div class="input-group">
-                <input type="text" id="pos-product-search" placeholder="SKU ou Nome..." onkeypress="if(event.key==='Enter') searchProducts()">
-                <button class="primary-btn" style="width: auto; margin: 0; padding: 0 25px;" onclick="searchProducts()">Buscar</button>
+                <input type="text" id="pos-product-search" placeholder="SKU ou Nome..." style="flex-grow:1; padding:10px; border:1px solid #ccc; border-radius:4px;">
+                <button class="primary-btn" style="width:auto; margin:0;" onclick="loadProducts()">Buscar</button>
             </div>
-            <div id="product-results">
-                <p>Carregando catálogo...</p>
-            </div>
+            <div id="product-results">Carregando catálogo...</div>
         </div>
 
         <div class="cart-panel">
-            <h2>Resumo da Venda</h2>
-            <div id="pos-cart-items"><p>Carrinho vazio.</p></div>
-
-            <div class="total-summary">
+            <h2>Resumo</h2>
+            <div id="pos-cart-items">Vazio.</div>
+            <div style="text-align:right; border-top:2px solid #333; margin-top:15px; padding-top:10px;">
                 <p>Subtotal: <span id="pos-subtotal">R$ 0,00</span></p>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
-                    <label>Desconto (%):</label>
-                    <input type="number" id="discount-input" min="0" max="100" value="0" style="width: 60px; text-align: right; padding: 5px;" onchange="updatePOSUI()">
-                </div>
-                <p class="final-total">Total: <span id="pos-total">R$ 0,00</span></p>
+                <p>Desconto (%): <input type="number" id="discount-input" value="0" style="width:50px;" onchange="updatePOSUI()"></p>
+                <h3 style="color:#8c735d;">Total: <span id="pos-total">R$ 0,00</span></h3>
             </div>
 
             <div id="payment-section">
-                <h4>Forma de Pagamento</h4>
-                <div class="payment-options-group">
-                    <button type="button" class="payment-option-btn active" onclick="setPayment('PIX', this)">PIX</button>
-                    <button type="button" class="payment-option-btn" onclick="setPayment('DEBITO', this)">Débito</button>
-                    <button type="button" class="payment-option-btn" onclick="setPayment('CREDITO', this)">Crédito</button>
-                    <button type="button" class="payment-option-btn" onclick="setPayment('DINHEIRO', this)">Dinheiro</button>
+                <h4>Pagamento</h4>
+                <div style="display:flex; flex-wrap:wrap;">
+                    <button class="payment-option-btn active" onclick="setPayment('PIX', this)">PIX</button>
+                    <button class="payment-option-btn" onclick="setPayment('DEBITO', this)">Débito</button>
+                    <button class="payment-option-btn" onclick="setPayment('CREDITO', this)">Crédito</button>
+                    <button class="payment-option-btn" onclick="setPayment('DINHEIRO', this)">Dinheiro</button>
                 </div>
-                <input type="text" id="payment-details" placeholder="Obs (Parcelas, troco...)" style="width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
             </div>
 
             <div id="client-section">
-                <h4>Dados do Cliente</h4>
-                <input type="tel" id="client-phone" placeholder="WhatsApp (ex: 5511987654321)">
-                <button type="button" class="primary-btn" style="background:#5d6d7e; margin: 0 0 10px 0; padding: 8px;" onclick="searchCustomerByPhone()">
-                    <i class="fas fa-search"></i> Buscar Cliente
-                </button>
-                <input type="text" id="client-name" placeholder="Nome do Cliente">
+                <h4>CRM / Cliente</h4>
+                <input type="tel" id="client-phone" placeholder="WhatsApp">
+                <button type="button" class="primary-btn" style="background:#5d6d7e; margin-top:0;" onclick="searchCustomerByPhone()">Buscar Cliente</button>
+                <input type="text" id="client-name" placeholder="Nome">
                 <input type="email" id="client-email" placeholder="E-mail">
             </div>
-            
-            <button type="button" class="primary-btn" id="finalize-sale-btn" onclick="finalizePosSale()">
-                <i class="fas fa-check-circle"></i> FINALIZAR E DAR BAIXA NO ESTOQUE
-            </button>
-            <button type="button" class="primary-btn secondary-btn" onclick="posCart = []; updatePOSUI();">
-                <i class="fas fa-trash"></i> Limpar Tudo
-            </button>
+
+            <button class="primary-btn" onclick="finalizePosSale()">FINALIZAR VENDA</button>
         </div>
     </div>
-    
     <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
