@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V10
- * Foco: Limpeza rigorosa de dados (CPF/TEL) e Correção de Erro 400
+ * TAMMY'S STORE - SISTEMA UNIFICADO V11
+ * Foco: Correção de UNIQUE constraint (Email) e campos obrigatórios (Nome/Celular)
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -28,14 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- 🎭 MÁSCARAS DE ENTRADA (VISUAIS) ---
-    const maskCPF = (value) => {
-        return value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
-    };
-
-    const maskPhone = (value) => {
-        return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
-    };
+    // --- 🎭 MÁSCARAS DE ENTRADA ---
+    const maskCPF = (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
+    const maskPhone = (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
 
     const cpfInput = document.getElementById('client-cpf');
     const phoneInput = document.getElementById('client-phone');
@@ -51,17 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
             allProducts = await res.json();
             container.innerHTML = allProducts.map(p => {
                 availableProducts[p.id] = p;
-                const isPDV = !!document.getElementById('product-results');
                 return `
-                <div class="product-card" ${isPDV ? `onclick="addToPOS(${p.id})"` : ''}>
-                    <div class="product-img-wrapper" ${!isPDV ? `onclick="openGallery(${p.id})"` : ''}>
-                        <img src="${buildUrl(p.main_image)}" onerror="this.src='https://placehold.co/150x150'">
-                    </div>
-                    <div style="flex-grow:1;">
-                        <h3 style="font-size:0.9rem;">${p.name}</h3>
-                        <p style="color:#d4af37; font-weight:600;">R$ ${parseFloat(p.price).toFixed(2)}</p>
-                    </div>
-                    ${!isPDV ? `<button class="btn-gold-outline add-cart-btn" data-id="${p.id}">ADICIONAR</button>` : ''}
+                <div class="product-card" onclick="addToPOS(${p.id})">
+                    <img src="${buildUrl(p.main_image)}" onerror="this.src='https://placehold.co/150x150'">
+                    <h4>${p.name}</h4>
+                    <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
                 </div>`;
             }).join('');
         } catch (e) { console.error("Erro ao carregar catálogo."); }
@@ -84,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { alert("Erro no CRM."); }
     };
 
-    // --- 🏦 FINALIZAÇÃO (RESOLVE ERRO 400) ---
+    // --- 🏦 FINALIZAÇÃO (CORREÇÃO UNIQUE CONSTRAINT EMAIL) ---
     window.setPayment = (method, btn) => {
         selectedPayment = method;
         document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
@@ -95,20 +84,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!posCart.length) return alert("Carrinho vazio!");
         
         const cName = document.getElementById('client-name').value.trim();
-        // Limpeza absoluta: remove tudo que não for número para CPF e Telefone
         const cPhoneRaw = document.getElementById('client-phone').value.replace(/\D/g, '');
         const cCpfRaw = document.getElementById('client-cpf').value.replace(/\D/g, '');
         const cBirth = document.getElementById('client-birth').value;
 
-        if (!cName || cPhoneRaw.length < 10) return alert("Nome e Telefone válido são obrigatórios.");
+        // Apenas Nome e Celular são obrigatórios
+        if (!cName || cPhoneRaw.length < 10) {
+            return alert("Nome e WhatsApp são obrigatórios para finalizar a venda.");
+        }
 
-        // Construção do objeto de cliente
+        // Criamos o objeto enviando APENAS o que foi preenchido.
+        // O e-mail foi removido para evitar o erro de 'UNIQUE constraint failed'.
         const customer_info = { 
             first_name: cName, 
             phone_number: cPhoneRaw 
         };
         
-        // Só adiciona se não estiver vazio, enviando apenas os números
         if (cCpfRaw) customer_info.cpf = cCpfRaw;
         if (cBirth && cBirth !== "") customer_info.birth_date = cBirth;
 
@@ -133,12 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!res.ok) {
                 console.error("Erro detalhado da API:", data);
-                // Tenta extrair a mensagem de erro específica do Django se existir
-                const errorMsg = data.message || JSON.stringify(data);
-                throw new Error(errorMsg);
+                throw new Error(data.error || data.message || "Erro ao processar venda");
             }
 
-            // Sucesso
+            // Sucesso: Preencher cupom e imprimir
             document.getElementById('print-client').innerText = cName;
             document.getElementById('print-total').innerText = document.getElementById('pos-total').innerText;
             window.print();
@@ -146,12 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Venda realizada com sucesso!");
             posCart = []; 
             updatePOSUI();
+            
+            // Limpar campos
             ['client-name', 'client-phone', 'client-cpf', 'client-birth', 'client-search-input'].forEach(id => {
                 if(document.getElementById(id)) document.getElementById(id).value = '';
             });
         } catch (e) {
             console.error("Erro no Checkout:", e);
-            alert("ERRO NO SERVIDOR: " + e.message);
+            alert("ERRO NO CHECKOUT: " + e.message);
         }
     };
 
