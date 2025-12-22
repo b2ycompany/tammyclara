@@ -4,34 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDV | Tammy´s Store</title>
-    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}"> 
+    <title>PDV & CRM | Tammy´s Store</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', sans-serif; background-color: #f4f7f6; margin: 0; }
-        .pos-header { background: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .pos-container { display: flex; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; }
-        .panel { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        .products-panel { flex: 2; }
-        .cart-panel { flex: 1; min-width: 350px; }
-
-        @media (max-width: 900px) {
-            .pos-container { flex-direction: column; padding: 10px; }
-            .cart-panel { min-width: 0; width: 100%; }
-            #product-results { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-
-        #product-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
-        .product-card { border: 1px solid #eee; padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; }
-        .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
+        body { font-family: 'Montserrat', sans-serif; background: #f4f7f6; margin: 0; }
+        .pos-container { display: flex; flex-wrap: wrap; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        .panel { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .products-panel { flex: 2; min-width: 320px; }
+        .cart-panel { flex: 1; min-width: 320px; }
         
-        .primary-btn { background: #8c735d; color: white; border: none; padding: 15px; border-radius: 4px; width: 100%; font-weight: 700; cursor: pointer; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        #product-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top:15px; }
+        .product-card { border: 1px solid #eee; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; transition: 0.3s; }
+        .product-card:hover { border-color: #d4af37; }
+        .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; }
 
-        /* ✅ CONFIGURAÇÃO DE IMPRESSÃO DO CUPOM */
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .crm-btn { background: #2c3e50; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .finalize-btn { background: #d4af37; color: black; border: none; padding: 15px; width: 100%; font-weight: bold; margin-top: 20px; cursor: pointer; border-radius: 4px; }
+
+        /* ✅ CSS DE IMPRESSÃO */
         #receipt-print { display: none; }
-
         @media print {
             body * { visibility: hidden; }
             #receipt-print, #receipt-print * { visibility: visible; }
@@ -39,54 +32,59 @@
                 display: block !important; 
                 position: absolute; 
                 left: 0; top: 0; 
-                width: 80mm; /* Ajuste para 58mm se sua impressora for menor */
-                font-family: 'Courier New', Courier, monospace;
-                font-size: 12px;
-                color: #000;
+                width: 72mm; /* Largura padrão térmica */
+                font-family: monospace;
+                padding: 10px;
             }
-            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body>
     {% csrf_token %}
-    <div class="pos-header">
-        <h1>PDV Tammy´s</h1>
-        <a href="/pdv/" style="color:white; text-decoration:none;"><i class="fas fa-sync"></i> Atualizar</a>
+    <div style="background:#2c3e50; color:white; padding:15px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin:0;">PDV & CRM TAMMY'S</h3>
+        <a href="/pdv/" style="color:white; text-decoration:none;"><i class="fas fa-sync"></i> Sincronizar</a>
     </div>
 
     <div class="pos-container">
         <div class="products-panel panel">
-            <input type="text" placeholder="Buscar peça..." onkeyup="filterPOS()">
+            <input type="text" placeholder="Buscar peça por nome..." onkeyup="loadProducts()">
             <div id="product-results">Carregando catálogo...</div>
         </div>
 
         <div class="cart-panel panel">
-            <h3>Resumo da Venda</h3>
-            <div id="pos-cart-items">Carrinho vazio.</div>
-            <div style="margin-top:20px; border-top: 2px solid #333; padding-top:10px;">
-                <p>Total: <strong id="pos-total">R$ 0,00</strong></p>
-                <input type="tel" id="client-phone" placeholder="WhatsApp Cliente">
-                <button class="primary-btn" onclick="searchCustomerByPhone()">Buscar CRM</button>
-                <input type="text" id="client-name" placeholder="Nome">
-                <button class="primary-btn" style="margin-top:15px; background: #d4af37; color: black;" onclick="finalizePosSale()">FINALIZAR VENDA</button>
-            </div>
+            <h4><i class="fas fa-user-tag"></i> CRM Cliente</h4>
+            <input type="tel" id="client-phone" placeholder="WhatsApp (55...)">
+            <button class="crm-btn" onclick="searchCustomerByPhone()">BUSCAR NO CRM</button>
+            
+            <input type="text" id="client-name" placeholder="Nome Completo">
+            <input type="email" id="client-email" placeholder="E-mail">
+            <label style="font-size: 0.75rem; color: #666; display:block; margin-top:5px;">Data de Nascimento:</label>
+            <input type="date" id="client-birth">
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <h4><i class="fas fa-shopping-bag"></i> Carrinho</h4>
+            <div id="pos-cart-items" style="min-height: 50px;"></div>
+            <h3 id="pos-total" style="text-align:right; color: #2c3e50;">R$ 0,00</h3>
+            
+            <button class="finalize-btn" onclick="finalizePosSale()">FINALIZAR VENDA & IMPRIMIR</button>
         </div>
     </div>
 
     <div id="receipt-print">
         <center>
-            <h2 style="margin-bottom:5px;">TAMMY'S STORE</h2>
-            <p>Boutique de Luxo</p>
-            <p>--------------------------------</p>
+            <h2 style="margin-bottom:0;">TAMMY'S STORE</h2>
+            <p style="font-size: 10px;">Boutique de Luxo</p>
+            <p>===============================</p>
         </center>
         <div id="print-items"></div>
-        <p>--------------------------------</p>
-        <p>TOTAL: <span id="print-total"></span></p>
+        <p>===============================</p>
+        <p>TOTAL: <strong id="print-total"></strong></p>
         <p>DATA: <span id="print-date"></span></p>
         <p>CLIENTE: <span id="print-client"></span></p>
         <center>
-            <p>--------------------------------</p>
+            <p>===============================</p>
             <p>Obrigado pela preferência!</p>
         </center>
     </div>
