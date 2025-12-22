@@ -62,13 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (document.getElementById('product-results')) {
                     // Layout PDV
                     return `
-                    <div class="product-card" onclick="addToPOS(${p.id})">
-                        <img src="${imgSource}" onerror="this.onerror=null; this.src='https://placehold.co/150x150?text=Sem+Foto';">
-                        <h4>${p.name}</h4>
-                        <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
+                    <div class="product-card" onclick="addToPOS(${p.id})" style="border: 1px solid #eee; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer;">
+                        <img src="${imgSource}" onerror="this.onerror=null; this.src='https://placehold.co/150x150?text=Sem+Foto';" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;">
+                        <h4 style="font-size: 0.8rem; margin: 5px 0;">${p.name}</h4>
+                        <p style="color:#d4af37; font-weight: 700;">R$ ${parseFloat(p.price).toFixed(2)}</p>
                     </div>`;
                 }
-                // Layout Boutique Site
+                // Layout Boutique Site (Grid Alinhado)
                 return `
                 <div class="product-card">
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalImg) modalImg.src = currentGalleryImages[currentImageIndex];
         if (thumbCont) {
             thumbCont.innerHTML = currentGalleryImages.map((src, i) => `
-                <img src="${src}" class="modal-thumb ${i === currentImageIndex ? 'active' : ''}" onclick="jumpToImage(${i})">
+                <img src="${src}" class="modal-thumb ${i === currentImageIndex ? 'active' : ''}" onclick="jumpToImage(${i})" style="width: 60px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid ${i === currentImageIndex ? '#d4af37' : 'transparent'}; opacity: ${i === currentImageIndex ? '1' : '0.6'};">
             `).join('');
         }
     }
