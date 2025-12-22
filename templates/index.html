@@ -18,8 +18,8 @@
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.8s ease, transform 0.8s ease; }
         .splash-logo-container { 
             position: relative; 
-            width: 180px; 
-            height: 180px; 
+            width: 200px; 
+            height: 200px; 
             border-radius: 50%; 
             overflow: hidden;
             display: flex; 
@@ -27,9 +27,9 @@
             align-items: center; 
             border: 2px solid var(--gold);
         }
-        .splash-logo-container img { width: 100%; border-radius: 50%; z-index: 2; }
+        .splash-logo-container img { width: 170px; border-radius: 50%; z-index: 2; }
         
-        /* Efeito de brilho (Shimmer) */
+        /* Efeito de brilho metálico passando pelo logo */
         .splash-logo-container::after {
             content: "";
             position: absolute;
@@ -37,9 +37,9 @@
             left: -150%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.4), transparent);
+            background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent);
             transform: rotate(30deg);
-            animation: shimmer 2s infinite;
+            animation: shimmer 2.5s infinite;
             z-index: 3;
         }
         @keyframes shimmer {
@@ -47,37 +47,36 @@
             100% { left: 150%; }
         }
 
-        /* HEADER ORIGINAL */
-        header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; background: rgba(0,0,0,0.8); }
+        /* HEADER */
+        header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
         header.scrolled { background: var(--dark); padding: 12px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
         .logo-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--white); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
         nav ul { display: flex; list-style: none; gap: 25px; }
-        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; }
+        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        nav a:hover { color: var(--gold); }
 
-        /* HERO ORIGINAL */
+        /* HERO */
         .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; }
         .hero-card { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; }
         .hero-card.show { opacity: 1; transform: translateY(0); }
         .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 15px; }
 
-        /* GRID BOUTIQUE ORIGINAL */
+        /* GRID */
         section { padding: 80px 5%; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 15px; transition: 0.4s; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 15px; transition: 0.4s; text-align: center; }
         .product-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-        .product-img-wrapper { height: 450px; overflow: hidden; background: #f9f9f9; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .product-img-wrapper { height: 450px; overflow: hidden; background: #f9f9f9; cursor: pointer; }
         .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; margin-top: 15px; background: transparent; cursor: pointer; font-size: 0.8rem; letter-spacing: 2px; }
 
-        /* GALERIA MODAL ORIGINAL */
-        .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); justify-content: center; align-items: center; flex-direction: column; }
-        .modal-nav-container { display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center; }
-        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 1.5rem; padding: 15px; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
-        .modal-thumbs { display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; max-width: 90%; padding: 10px; }
-        .modal-thumb { width: 60px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: 0.3s; }
-        .modal-thumb.active { border-color: var(--gold); opacity: 1; }
-        .close-modal { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; }
+        /* WHATSAPP */
+        .btn-whatsapp { display: inline-block; background: #25d366; color: white; padding: 15px 30px; border-radius: 4px; text-decoration: none; font-weight: 600; margin-top: 20px; transition: 0.3s; }
+        .btn-whatsapp:hover { background: #128c7e; transform: scale(1.05); }
 
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; }
+        
         @media (max-width: 768px) {
             header { padding: 15px 5%; flex-direction: column; gap: 10px; }
             .hero h1 { font-size: 2rem; }
@@ -87,6 +86,7 @@
 </head>
 <body>
     {% csrf_token %}
+
     <div id="splash-screen">
         <div class="splash-logo-container">
             <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo">
@@ -115,20 +115,45 @@
     </section>
 
     <section id="colecao">
-        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 50px;">A Coleção</h2>
+        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 50px;">Nossa Curadoria</h2>
         <div class="grid" id="products-container"></div>
     </section>
 
-    <div id="image-modal" class="modal">
-        <span class="close-modal" onclick="closeGallery()">×</span>
-        <div class="modal-nav-container">
-            <button class="nav-btn" onclick="changeImage(-1)"><i class="fas fa-chevron-left"></i></button>
-            <img id="modal-main-image" src="" style="max-height: 70vh; max-width: 80vw; object-fit: contain;">
-            <button class="nav-btn" onclick="changeImage(1)"><i class="fas fa-chevron-right"></i></button>
+    <section id="sacola" style="background:#fafafa;">
+        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 40px;">Sua Sacola</h2>
+        <div class="cart-items"></div>
+        <div style="margin-top:40px; text-align:right;">
+            <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
+            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer; letter-spacing: 2px;">CONFIRMAR PEDIDO (ADMIN)</button>
         </div>
-        <div class="modal-thumbs" id="modal-thumbnails-container"></div>
+    </section>
+
+    <section id="contato" style="text-align:center;">
+        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 30px;">Atendimento Exclusive</h2>
+        <p>Clique abaixo para falar diretamente com Tammy ou Clara.</p>
+        <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp">
+            <i class="fab fa-whatsapp"></i> CHAMAR NO WHATSAPP
+        </a>
+
+        <div style="margin-top: 60px;">
+            <h3 style="font-family:'Playfair Display'; margin-bottom: 20px;">Boutique Cotia</h3>
+            <p style="margin-bottom: 30px;">R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
+            <div style="height:450px; border-radius:8px; overflow:hidden; border: 2px solid var(--gold);">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3655.8453482352!2d-46.924848!3d-23.609874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDM2JzM1LjUiUyA0NsKwNTUnMjkuNSJX!5e0!3m2!1spt-BR!2sbr!4v1640000000000!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <div id="image-modal" class="modal">
+        <span class="close-modal" style="position:absolute; top:30px; right:30px; color:#fff; font-size:40px; cursor:pointer;">×</span>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <button class="nav-btn" onclick="changeImage(-1)" style="background:none; border:1px solid var(--gold); color:var(--gold); font-size:2rem; padding:10px; cursor:pointer;">❮</button>
+            <img id="modal-main-image" style="max-height:75vh; max-width:80vw; object-fit: contain;">
+            <button class="nav-btn" onclick="changeImage(1)" style="background:none; border:1px solid var(--gold); color:var(--gold); font-size:2rem; padding:10px; cursor:pointer;">❯</button>
+        </div>
+        <div id="modal-thumbnails-container" style="display:flex; margin-top:20px; gap: 10px; overflow-x: auto; max-width: 90%;"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=300"></script>
+    <script src="{% static 'js/script.js' %}?v=400"></script>
 </body>
 </html>
