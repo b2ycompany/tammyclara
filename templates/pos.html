@@ -12,7 +12,7 @@
         body { font-family: 'Montserrat', sans-serif; background-color: #f4f7f6; margin: 0; }
         .pos-header { background: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* ✅ PDV RESPONSIVO */
+        /* PDV RESPONSIVO */
         .pos-container { display: flex; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; }
         .panel { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
         .products-panel { flex: 2; }
@@ -33,15 +33,16 @@
     </style>
 </head>
 <body>
+    {% csrf_token %}
     <div class="pos-header">
         <h1>PDV Tammy´s</h1>
-        <a href="/" style="color:white; text-decoration:none;"><i class="fas fa-home"></i> Sair</a>
+        <a href="/pdv/" style="color:white; text-decoration:none;"><i class="fas fa-sync"></i> Atualizar</a>
     </div>
 
     <div class="pos-container">
         <div class="products-panel panel">
             <input type="text" placeholder="Buscar peça..." onkeyup="filterPOS()">
-            <div id="product-results">Carregando...</div>
+            <div id="product-results">Carregando catálogo...</div>
         </div>
 
         <div class="cart-panel panel">
