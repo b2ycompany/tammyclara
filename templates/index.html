@@ -13,32 +13,34 @@
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
 
-        header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: #000; }
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: 0.8s opacity ease; }
-
-        /* ✅ GRID ALINHADO */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.8s ease; }
+        
+        /* ✅ GRID ALINHADO PROFISSIONAL */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 120px 5% 50px; align-items: stretch; }
-        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 100%; transition: 0.4s; }
         .product-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
         
-        .product-img-wrapper { height: 400px; overflow: hidden; background: #f9f9f9; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .product-img-wrapper { height: 400px; overflow: hidden; background: #f9f9f9; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
         .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 15px; background: transparent; cursor: pointer; letter-spacing: 2px; }
 
-        /* ✅ GALERIA */
+        /* ✅ MODAL DE GALERIA NAVEGÁVEL */
         .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); justify-content: center; align-items: center; flex-direction: column; }
         .modal-nav-container { display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center; }
-        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 1.5rem; padding: 15px; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
-        .modal-thumbs { display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; max-width: 90%; padding: 10px; }
-        .modal-thumb { width: 60px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: 0.3s; }
-        .modal-thumb.active { border-color: var(--gold); opacity: 1; }
+        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 1.8rem; padding: 15px; cursor: pointer; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+        .modal-thumbs { display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; max-width: 90%; padding: 10px; }
         .close-modal { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; }
+
+        @media (max-width: 768px) { header { padding: 15px 5%; flex-direction: column; gap: 10px; } .product-img-wrapper { height: 350px; } }
     </style>
 </head>
 <body>
     {% csrf_token %}
     <div id="splash-screen"><img src="{% static 'img/logo_tammy_clara.png' %}" width="170"></div>
-    <header><a href="/" style="color:var(--gold); text-decoration:none; font-family:'Playfair Display'; font-size:1.8rem;">TAMMY'S</a></header>
+    <header style="position: fixed; top: 0; width: 100%; background: #000; padding: 20px 5%; z-index: 1000;">
+        <a href="/" style="color:var(--gold); text-decoration:none; font-family:'Playfair Display'; font-size:1.8rem;">TAMMY'S</a>
+        <nav><ul style="display:flex; list-style:none; gap:20px;"><li><a href="#colecao" style="color:white; text-decoration:none; font-size:0.7rem; text-transform:uppercase;">Coleção</a></li></ul></nav>
+    </header>
 
     <div class="grid" id="products-container"></div>
 
