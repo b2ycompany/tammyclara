@@ -8,48 +8,112 @@
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
         :root { --gold: #d4af37; --dark: #0b0b0b; --white: #ffffff; --glass: rgba(10, 10, 10, 0.85); }
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
 
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: 0.8s opacity ease; }
-        header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: #000; }
+        /* SEU SPLASH SCREEN ORIGINAL */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.8s ease, transform 0.8s ease; }
+        .splash-logo-container { position: relative; width: 200px; height: 200px; border-radius: 50%; padding: 5px; background: linear-gradient(45deg, transparent, var(--gold), transparent); animation: rotateBorder 4s linear infinite; display: flex; justify-content: center; align-items: center; }
+        #splash-screen img { width: 170px; border-radius: 50%; }
+        @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* SEU HEADER ORIGINAL */
+        header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
+        header.scrolled { background: var(--dark); padding: 12px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
         .logo-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--white); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
         nav ul { display: flex; list-style: none; gap: 25px; }
-        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; }
+        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        nav a:hover { color: var(--gold); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 120px 5% 50px; align-items: stretch; }
-        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 100%; transition: 0.4s; }
+        /* SEU HERO ORIGINAL */
+        .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; }
+        .hero-card { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; }
+        .hero-card.show { opacity: 1; transform: translateY(0); }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 15px; }
+
+        /* GRID BOUTIQUE */
+        section { padding: 80px 5%; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 15px; transition: 0.4s; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
         .product-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-        
         .product-img-wrapper { height: 450px; overflow: hidden; background: #f9f9f9; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 15px; background: transparent; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; font-size: 0.7rem; margin-top: 15px; }
+        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; margin-top: 15px; background: transparent; cursor: pointer; font-size: 0.8rem; letter-spacing: 2px; }
 
+        /* WHATSAPP */
+        .btn-whatsapp { display: inline-block; background: #25d366; color: white; padding: 15px 30px; border-radius: 4px; text-decoration: none; font-weight: 600; margin-top: 20px; transition: 0.3s; }
+
+        /* GALERIA MODAL */
         .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); justify-content: center; align-items: center; flex-direction: column; }
         .modal-nav-container { display: flex; align-items: center; gap: 20px; width: 100%; justify-content: center; }
-        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 1.5rem; padding: 15px; cursor: pointer; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 1.5rem; padding: 15px; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
         .modal-thumbs { display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; max-width: 90%; padding: 10px; }
+        .modal-thumb { width: 60px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: 0.3s; }
+        .modal-thumb.active { border-color: var(--gold); opacity: 1; }
         .close-modal { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; }
 
-        @media (max-width: 768px) { header { padding: 15px 5%; flex-direction: column; gap: 10px; } }
+        @media (max-width: 768px) {
+            header { padding: 15px 5%; flex-direction: column; gap: 10px; }
+            .hero h1 { font-size: 2rem; }
+            .product-img-wrapper { height: 350px; }
+        }
     </style>
 </head>
 <body>
     {% csrf_token %}
-    <div id="splash-screen"><img src="{% static 'img/logo_tammy_clara.png' %}" width="170"></div>
-    <header><a href="/" class="logo-text">TAMMY'S</a><nav><ul><li><a href="#colecao">Coleção</a></li><li><a href="#sacola">Sacola</a></li><li><a href="#contato">Contato</a></li></ul></nav></header>
+    <div id="splash-screen">
+        <div class="splash-logo-container"><img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo"></div>
+        <h2 style="color:#fff; margin-top:30px; letter-spacing:10px; font-family:'Playfair Display';">TAMMY'S</h2>
+    </div>
 
-    <div class="grid" id="products-container"></div>
+    <header id="main-header">
+        <a href="#home" class="logo-text">Tammy's</a>
+        <nav>
+            <ul>
+                <li><a href="#home">Início</a></li>
+                <li><a href="#colecao">Coleção</a></li>
+                <li><a href="#sacola">Sacola</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <section id="contato" style="text-align:center; padding: 100px 5%;">
+    <section class="hero" id="home">
+        <div class="hero-card" id="heroCard">
+            <h1>Arte em Vestir</h1>
+            <p style="color:#ddd; margin: 20px 0;">Onde a sofisticação encontra sua melhor versão.</p>
+            <a href="#colecao" class="btn-gold-outline" style="text-decoration:none">CONHECER AGORA</a>
+        </div>
+    </section>
+
+    <section id="colecao">
+        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 50px;">Nossa Curadoria</h2>
+        <div class="grid" id="products-container"></div>
+    </section>
+
+    <section id="sacola" style="background:#fafafa;">
+        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 40px;">Sua Sacola</h2>
+        <div class="cart-items"></div>
+        <div style="margin-top:40px; text-align:right;">
+            <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
+            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer; letter-spacing: 2px;">CONFIRMAR PEDIDO (ADMIN)</button>
+        </div>
+    </section>
+
+    <section id="contato" style="text-align:center;">
         <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 30px;">Atendimento Exclusive</h2>
-        <a href="https://wa.me/5511999999999" target="_blank" style="background:#25d366; color:white; padding:15px 30px; text-decoration:none; border-radius:4px; font-weight:600;"><i class="fab fa-whatsapp"></i> WHATSAPP</a>
+        <p>Clique abaixo para falar diretamente com Tammy ou Clara.</p>
+        <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> WHATSAPP</a>
+
         <div style="margin-top: 60px;">
-            <h3>Boutique Cotia</h3>
-            <p>R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
-            <iframe src="http://googleusercontent.com/maps.google.com/6" width="100%" height="450" style="border:0; margin-top:30px;" allowfullscreen="" loading="lazy"></iframe>
+            <h3 style="font-family:'Playfair Display'; margin-bottom: 20px;">Boutique Cotia</h3>
+            <p style="margin-bottom: 30px;">R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
+            <div style="height:450px; border-radius:8px; overflow:hidden; border: 2px solid var(--gold);">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.467332306351!2d-46.91717882466858!3d-23.605481778772094!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf06f8c7b89791%3A0x63351664687a4192!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1703254900000!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
         </div>
     </section>
 
@@ -62,6 +126,7 @@
         </div>
         <div class="modal-thumbs" id="modal-thumbnails-container"></div>
     </div>
-    <script src="{% static 'js/script.js' %}"></script>
+
+    <script src="{% static 'js/script.js' %}?v=250"></script>
 </body>
 </html>
