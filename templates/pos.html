@@ -8,84 +8,101 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', sans-serif; background: #f4f7f6; margin: 0; }
+        :root { --gold: #d4af37; --dark: #000; --light: #f4f7f6; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--light); margin: 0; }
+        
         .pos-container { display: flex; flex-wrap: wrap; padding: 20px; gap: 20px; max-width: 1400px; margin: 0 auto; }
         .panel { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .products-panel { flex: 2; min-width: 320px; }
-        .cart-panel { flex: 1; min-width: 320px; }
+        .cart-panel { flex: 1; min-width: 350px; }
         
         #product-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top:15px; }
         .product-card { border: 1px solid #eee; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; transition: 0.3s; }
-        .product-card:hover { border-color: #d4af37; }
+        .product-card:hover { border-color: var(--gold); }
         .product-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; }
 
-        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .crm-btn { background: #2c3e50; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        .finalize-btn { background: #d4af37; color: black; border: none; padding: 15px; width: 100%; font-weight: bold; margin-top: 20px; cursor: pointer; border-radius: 4px; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        
+        /* BOTÕES DE PAGAMENTO */
+        .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .pay-btn { padding: 12px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px; font-weight: 600; transition: 0.2s; }
+        .pay-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+        
+        .crm-btn { background: #2c3e50; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; border-radius: 4px; margin-bottom: 10px; }
+        .finalize-btn { background: var(--dark); color: var(--gold); border: 2px solid var(--gold); padding: 18px; width: 100%; font-weight: bold; margin-top: 20px; cursor: pointer; font-size: 1rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .finalize-btn:hover { background: var(--gold); color: var(--dark); }
 
-        /* ✅ CSS DE IMPRESSÃO */
+        /* ✅ REGRAS DE IMPRESSÃO */
         #receipt-print { display: none; }
-        @media print {
-            body * { visibility: hidden; }
-            #receipt-print, #receipt-print * { visibility: visible; }
-            #receipt-print { 
-                display: block !important; 
-                position: absolute; 
-                left: 0; top: 0; 
-                width: 72mm; /* Largura padrão térmica */
-                font-family: monospace;
-                padding: 10px;
-            }
+        @media print { 
+            body * { visibility: hidden; } 
+            #receipt-print, #receipt-print * { visibility: visible; } 
+            #receipt-print { display: block !important; position: absolute; left: 0; top: 0; width: 80mm; font-family: monospace; padding: 10px; } 
+        }
+
+        @media (max-width: 768px) { 
+            .pos-container { flex-direction: column; } 
+            #product-results { grid-template-columns: 1fr 1fr; } 
         }
     </style>
 </head>
 <body>
     {% csrf_token %}
-    <div style="background:#2c3e50; color:white; padding:15px; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin:0;">PDV & CRM TAMMY'S</h3>
-        <a href="/pdv/" style="color:white; text-decoration:none;"><i class="fas fa-sync"></i> Sincronizar</a>
+    <div style="background: var(--dark); color: var(--gold); padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        <h3 style="margin:0; letter-spacing:2px; font-weight: 700;">TAMMY'S PDV</h3>
+        <a href="/pdv/" style="color:white; text-decoration:none; font-size: 0.9rem;"><i class="fas fa-sync"></i> ATUALIZAR</a>
     </div>
 
     <div class="pos-container">
         <div class="products-panel panel">
-            <input type="text" placeholder="Buscar peça por nome..." onkeyup="loadProducts()">
+            <input type="text" placeholder="🔍 Buscar peça por Nome ou SKU..." onkeyup="loadProducts()">
             <div id="product-results">Carregando catálogo...</div>
         </div>
 
         <div class="cart-panel panel">
-            <h4><i class="fas fa-user-tag"></i> CRM Cliente</h4>
-            <input type="tel" id="client-phone" placeholder="WhatsApp (55...)">
-            <button class="crm-btn" onclick="searchCustomerByPhone()">BUSCAR NO CRM</button>
+            <h4><i class="fas fa-search"></i> Localizar Cliente</h4>
+            <input type="text" id="client-search-input" placeholder="Nome, CPF ou WhatsApp...">
+            <button class="crm-btn" onclick="searchCustomer()">BUSCAR NO CRM</button>
             
-            <input type="text" id="client-name" placeholder="Nome Completo">
-            <input type="email" id="client-email" placeholder="E-mail">
-            <label style="font-size: 0.75rem; color: #666; display:block; margin-top:5px;">Data de Nascimento:</label>
-            <input type="date" id="client-birth">
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <input type="text" id="client-name" placeholder="Nome Completo (Obrigatório)">
+            <input type="tel" id="client-phone" placeholder="WhatsApp (Obrigatório)">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="client-cpf" placeholder="CPF">
+                <input type="date" id="client-birth" title="Data de Nascimento">
+            </div>
 
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            <h4 style="margin-top: 20px;"><i class="fas fa-credit-card"></i> Pagamento</h4>
+            <div class="payment-grid">
+                <button class="pay-btn active" onclick="setPayment('PIX', this)">PIX</button>
+                <button class="pay-btn" onclick="setPayment('CARTÃO', this)">CARTÃO</button>
+                <button class="pay-btn" onclick="setPayment('DINHEIRO', this)">DINHEIRO</button>
+                <button class="pay-btn" onclick="setPayment('DEBITO', this)">DÉBITO</button>
+            </div>
+
+            <h4 style="margin-top: 20px;"><i class="fas fa-shopping-cart"></i> Itens</h4>
+            <div id="pos-cart-items" style="font-size: 0.9rem; border-top: 1px solid #eee; padding-top: 10px; min-height: 40px;"></div>
             
-            <h4><i class="fas fa-shopping-bag"></i> Carrinho</h4>
-            <div id="pos-cart-items" style="min-height: 50px;"></div>
-            <h3 id="pos-total" style="text-align:right; color: #2c3e50;">R$ 0,00</h3>
+            <h3 style="text-align:right; color: #8c735d; border-top: 2px solid #eee; padding-top: 10px;">
+                TOTAL: <span id="pos-total">R$ 0,00</span>
+            </h3>
             
-            <button class="finalize-btn" onclick="finalizePosSale()">FINALIZAR VENDA & IMPRIMIR</button>
+            <button class="finalize-btn" onclick="finalizePosSale()">FINALIZAR & IMPRIMIR</button>
         </div>
     </div>
 
     <div id="receipt-print">
         <center>
-            <h2 style="margin-bottom:0;">TAMMY'S STORE</h2>
-            <p style="font-size: 10px;">Boutique de Luxo</p>
-            <p>===============================</p>
+            <h2 style="margin:0;">TAMMY'S STORE</h2>
+            <p>Cupom Não Fiscal</p>
+            <p>--------------------------------</p>
         </center>
-        <div id="print-items"></div>
-        <p>===============================</p>
-        <p>TOTAL: <strong id="print-total"></strong></p>
-        <p>DATA: <span id="print-date"></span></p>
         <p>CLIENTE: <span id="print-client"></span></p>
+        <p>TOTAL: <span id="print-total"></span></p>
         <center>
-            <p>===============================</p>
-            <p>Obrigado pela preferência!</p>
+            <p>--------------------------------</p>
+            <p>Obrigada pela preferência!</p>
         </center>
     </div>
 

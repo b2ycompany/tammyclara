@@ -1,15 +1,19 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V6
- * Foco: Dashboard CRM, Busca de Clientes e Estabilidade de Mídia
+ * TAMMY'S STORE - CORE SCRIPT UNIFICADO V7
+ * Foco: CRM Multibusca (Nome, CPF, Tel), Pagamentos e Cadastro Automático
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
     let availableProducts = {}; 
     let allProducts = []; 
     let posCart = []; 
+    let selectedPayment = 'PIX'; // Padrão inicial
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
     
-    // --- 🚀 SPLASH SCREEN & HERO ---
+    let currentGalleryImages = [];
+    let currentImageIndex = 0;
+
+    // --- 🚀 INTERFACE E SPLASH (DESIGN ORIGINAL) ---
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
     setTimeout(() => {
@@ -21,38 +25,101 @@ document.addEventListener('DOMContentLoaded', () => {
         if (heroCard) heroCard.classList.add('show');
     }, 2500); 
 
-    // --- 👥 CRM: BUSCA DE CLIENTES GLOBAL ---
-    window.searchCustomerByPhone = async () => {
-        const phone = document.getElementById('client-phone')?.value;
-        if (!phone) return alert("Digite o WhatsApp.");
+    window.addEventListener('scroll', () => {
+        const header = document.getElementById('main-header');
+        if (header) window.scrollY > 60 ? header.classList.add('scrolled') : header.classList.remove('scrolled');
+    });
+
+    const buildUrl = (path) => {
+        if (!path) return 'https://placehold.co/400x600?text=Foto+Indisponivel';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
+    };
+
+    // --- 🛒 CATÁLOGO ---
+    window.loadProducts = async () => {
+        const container = document.getElementById('products-container') || document.getElementById('product-results');
+        if (!container) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/customer/search/${phone}/`);
+            const res = await fetch(`${API_BASE_URL}/products/`);
+            const products = await res.json();
+            allProducts = products;
+            container.innerHTML = products.map(p => {
+                availableProducts[p.id] = p;
+                const imgSource = buildUrl(p.main_image);
+                
+                // Se estiver no PDV
+                if (document.getElementById('product-results')) {
+                    return `
+                    <div class="product-card" onclick="addToPOS(${p.id})">
+                        <img src="${imgSource}" onerror="this.src='https://placehold.co/150x150?text=Sem+Foto';">
+                        <h4>${p.name}</h4>
+                        <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
+                    </div>`;
+                }
+                // Se estiver na Vitrine do Site
+                return `
+                <div class="product-card">
+                    <div class="product-img-wrapper" onclick="openGallery(${p.id})">
+                        <img src="${imgSource}" alt="${p.name}" onerror="this.src='https://placehold.co/400x600';">
+                    </div>
+                    <div style="flex-grow:1;">
+                        <h3>${p.name}</h3>
+                        <p style="color:#d4af37; font-weight:600;">R$ ${parseFloat(p.price).toFixed(2)}</p>
+                    </div>
+                    <button class="btn-gold-outline add-cart-btn" data-id="${p.id}">ADICIONAR</button>
+                </div>`;
+            }).join('');
+        } catch (e) { console.error("Erro ao carregar produtos:", e); }
+    };
+
+    // --- 👥 CRM: BUSCA MULTIFUNCIONAL ---
+    window.searchCustomer = async () => {
+        const query = document.getElementById('client-search-input')?.value;
+        if (!query) return alert("Digite o Nome, CPF ou Telefone para buscar.");
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/customer/search/${query}/`);
             if (res.ok) {
                 const data = await res.json();
                 if(document.getElementById('client-name')) document.getElementById('client-name').value = data.first_name || '';
-                if(document.getElementById('client-email')) document.getElementById('client-email').value = data.email || '';
+                if(document.getElementById('client-phone')) document.getElementById('client-phone').value = data.phone_number || '';
+                if(document.getElementById('client-cpf')) document.getElementById('client-cpf').value = data.cpf || '';
+                if(document.getElementById('client-birth')) document.getElementById('client-birth').value = data.birth_date || '';
                 alert("Cliente localizado no CRM!");
             } else {
-                alert("Cliente não encontrado. Preencha os dados para cadastrar.");
+                alert("Cliente não encontrado. Preencha os campos para cadastro automático.");
             }
-        } catch (e) { alert("Erro ao buscar cliente."); }
+        } catch (e) { alert("Erro na busca."); }
     };
 
-    // --- 🏦 FINALIZAÇÃO, CRM E IMPRESSÃO ---
+    // --- 🏦 PAGAMENTO E FINALIZAÇÃO ---
+    window.setPayment = (method, btn) => {
+        selectedPayment = method;
+        document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    };
+
     window.finalizePosSale = async () => {
         if (!posCart.length) return alert("Carrinho vazio!");
+        
         const clientName = document.getElementById('client-name')?.value;
         const clientPhone = document.getElementById('client-phone')?.value;
-        
-        if (!clientName || !clientPhone) return alert("Nome e WhatsApp são obrigatórios.");
+        const clientCpf = document.getElementById('client-cpf')?.value;
+        const clientBirth = document.getElementById('client-birth')?.value;
+
+        if (!clientName || !clientPhone) return alert("Nome e Telefone são obrigatórios para o CRM.");
 
         const payload = {
             customer_info: { 
                 first_name: clientName, 
-                phone_number: clientPhone,
-                birth_date: document.getElementById('client-birth')?.value 
+                phone_number: clientPhone, 
+                cpf: clientCpf,
+                birth_date: clientBirth 
             },
             items: posCart.map(i => ({ id: i.id, quantity: i.quantity })),
+            payment_info: { method: selectedPayment },
             origin: 'POS'
         };
 
@@ -65,69 +132,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(payload)
             });
+
             if (res.ok) {
-                window.print(); // Dispara o cupom térmico
-                alert("Venda realizada e salva no CRM!");
-                posCart = [];
-                updatePOSUI();
-            }
-        } catch (e) { alert("Erro ao processar venda."); }
-    };
-
-    // --- 🛒 CATÁLOGO E GRID DINÂMICO ---
-    window.loadProducts = async () => {
-        const container = document.getElementById('products-container') || document.getElementById('product-results');
-        if (!container) return;
-        try {
-            const res = await fetch(`${API_BASE_URL}/products/`);
-            const products = await res.json();
-            allProducts = products;
-            container.innerHTML = products.map(p => {
-                availableProducts[p.id] = p;
-                // Ajuste de URL de imagem para garantir exibição
-                const img = p.main_image ? (p.main_image.startsWith('http') ? p.main_image : '/media/'+p.main_image) : 'https://placehold.co/400x600';
+                // Preenche cupom térmico
+                if(document.getElementById('print-client')) document.getElementById('print-client').innerText = clientName;
+                if(document.getElementById('print-total')) document.getElementById('print-total').innerText = document.getElementById('pos-total').innerText;
                 
-                return `
-                <div class="product-card" ${document.getElementById('product-results') ? `onclick="addToPOS(${p.id})"` : ''}>
-                    <div class="product-img-wrapper" ${!document.getElementById('product-results') ? `onclick="openGallery(${p.id})"` : ''}>
-                        <img src="${img}" onerror="this.src='https://placehold.co/400x600?text=Sincronizando...'">
-                    </div>
-                    <div style="flex-grow:1;">
-                        <h3>${p.name}</h3>
-                        <p style="color:#d4af37; font-weight:600;">R$ ${parseFloat(p.price).toFixed(2)}</p>
-                    </div>
-                    ${!document.getElementById('product-results') ? `<button class="btn-gold-outline add-cart-btn" data-id="${p.id}">ADICIONAR</button>` : ''}
-                </div>`;
-            }).join('');
-        } catch (e) { console.error("Erro no carregamento:", e); }
+                window.print(); // Comando de impressão
+                alert("Venda registrada e CRM atualizado!");
+                posCart = []; 
+                updatePOSUI();
+                
+                // Limpa campos do CRM
+                ['client-name', 'client-phone', 'client-cpf', 'client-birth', 'client-search-input'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.value = '';
+                });
+            } else {
+                alert("Erro ao salvar venda no servidor.");
+            }
+        } catch (e) { alert("Erro de conexão ao processar."); }
     };
 
-    // --- ➕ FUNÇÕES AUXILIARES DO PDV ---
+    // --- 🛒 LÓGICA DO CARRINHO PDV ---
     window.addToPOS = (id) => {
         const p = allProducts.find(i => i.id === id);
-        if (!p) return;
-        const exist = posCart.find(i => i.id === id);
-        exist ? exist.quantity++ : posCart.push({...p, quantity: 1, price: parseFloat(p.price)});
-        updatePOSUI();
+        if (p) {
+            const exist = posCart.find(i => i.id === id);
+            exist ? exist.quantity++ : posCart.push({...p, quantity: 1, price: parseFloat(p.price)});
+            updatePOSUI();
+        }
     };
 
     window.updatePOSUI = () => {
         const cont = document.getElementById('pos-cart-items');
         if (cont) {
             cont.innerHTML = posCart.map(i => `
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <span>${i.name} (${i.quantity}x)</span>
-                    <button onclick="removeFromPOS(${i.id})" style="color:red; background:none; border:none; cursor:pointer;">&times;</button>
-                </div>`).join('') || 'Vazio';
+                <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
+                    <span>${i.name} (x${i.quantity})</span>
+                    <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
+                </div>`).join('') || 'Carrinho Vazio';
             
             const total = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
             document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
         }
-    };
-
-    window.removeFromPOS = (id) => {
-        posCart = posCart.filter(i => i.id !== id);
-        updatePOSUI();
     };
 
     // Inicialização
