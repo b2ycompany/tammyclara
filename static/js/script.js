@@ -1,14 +1,16 @@
 /**
  * TAMMY'S STORE - CORE SCRIPT UNIFICADO
- * Versão: Galeria Navegável e Estabilidade de Mídia
+ * Versão Final: Galeria Navegável e Estabilidade de Mídia
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
     let availableProducts = {}; 
     let allProducts = []; 
+    let posCart = []; 
+    let selectedPayment = 'PIX';
     let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
-
+    
     // Estado da Galeria
     let currentGalleryImages = [];
     let currentImageIndex = 0;
@@ -31,11 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (header) window.scrollY > 60 ? header.classList.add('scrolled') : header.classList.remove('scrolled');
     });
 
-    // ✅ RESOLUÇÃO DE CAMINHOS DE IMAGEM (Anti-404)
+    // ✅ RESOLUÇÃO DE CAMINHOS DE IMAGEM (Garante que pegue a foto do Admin)
     const buildUrl = (path) => {
         if (!path) return 'https://placehold.co/400x600?text=Foto+Indisponivel';
         if (path.startsWith('http')) return path;
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        // Força o prefixo /media/ que é onde o Django salva as fotos
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
@@ -54,37 +57,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 availableProducts[p.id] = p;
                 const imgSource = buildUrl(p.main_image);
                 
+                if (document.getElementById('product-results')) {
+                    // Layout PDV
+                    return `
+                    <div class="product-card" onclick="addToPOS(${p.id})">
+                        <img src="${imgSource}" onerror="this.onerror=null; this.src='https://placehold.co/150x150?text=Sem+Foto';">
+                        <h4>${p.name}</h4>
+                        <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
+                    </div>`;
+                }
+                // Layout Boutique Site
                 return `
                 <div class="product-card">
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
-                        <img src="${imgSource}" 
-                             alt="${p.name}" 
+                        <img src="${imgSource}" alt="${p.name}" 
                              onerror="this.onerror=null; this.src='https://placehold.co/400x600?text=Aguardando+Sincronizacao';">
                     </div>
                     <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
                         <h3 style="font-family:'Playfair Display'; margin-top:10px; font-size: 1.2rem;">${p.name}</h3>
                         <p style="color:#d4af37; font-weight:600; margin:10px 0;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
                     </div>
-                    <button class="btn-gold-outline add-to-cart-btn" data-id="${p.id}">ADICIONAR À SACOLA</button>
+                    <button class="btn-gold-outline add-cart" data-id="${p.id}">ADICIONAR À SACOLA</button>
                 </div>`;
             }).join('');
 
-            document.querySelectorAll('.add-to-cart-btn').forEach(b => b.onclick = (e) => {
-                const prod = availableProducts[e.target.dataset.id];
+            document.querySelectorAll('.add-cart').forEach(b => b.onclick = (e) => {
+                const pId = e.target.dataset.id;
+                const prod = availableProducts[pId];
+                if (!prod) return;
                 const exist = cart.find(i => i.id === prod.id);
                 exist ? exist.quantity++ : cart.push({...prod, quantity: 1, price: parseFloat(prod.price)});
                 localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
-                alert("Peça adicionada!");
+                updateUI();
+                alert("Adicionado!");
             });
         } catch (e) { console.error("Erro Catálogo:", e); }
     }
+
+    // --- GESTÃO DE SACOLA ---
+    window.updateUI = () => {
+        const cont = document.querySelector('.cart-items');
+        if (!cont) return;
+        let total = 0;
+        cont.innerHTML = cart.map(item => {
+            total += item.price * item.quantity;
+            return `
+            <div class="cart-item" style="display:flex; align-items:center; gap:15px; margin-bottom:15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <img src="${buildUrl(item.main_image)}" width="60" height="80" style="object-fit:cover;">
+                <div style="flex-grow:1;">
+                    <h4 style="font-family:'Playfair Display'; font-size:0.9rem;">${item.name}</h4>
+                    <p style="font-size:0.7rem; opacity:0.5;">${item.quantity} un.</p>
+                </div>
+                <button onclick="remove(${item.id})" style="color:red; background:none; border:none; cursor:pointer;">&times;</button>
+            </div>`;
+        }).join('') || '<p>Sacola vazia.</p>';
+        const totalDisp = document.getElementById('cart-total');
+        if (totalDisp) totalDisp.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    };
+
+    window.remove = (id) => {
+        cart = cart.filter(i => i.id !== id);
+        localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
+        updateUI();
+    };
 
     // ✅ LÓGICA DE GALERIA NAVEGÁVEL
     window.openGallery = (id) => {
         const p = availableProducts[id];
         if (!p) return;
 
-        // Monta array: Imagem Principal + Imagens Adicionais
         currentGalleryImages = [buildUrl(p.main_image)];
         if (p.images && p.images.length > 0) {
             p.images.forEach(imgObj => currentGalleryImages.push(buildUrl(imgObj.image)));
@@ -92,12 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentImageIndex = 0;
         updateGalleryUI();
-        
-        const modal = document.getElementById('image-modal');
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+        document.getElementById('image-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     };
 
     window.changeImage = (direction) => {
@@ -113,26 +150,47 @@ document.addEventListener('DOMContentLoaded', () => {
         if (main) main.src = currentGalleryImages[currentImageIndex];
         if (thumbs) {
             thumbs.innerHTML = currentGalleryImages.map((src, i) => `
-                <img src="${src}" class="modal-thumb ${i === currentImageIndex ? 'active' : ''}" 
-                     onclick="jumpToImage(${i})">
+                <img src="${src}" class="modal-thumb ${i === currentImageIndex ? 'active' : ''}" onclick="jumpToImage(${i})">
             `).join('');
         }
     }
 
     window.jumpToImage = (i) => { currentImageIndex = i; updateGalleryUI(); };
-    window.closeGallery = () => { 
-        document.getElementById('image-modal').style.display = 'none'; 
-        document.body.style.overflow = 'auto'; 
+    window.closeGallery = () => { document.getElementById('image-modal').style.display = 'none'; document.body.style.overflow = 'auto'; };
+
+    // --- PDV (100% FUNCIONAL) ---
+    window.addToPOS = (id) => {
+        const p = allProducts.find(i => i.id === id);
+        if (!p) return;
+        const exist = posCart.find(i => i.id === id);
+        exist ? exist.quantity++ : posCart.push({...p, quantity: 1, price: parseFloat(p.price)});
+        updatePOSUI();
     };
 
-    // ✅ Correção linha 104 (Verifica existência do botão)
-    const checkoutBtn = document.getElementById('checkout-admin-btn');
-    if (checkoutBtn) {
-        checkoutBtn.onclick = async () => {
-            // Lógica de checkout simplificada
-            alert("Enviando pedido para consultoria...");
-        };
-    }
+    window.updatePOSUI = () => {
+        const cont = document.getElementById('pos-cart-items');
+        if (!cont) return;
+        cont.innerHTML = posCart.map(i => `<div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${i.name} (${i.quantity}x)</span><button onclick="removeFromPOS(${i.id})" style="color:red; background:none; border:none;">&times;</button></div>`).join('') || 'Vazio';
+        const sub = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
+        const total = sub * (1 - (parseFloat(document.getElementById('discount-input')?.value || 0) / 100));
+        if (document.getElementById('pos-total')) document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
+    };
+
+    window.removeFromPOS = (id) => { posCart = posCart.filter(i => i.id !== id); updatePOSUI(); };
+
+    window.searchCustomerByPhone = async () => {
+        const phone = document.getElementById('client-phone')?.value;
+        if(!phone) return alert("Digite o WhatsApp.");
+        try {
+            const res = await fetch(`${API_BASE_URL}/customer/search/${phone}/`);
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('client-name').value = data.first_name;
+                alert("Cliente encontrado!");
+            } else { alert("Não cadastrado."); }
+        } catch (e) { console.log("Erro CRM"); }
+    };
 
     loadProducts();
+    updateUI();
 });
