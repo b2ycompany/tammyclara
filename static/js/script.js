@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V9.1
- * Foco: Correção de Erro 400 (Bad Request), Máscaras e Validação de Dados
+ * TAMMY'S STORE - SISTEMA UNIFICADO V10
+ * Foco: Limpeza rigorosa de dados (CPF/TEL) e Correção de Erro 400
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- 🎭 MÁSCARAS DE ENTRADA ---
+    // --- 🎭 MÁSCARAS DE ENTRADA (VISUAIS) ---
     const maskCPF = (value) => {
         return value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
     };
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 🛒 CARREGAMENTO DE PRODUTOS ---
     window.loadProducts = async () => {
-        const container = document.getElementById('products-container') || document.getElementById('product-results');
+        const container = document.getElementById('product-results') || document.getElementById('products-container');
         if (!container) return;
         try {
             const res = await fetch(`${API_BASE_URL}/products/`);
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `
                 <div class="product-card" ${isPDV ? `onclick="addToPOS(${p.id})"` : ''}>
                     <div class="product-img-wrapper" ${!isPDV ? `onclick="openGallery(${p.id})"` : ''}>
-                        <img src="${buildUrl(p.main_image)}" onerror="this.src='https://placehold.co/400x600'">
+                        <img src="${buildUrl(p.main_image)}" onerror="this.src='https://placehold.co/150x150'">
                     </div>
                     <div style="flex-grow:1;">
                         <h3 style="font-size:0.9rem;">${p.name}</h3>
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { alert("Erro no CRM."); }
     };
 
-    // --- 🏦 FINALIZAÇÃO (CORREÇÃO DO ERRO 400/500) ---
+    // --- 🏦 FINALIZAÇÃO (RESOLVE ERRO 400) ---
     window.setPayment = (method, btn) => {
         selectedPayment = method;
         document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
@@ -95,20 +95,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!posCart.length) return alert("Carrinho vazio!");
         
         const cName = document.getElementById('client-name').value.trim();
+        // Limpeza absoluta: remove tudo que não for número para CPF e Telefone
         const cPhoneRaw = document.getElementById('client-phone').value.replace(/\D/g, '');
         const cCpfRaw = document.getElementById('client-cpf').value.replace(/\D/g, '');
         const cBirth = document.getElementById('client-birth').value;
 
-        if (!cName || cPhoneRaw.length < 10) return alert("Nome e Telefone válido (DDD + Número) são obrigatórios.");
+        if (!cName || cPhoneRaw.length < 10) return alert("Nome e Telefone válido são obrigatórios.");
 
-        // Construção do objeto de cliente limpando campos vazios para evitar Erro 400
+        // Construção do objeto de cliente
         const customer_info = { 
             first_name: cName, 
             phone_number: cPhoneRaw 
         };
         
+        // Só adiciona se não estiver vazio, enviando apenas os números
         if (cCpfRaw) customer_info.cpf = cCpfRaw;
-        if (cBirth) customer_info.birth_date = cBirth;
+        if (cBirth && cBirth !== "") customer_info.birth_date = cBirth;
 
         const payload = {
             customer_info: customer_info,
@@ -130,9 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (!res.ok) {
-                // Se o servidor retornar erro, mostramos o que ele rejeitou especificamente
-                console.error("Erro da API:", data);
-                throw new Error(data.message || data.detail || "Dados inválidos (Verifique CPF ou Data)");
+                console.error("Erro detalhado da API:", data);
+                // Tenta extrair a mensagem de erro específica do Django se existir
+                const errorMsg = data.message || JSON.stringify(data);
+                throw new Error(errorMsg);
             }
 
             // Sucesso
@@ -148,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (e) {
             console.error("Erro no Checkout:", e);
-            alert("ERRO NO CHECKOUT: " + e.message);
+            alert("ERRO NO SERVIDOR: " + e.message);
         }
     };
 
