@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA ONE PAGE BOUTIQUE
- * Versão Corrigida: Fim do Looping de Imagens e Carregamento Admin
+ * TAMMY'S STORE - SISTEMA UNIFICADO
+ * Versão Corrigida: Fim do Looping de Erros e Carregamento Admin
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,16 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 2500); 
 
-    // ✅ Função de auxílio de mídia corrigida para evitar loops
+    // ✅ Função de auxílio de mídia para garantir o caminho /media/
     const buildUrl = (path) => {
         if (!path) return ''; 
         if (path.startsWith('http')) return path;
-        // Garante que o caminho comece com /media/
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        // Garante que o caminho aponte para a pasta de mídias do Django
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- CARREGAMENTO API ---
+    // --- CARREGAMENTO DO CATÁLOGO ---
     async function loadProducts() {
         const cont = document.getElementById('products-container');
         if (!cont) return;
@@ -50,9 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
                         <img src="${imgSource}" 
                              alt="${p.name}" 
-                             onerror="this.onerror=null; this.style.display='none'; this.parentNode.innerHTML='<div style=\'padding:40px; color:#ccc; font-size:0.7rem;\'>IMAGEM INDISPONÍVEL NO ADMIN</div>';">
+                             onerror="this.onerror=null; this.src=''; this.parentNode.innerHTML='<div style=\'padding:60px 20px; color:#999; font-size:0.7rem; background:#f0f0f0;\'>IMAGEM NÃO DISPONÍVEL NO SERVIDOR</div>';">
                     </div>
-                    <h3 style="font-family:'Playfair Display'; margin-top:15px;">${p.name}</h3>
+                    <h3 style="font-family:'Playfair Display'; margin-top:15px; font-size: 1.2rem;">${p.name}</h3>
                     <p style="color:#d4af37; font-weight:600; margin-top:10px;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
                     <button class="btn-gold-outline add-cart" data-id="${p.id}">ADICIONAR À SACOLA</button>
                 </div>`;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 exist ? exist.quantity++ : cart.push({...p, quantity: 1, price: parseFloat(p.price)});
                 localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
                 updateCartUI();
-                alert("Peça reservada com sucesso!");
+                alert("Adicionado com sucesso!");
             });
         } catch (e) { console.error("Erro no catálogo:", e); }
     }
@@ -80,15 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
         cont.innerHTML = cart.map(item => {
             total += item.price * item.quantity;
             return `
-            <div class="cart-item" style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
-                <img src="${buildUrl(item.main_image)}" width="60" height="80" style="object-fit:cover;" onerror="this.onerror=null; this.src='';">
+            <div class="cart-item" style="display:flex; align-items:center; gap:15px; margin-bottom:15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <img src="${buildUrl(item.main_image)}" width="60" height="80" style="object-fit:cover;" onerror="this.onerror=null; this.style.display='none';">
                 <div style="flex-grow:1;">
                     <h4 style="font-family:'Playfair Display'; font-size:0.9rem;">${item.name}</h4>
                     <p style="font-size:0.7rem; opacity:0.5;">${item.quantity} un.</p>
                 </div>
-                <button onclick="remove(${item.id})" style="color:red; background:none; border:none; cursor:pointer;">×</button>
+                <button onclick="remove(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-size: 1.2rem;">&times;</button>
             </div>`;
-        }).join('') || '<p style="text-align:center; opacity:0.5;">Sacola vazia.</p>';
+        }).join('') || '<p style="text-align:center; opacity:0.5; padding: 20px;">Sua sacola está vazia.</p>';
         
         if (totalDisp) totalDisp.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
     };
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.removeItem('tammyClaraCart');
                     window.location.href = '/order-success/';
                 }
-            } catch (e) { alert("Erro na comunicação com o servidor."); }
+            } catch (e) { alert("Erro ao processar reserva."); }
         };
     }
 
