@@ -21,14 +21,13 @@
         /* PRODUTOS PADRONIZADOS */
         .products-panel { flex: 2; min-width: 400px; }
         #product-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top:20px; }
-        .product-card { border: 1px solid #eee; border-radius: 8px; overflow: hidden; cursor: pointer; text-align: center; transition: 0.3s; }
-        .product-card:hover { border-color: var(--gold); transform: translateY(-3px); }
-        .product-img-wrapper { width: 100%; height: 200px; overflow: hidden; background: #fafafa; }
-        .standard-img { width: 100%; height: 100%; object-fit: cover; }
+        .product-card-pos { border: 1px solid #eee; border-radius: 8px; overflow: hidden; cursor: pointer; text-align: center; transition: 0.3s; padding: 10px; }
+        .product-card-pos:hover { border-color: var(--gold); transform: translateY(-3px); background: #fffcf5; }
+        .img-pos { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
         
         /* CRM E CARRINHO */
         .cart-panel { flex: 1; min-width: 380px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; box-sizing: border-box; }
         .btn-search { background: #2c3e50; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: 600; }
         
         /* FORMAS DE PAGAMENTO */
@@ -37,20 +36,21 @@
         .pay-btn.active { background: var(--gold); border-color: var(--gold); color: #000; }
         
         /* CARRINHO */
-        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .del-btn { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+        #pos-cart-items { min-height: 50px; margin-top: 15px; }
         .finalize-btn { background: var(--dark); color: var(--gold); border: 2px solid var(--gold); padding: 20px; width: 100%; font-weight: 700; border-radius: 5px; cursor: pointer; margin-top: 25px; text-transform: uppercase; font-size: 1rem; }
         
         /* IMPRESSÃO */
-        @media print { body * { visibility: hidden; } #receipt-print, #receipt-print * { visibility: visible; } #receipt-print { display: block !important; position: absolute; left: 0; top: 0; width: 80mm; font-family: monospace; } }
-        #receipt-print { display: none; padding: 10px; }
+        @media print { body * { visibility: hidden; } #receipt-print, #receipt-print * { visibility: visible; } #receipt-print { display: block !important; position: absolute; left: 0; top: 0; width: 80mm; } }
+        #receipt-print { display: none; padding: 10px; font-family: monospace; font-size: 12px; }
+        
+        @media (max-width: 768px) { .pos-main { flex-direction: column; } .cart-panel { min-width: 100%; } }
     </style>
 </head>
 <body>
     {% csrf_token %}
     <div class="pos-header">
         <h3 style="margin:0; letter-spacing:2px;">TAMMY'S PDV PROFISSIONAL</h3>
-        <button onclick="location.reload()" style="background:none; border:none; color:#fff; cursor:pointer;"><i class="fas fa-sync"></i> ATUALIZAR</button>
+        <button onclick="window.location.reload()" style="background:none; border:none; color:#fff; cursor:pointer;"><i class="fas fa-sync"></i> ATUALIZAR</button>
     </div>
 
     <div class="pos-main">
@@ -66,8 +66,8 @@
             
             <hr style="margin: 20px 0;">
             <input type="text" id="client-name" placeholder="Nome Completo (Obrigatório)">
-            <input type="tel" id="client-phone" placeholder="WhatsApp (Obrigatório)">
-            <input type="text" id="client-cpf" placeholder="CPF (Opcional)">
+            <input type="tel" id="client-phone" placeholder="WhatsApp (Obrigatório)" maxlength="15">
+            <input type="text" id="client-cpf" placeholder="CPF 000.000.000-00" maxlength="14">
             <input type="date" id="client-birth" title="Data de Nascimento">
 
             <h4><i class="fas fa-credit-card"></i> FORMA DE PAGAMENTO</h4>
@@ -79,7 +79,7 @@
             </div>
 
             <h4><i class="fas fa-shopping-basket"></i> ITENS NO CARRINHO</h4>
-            <div id="pos-cart-items" style="min-height: 50px;"></div>
+            <div id="pos-cart-items">Vazio</div>
             <h3 style="text-align:right; border-top: 2px solid #eee; padding-top: 15px;">TOTAL: <span id="pos-total">R$ 0,00</span></h3>
             
             <button class="finalize-btn" onclick="finalizePosSale()">FINALIZAR VENDA & IMPRIMIR</button>
@@ -91,6 +91,7 @@
         <p>--------------------------------</p>
         <p>CLIENTE: <span id="print-client"></span></p>
         <p>TOTAL: <span id="print-total"></span></p>
+        <p>DATA: <span id="print-date"></span></p>
         <p>--------------------------------</p>
         <center><p>Obrigada pela preferência!</p></center>
     </div>
