@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tammy's Store | Boutique de Luxo</title>
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@200;300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
@@ -14,68 +14,75 @@
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
 
-        /* ✅ SPLASH SCREEN ORIGINAL COM BRILHO */
+        /* ✅ SPLASH SCREEN ORIGINAL COM BRILHO DOURADO */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: 0.8s ease; }
-        .splash-logo-container { position: relative; width: 200px; height: 200px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; }
-        .splash-logo-container img { width: 170px; border-radius: 50%; }
-        .splash-logo-container::after { content: ""; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent); transform: rotate(30deg); animation: shimmer 2.5s infinite; }
+        .splash-logo-container { position: relative; width: 220px; height: 220px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; }
+        .splash-logo-container img { width: 180px; border-radius: 50%; z-index: 2; }
+        .splash-logo-container::after { content: ""; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent); transform: rotate(30deg); animation: shimmer 2.5s infinite; z-index: 3; }
         @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
 
-        /* ✅ HEADER ORIGINAL RESTAURADO */
+        /* ✅ HEADER PREMIUM (EFEITO GLASS) */
         header { position: fixed; top: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; background: transparent; }
-        header.scrolled { background: var(--dark); padding: 15px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
+        header.scrolled { background: var(--dark); padding: 15px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.3); backdrop-filter: blur(10px); }
         .logo-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--white) !important; text-transform: uppercase; letter-spacing: 5px; text-decoration: none; font-weight: 700; }
-        nav a { text-decoration: none; color: var(--white) !important; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; margin-left: 25px; transition: 0.3s; }
+        nav a { text-decoration: none; color: var(--white) !important; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; margin-left: 25px; transition: 0.3s; font-weight: 400; }
         nav a:hover { color: var(--gold) !important; }
 
         /* ✅ HERO SECTION */
         .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; }
-        .hero-card { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; }
+        .hero-card { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 50px; text-align: center; backdrop-filter: blur(15px); width: 90%; max-width: 650px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; }
         .hero-card.show { opacity: 1; transform: translateY(0); }
-        .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 15px; }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--gold); margin-bottom: 20px; letter-spacing: 2px; }
 
-        /* ✅ GRID BOUTIQUE - CORREÇÃO DE IMAGENS GIGANTES */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 100px 5% 50px; }
-        .product-card { background: #fff; border: 1px solid #f2f2f2; padding: 20px; text-align: center; display: flex; flex-direction: column; height: 100%; transition: 0.3s; }
-        .product-card:hover { border-color: var(--gold); transform: translateY(-5px); }
+        /* ✅ GRID BOUTIQUE - CORREÇÃO DEFINITIVA PARA FOTOS DE IPHONE */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 100px 5% 50px; }
+        .product-card { background: #fff; border: 1px solid #f2f2f2; padding: 25px; text-align: center; display: flex; flex-direction: column; height: 100%; transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .product-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
         
-        /* Container trava o tamanho da imagem independente da resolução */
+        /* O "Quadro" que domina as fotos de alta resolução do iPhone */
         .product-img-wrapper { 
             position: relative;
             width: 100%;
-            aspect-ratio: 3/4; /* Proporção padrão de catálogo de moda */
+            aspect-ratio: 3/4; /* Proporção de catálogo de luxo */
             overflow: hidden; 
             background: #f9f9f9; 
             cursor: pointer; 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
         }
         .product-img-wrapper img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Domina fotos gigantes do celular para caber no quadro sem distorcer */
-            transition: 0.5s ease;
+            object-fit: cover; /* Enquadra a foto sem esticar */
+            transition: 0.6s ease;
         }
+        .product-card:hover .product-img-wrapper img { transform: scale(1.05); }
 
-        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 15px; background: transparent; cursor: pointer; letter-spacing: 2px; font-weight: 600; font-size: 0.7rem; margin-top: auto; text-decoration: none; }
+        .price { font-family: 'Montserrat', sans-serif; color: var(--gold); font-weight: 700; font-size: 1.3rem; margin: 15px 0; }
+        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 18px; background: transparent; cursor: pointer; letter-spacing: 3px; font-weight: 700; font-size: 0.75rem; margin-top: auto; text-decoration: none; transition: 0.3s; }
+        .btn-gold-outline:hover { background: var(--gold); color: #000; }
 
-        /* ✅ SACOLA */
-        #sacola { padding: 80px 5%; background: #fafafa; }
-        .cart-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        /* ✅ SACOLA DE COMPRAS */
+        #sacola { padding: 100px 5%; background: #fafafa; }
+        .cart-items { margin-bottom: 30px; }
+        .cart-item { display: flex; align-items: center; gap: 20px; padding: 15px; border-bottom: 1px solid #ddd; background: #fff; margin-bottom: 10px; }
 
         /* ✅ CONTATO, WHATSAPP E MAPA */
         .contact-section { padding: 100px 5%; text-align: center; background: #000; color: #fff; }
-        .btn-whatsapp { display: inline-flex; align-items: center; gap: 10px; background: #25d366; color: white; padding: 20px 40px; border-radius: 4px; text-decoration: none; font-weight: bold; margin-top: 30px; }
-        .map-container { margin-top: 60px; height: 450px; border-radius: 10px; overflow: hidden; border: 2px solid var(--gold); }
+        .btn-whatsapp { display: inline-flex; align-items: center; gap: 15px; background: #25d366; color: white; padding: 22px 45px; border-radius: 5px; text-decoration: none; font-weight: 700; margin-top: 40px; transition: 0.3s; font-size: 1.1rem; }
+        .btn-whatsapp:hover { transform: scale(1.05); background: #128c7e; }
+        .map-container { margin-top: 80px; height: 500px; border-radius: 12px; overflow: hidden; border: 2px solid var(--gold); }
 
         /* ✅ MODAL DE GALERIA NAVEGÁVEL */
         .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); justify-content: center; align-items: center; flex-direction: column; }
-        .modal-main { display: flex; align-items: center; gap: 20px; }
-        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 2rem; padding: 10px 20px; cursor: pointer; border-radius: 50%; }
-        .close-modal { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 45px; cursor: pointer; }
-        #modal-thumbnails-container img { width: 60px; height: 80px; object-fit: cover; margin: 5px; cursor: pointer; opacity: 0.6; border: 1px solid transparent; }
-        #modal-thumbnails-container img.active { opacity: 1; border-color: var(--gold); }
+        .modal-main { display: flex; align-items: center; gap: 30px; width: 90%; justify-content: center; }
+        .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 2rem; width: 60px; height: 60px; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .nav-btn:hover { background: var(--gold); color: #000; }
+        .close-modal { position: absolute; top: 40px; right: 40px; color: #fff; font-size: 50px; cursor: pointer; }
+        #modal-thumbnails-container { display: flex; gap: 15px; margin-top: 30px; overflow-x: auto; padding: 10px; max-width: 80%; }
+        .modal-thumb { width: 70px; height: 100px; object-fit: cover; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: 0.3s; }
+        .modal-thumb.active { border-color: var(--gold); opacity: 1; }
 
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr 1fr; gap: 15px; } .hero h1 { font-size: 2rem; } }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr 1fr; gap: 15px; } .hero h1 { font-size: 2.2rem; } .logo-text { font-size: 1.4rem; } }
     </style>
 </head>
 <body>
@@ -83,7 +90,7 @@
     
     <div id="splash-screen">
         <div class="splash-logo-container"><img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo"></div>
-        <h2 style="color:#fff; margin-top:30px; letter-spacing:10px; font-family:'Playfair Display';">TAMMY'S</h2>
+        <h2 style="color:#fff; margin-top:30px; letter-spacing:10px; font-family:'Playfair Display'; font-weight: 400;">TAMMY'S</h2>
     </div>
 
     <header id="main-header">
@@ -100,33 +107,39 @@
     <section class="hero" id="home">
         <div class="hero-card" id="heroCard">
             <h1>Arte em Vestir</h1>
-            <p style="color:#ddd; margin: 20px 0;">A sofisticação que você merece.</p>
-            <a href="#colecao" class="btn-gold-outline">CONHECER AGORA</a>
+            <p style="color:#ddd; margin: 25px 0; font-size: 1.1rem; letter-spacing: 1px;">A sofisticação que você merece em cada detalhe.</p>
+            <a href="#colecao" class="btn-gold-outline" style="max-width: 300px; margin: 0 auto;">CONHECER AGORA</a>
         </div>
     </section>
 
     <main id="colecao">
-        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.5rem; margin-top: 50px;">Nossa Curadoria</h2>
+        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.8rem; margin: 60px 0 20px;">Nossa Curadoria</h2>
         <div class="grid" id="products-container"></div>
     </main>
 
     <section id="sacola">
-        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 30px;">Sua Sacola</h2>
+        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 40px; text-align: center;">Sua Sacola</h2>
         <div class="cart-items"></div>
-        <div style="text-align:right; margin-top: 30px;">
+        <div style="text-align:right; margin-top: 40px; border-top: 2px solid #000; padding-top: 20px;">
             <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
-            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer; letter-spacing: 2px;">CONFIRMAR PEDIDO</button>
+            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; max-width: 400px; padding:22px; border:none; margin-top:30px; font-weight:700; cursor:pointer; letter-spacing: 3px; font-size: 1rem;">CONFIRMAR PEDIDO (SITE)</button>
         </div>
     </section>
 
     <section class="contact-section" id="contato">
-        <h2 style="font-family:'Playfair Display'; font-size: 2.2rem;">Atendimento Exclusive</h2>
-        <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> CHAMAR NO WHATSAPP</a>
+        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; color: var(--gold); margin-bottom: 20px;">Atendimento Exclusive</h2>
+        <p style="font-weight: 300; letter-spacing: 1px;">Fale diretamente com Tammy ou Clara para consultoria personalizada.</p>
         
-        <div style="margin-top: 60px;">
-            <p style="margin-bottom: 20px;">R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
+        <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp">
+            <i class="fab fa-whatsapp"></i> CHAMAR NO WHATSAPP
+        </a>
+
+        <div style="margin-top: 100px;">
+            <h3 style="font-family:'Playfair Display'; font-size: 2rem; margin-bottom: 15px;">Boutique Cotia</h3>
+            <p style="margin-bottom: 40px; letter-spacing: 2px; font-weight: 300;">R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
             <div class="map-container">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.4447432095!2d-46.9189!3d-23.6063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDM2JzIyLjciUyA0NsKwNTUnMDguMCJX!5e0!3m2!1spt-BR!2sbr!4v1630000000000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.347573033503!2d-46.92080062466874!3d-23.610688678765415!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf97397b982187%3A0xc3f8379435c24976!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253%20-%20Jardim%20Dinorah%2C%20Cotia%20-%20SP%2C%2006703-000!5e0!3m2!1spt-BR!2sbr!4v1710000000000!5m2!1spt-BR!2sbr" 
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </section>
@@ -135,12 +148,12 @@
         <span class="close-modal" onclick="closeGallery()">×</span>
         <div class="modal-main">
             <button class="nav-btn" onclick="changeImage(-1)">❮</button>
-            <img id="modal-main-image" style="max-height: 75vh; max-width: 80vw; object-fit: contain;">
+            <img id="modal-main-image" style="max-height: 80vh; max-width: 80vw; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
             <button class="nav-btn" onclick="changeImage(1)">❯</button>
         </div>
-        <div id="modal-thumbnails-container" style="display:flex; margin-top:20px; gap:10px; overflow-x: auto;"></div>
+        <div id="modal-thumbnails-container"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=13"></script>
+    <script src="{% static 'js/script.js' %}?v=15"></script>
 </body>
 </html>

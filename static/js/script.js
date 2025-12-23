@@ -1,17 +1,15 @@
 /**
- * TAMMY'S STORE - CORE V12 (DEFINITIVO)
- * Funcionalidades: Splash Original, CRM Multibusca, Máscaras, Galeria e PDV
+ * TAMMY'S STORE - CORE V15 (INTEGRAL)
+ * Funcionalidades: Splash, CRM Multibusca, Máscaras, Galeria e PDV
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
     let allProducts = [], posCart = [], selectedPayment = 'PIX';
-    let availableProducts = {};
-    let cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
-    let currentGalleryImages = [];
-    let currentImageIndex = 0;
+    let availableProducts = {}, cart = JSON.parse(localStorage.getItem('tammyClaraCart')) || [];
+    let currentGalleryImages = [], currentImageIndex = 0;
 
-    // --- 🚀 INTERFACE: SPLASH E HERO CARD ORIGINAIS ---
+    // --- 🚀 INTERFACE: SPLASH E HERO CARD ---
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if (splash) {
@@ -63,27 +61,27 @@ document.addEventListener('DOMContentLoaded', () => {
             
             container.innerHTML = products.map(p => {
                 availableProducts[p.id] = p;
-                const img = p.main_image ? (p.main_image.startsWith('http') ? p.main_image : '/media/'+p.main_image) : 'https://placehold.co/400x600';
+                const img = p.main_image ? (p.main_image.startsWith('http') ? p.main_image : '/media/'+p.main_image) : 'https://placehold.co/600x800';
                 
-                // LAYOUT PDV (Imagens Pequenas em Grid)
+                // LAYOUT PDV (Imagens Pequenas e Grid de Operação)
                 if (document.getElementById('product-results')) {
                     return `
-                    <div class="product-card-pos" onclick="addToPOS(${p.id})">
-                        <img src="${img}" class="img-pos">
-                        <h4 style="margin:5px 0; font-size:0.8rem;">${p.name}</h4>
-                        <p style="color:#d4af37; font-weight:700;">R$ ${parseFloat(p.price).toFixed(2)}</p>
+                    <div class="product-card-pos" onclick="addToPOS(${p.id})" style="border: 1px solid #eee; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px;">
+                        <img src="${img}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 4px;">
+                        <h4 style="margin:8px 0; font-size:0.75rem;">${p.name}</h4>
+                        <p style="color:#d4af37; font-weight:700; font-size:0.85rem;">R$ ${parseFloat(p.price).toFixed(2)}</p>
                     </div>`;
                 }
                 
-                // LAYOUT BOUTIQUE (Imagens Grandes 3:4)
+                // LAYOUT BOUTIQUE (Imagens Proporção 3:4 Fixas para iPhone)
                 return `
                 <div class="product-card">
                     <div class="product-img-wrapper" onclick="openGallery(${p.id})">
                         <img src="${img}" alt="${p.name}">
                     </div>
                     <div class="info-content">
-                        <h3 style="font-family:'Playfair Display'; margin-top:10px;">${p.name}</h3>
-                        <p style="color:#d4af37; font-weight:600; margin:10px 0;">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
+                        <h3 style="font-family:'Playfair Display'; margin-top:15px; font-size:1.3rem;">${p.name}</h3>
+                        <p class="price">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
                     </div>
                     <button class="btn-gold-outline add-cart" data-id="${p.id}">ADICIONAR À SACOLA</button>
                 </div>`;
@@ -96,15 +94,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 exist ? exist.quantity++ : cart.push({...prod, quantity: 1, price: parseFloat(prod.price)});
                 localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
                 updateUI();
-                alert("Adicionado!");
+                alert("Peça adicionada à sacola!");
             });
         } catch (e) { console.error("Erro Catálogo:", e); }
+    };
+
+    // --- 🛍️ SACOLA SITE ---
+    window.updateUI = () => {
+        const cont = document.querySelector('.cart-items');
+        if (!cont) return;
+        let total = 0;
+        cont.innerHTML = cart.map(item => {
+            total += item.price * item.quantity;
+            return `
+            <div class="cart-item">
+                <img src="${item.main_image.startsWith('http') ? item.main_image : '/media/'+item.main_image}" width="70" height="90" style="object-fit:cover;">
+                <div style="flex-grow:1;">
+                    <h4 style="font-family:'Playfair Display';">${item.name}</h4>
+                    <p>${item.quantity} un. - R$ ${(item.price * item.quantity).toFixed(2)}</p>
+                </div>
+                <button onclick="removeFromCart(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-size:1.5rem;">&times;</button>
+            </div>`;
+        }).join('') || '<p style="text-align:center; padding:20px;">Sua sacola está vazia.</p>';
+        if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    };
+
+    window.removeFromCart = (id) => {
+        cart = cart.filter(i => i.id !== id);
+        localStorage.setItem('tammyClaraCart', JSON.stringify(cart));
+        updateUI();
     };
 
     // --- 👥 CRM: BUSCA MULTI-DADOS ---
     window.searchCustomer = async () => {
         const q = document.getElementById('client-search-input')?.value.replace(/\D/g, "");
-        if (!q) return alert("Informe Nome, CPF ou Telefone.");
+        if (!q) return alert("Informe Nome, CPF ou WhatsApp para buscar.");
         try {
             const res = await fetch(`${API_BASE_URL}/customer/search/${q}/`);
             if (res.ok) {
@@ -114,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('client-cpf').value = d.cpf || '';
                 document.getElementById('client-birth').value = d.birth_date || '';
                 alert("Cliente localizado no CRM!");
-            } else { alert("Cliente não encontrado."); }
+            } else { alert("Cliente não encontrado. Preencha os campos para cadastrar."); }
         } catch (e) { console.error("Erro CRM:", e); }
     };
 
@@ -174,16 +198,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const cont = document.getElementById('pos-cart-items');
         if (!cont) return;
         cont.innerHTML = posCart.map(i => `
-            <div class="cart-row">
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-size:0.9rem;">
                 <span>${i.name} (x${i.quantity})</span>
                 <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
-            </div>`).join('') || 'Vazio';
+            </div>`).join('') || '<p style="color:#999; text-align:center;">Carrinho Vazio</p>';
         const total = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
         document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
     };
 
     window.finalizePosSale = async () => {
-        if (!posCart.length) return alert("Adicione produtos!");
+        if (!posCart.length) return alert("Adicione produtos primeiro!");
         const clientName = document.getElementById('client-name').value;
         const clientPhone = document.getElementById('client-phone').value;
         if (!clientName || !clientPhone) return alert("Nome e WhatsApp são obrigatórios.");
@@ -218,11 +242,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 posCart = []; 
                 updatePOSUI(); 
             } else {
-                alert("Erro ao salvar venda no servidor.");
+                alert("Erro ao processar venda. Tente novamente.");
             }
-        } catch (e) { alert("Erro na conexão com a API."); }
+        } catch (e) { alert("Erro de conexão com o servidor."); }
     };
 
     setupInputs();
     loadProducts();
+    updateUI();
 });
