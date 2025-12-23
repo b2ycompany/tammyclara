@@ -14,47 +14,66 @@
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
 
-        /* SPLASH SCREEN ORIGINAL COM BRILHO */
+        /* ✅ SPLASH SCREEN ORIGINAL COM BRILHO */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: 0.8s ease; }
         .splash-logo-container { position: relative; width: 200px; height: 200px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; }
         .splash-logo-container img { width: 170px; border-radius: 50%; }
         .splash-logo-container::after { content: ""; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent); transform: rotate(30deg); animation: shimmer 2.5s infinite; }
         @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
 
-        /* HEADER ORIGINAL RESTAURADO */
+        /* ✅ HEADER ORIGINAL RESTAURADO */
         header { position: fixed; top: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; background: transparent; }
         header.scrolled { background: var(--dark); padding: 15px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
         .logo-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--white) !important; text-transform: uppercase; letter-spacing: 5px; text-decoration: none; font-weight: 700; }
         nav a { text-decoration: none; color: var(--white) !important; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; margin-left: 25px; transition: 0.3s; }
         nav a:hover { color: var(--gold) !important; }
 
-        /* HERO SECTION */
+        /* ✅ HERO SECTION */
         .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; }
         .hero-card { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; }
         .hero-card.show { opacity: 1; transform: translateY(0); }
         .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 15px; }
 
-        /* GRID BOUTIQUE - FIX DE IMAGEM */
+        /* ✅ GRID BOUTIQUE - CORREÇÃO DE IMAGENS GIGANTES */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 100px 5% 50px; }
         .product-card { background: #fff; border: 1px solid #f2f2f2; padding: 20px; text-align: center; display: flex; flex-direction: column; height: 100%; transition: 0.3s; }
-        .product-img-wrapper { aspect-ratio: 3/4; overflow: hidden; background: #f9f9f9; cursor: pointer; margin-bottom: 15px; }
-        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .product-card:hover { border-color: var(--gold); transform: translateY(-5px); }
+        
+        /* Container trava o tamanho da imagem independente da resolução */
+        .product-img-wrapper { 
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3/4; /* Proporção padrão de catálogo de moda */
+            overflow: hidden; 
+            background: #f9f9f9; 
+            cursor: pointer; 
+            margin-bottom: 15px; 
+        }
+        .product-img-wrapper img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* Domina fotos gigantes do celular para caber no quadro sem distorcer */
+            transition: 0.5s ease;
+        }
+
         .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 15px; background: transparent; cursor: pointer; letter-spacing: 2px; font-weight: 600; font-size: 0.7rem; margin-top: auto; text-decoration: none; }
 
-        /* SACOLA */
+        /* ✅ SACOLA */
         #sacola { padding: 80px 5%; background: #fafafa; }
         .cart-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
 
-        /* CONTATO E MAPA RESTAURADOS */
+        /* ✅ CONTATO, WHATSAPP E MAPA */
         .contact-section { padding: 100px 5%; text-align: center; background: #000; color: #fff; }
         .btn-whatsapp { display: inline-flex; align-items: center; gap: 10px; background: #25d366; color: white; padding: 20px 40px; border-radius: 4px; text-decoration: none; font-weight: bold; margin-top: 30px; }
         .map-container { margin-top: 60px; height: 450px; border-radius: 10px; overflow: hidden; border: 2px solid var(--gold); }
 
-        /* MODAL GALERIA NAVEGÁVEL */
+        /* ✅ MODAL DE GALERIA NAVEGÁVEL */
         .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); justify-content: center; align-items: center; flex-direction: column; }
         .modal-main { display: flex; align-items: center; gap: 20px; }
         .nav-btn { background: none; border: 1px solid var(--gold); color: var(--gold); font-size: 2rem; padding: 10px 20px; cursor: pointer; border-radius: 50%; }
         .close-modal { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 45px; cursor: pointer; }
+        #modal-thumbnails-container img { width: 60px; height: 80px; object-fit: cover; margin: 5px; cursor: pointer; opacity: 0.6; border: 1px solid transparent; }
+        #modal-thumbnails-container img.active { opacity: 1; border-color: var(--gold); }
 
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr 1fr; gap: 15px; } .hero h1 { font-size: 2rem; } }
     </style>
@@ -96,7 +115,7 @@
         <div class="cart-items"></div>
         <div style="text-align:right; margin-top: 30px;">
             <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
-            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer; letter-spacing: 2px;">CONFIRMAR PEDIDO (SITE)</button>
+            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer; letter-spacing: 2px;">CONFIRMAR PEDIDO</button>
         </div>
     </section>
 
@@ -105,11 +124,9 @@
         <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> CHAMAR NO WHATSAPP</a>
         
         <div style="margin-top: 60px;">
-            <h3>Boutique Cotia</h3>
             <p style="margin-bottom: 20px;">R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
             <div class="map-container">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.4447432095!2d-46.9189!3d-23.6063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDM2JzIyLjciUyA0NsKwNTUnMDguMCJX!5e0!3m2!1spt-BR!2sbr!4v1630000000000" 
-                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.4447432095!2d-46.9189!3d-23.6063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDM2JzIyLjciUyA0NsKwNTUnMDguMCJX!5e0!3m2!1spt-BR!2sbr!4v1630000000000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </section>
@@ -124,6 +141,6 @@
         <div id="modal-thumbnails-container" style="display:flex; margin-top:20px; gap:10px; overflow-x: auto;"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=12"></script>
+    <script src="{% static 'js/script.js' %}?v=13"></script>
 </body>
 </html>
