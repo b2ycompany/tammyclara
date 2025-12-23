@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tammy's Store | Moda e Carinho</title>
+    <title>Tammy's Store | Boutique de Luxo</title>
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -14,133 +14,117 @@
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
 
-        /* SPLASH SCREEN */
+        /* ✅ SPLASH SCREEN OTIMIZADO COM BRILHO */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: 0.8s ease; }
-        .splash-logo-container { position: relative; width: 180px; height: 180px; border-radius: 50%; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 2px solid var(--gold); }
-        .splash-logo-container img { width: 150px; z-index: 2; }
+        .splash-logo-container { position: relative; width: 220px; height: 220px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; }
+        .splash-logo-container img { width: 180px; border-radius: 50%; }
         .splash-logo-container::after { content: ""; position: absolute; top: -50%; left: -150%; width: 200%; height: 200%; background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent); transform: rotate(30deg); animation: shimmer 2.5s infinite; }
         @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
 
-        /* HEADER */
-        header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
-        header.scrolled { background: var(--dark); padding: 12px 5%; border-bottom: 1px solid var(--gold); }
-        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #fff; text-decoration: none; letter-spacing: 2px; }
-        nav ul { display: flex; list-style: none; gap: 20px; }
-        nav a { color: #fff; text-decoration: none; font-size: 0.8rem; letter-spacing: 1px; }
+        /* HEADER PREMIUM */
+        header { position: fixed; top: 0; width: 100%; padding: 25px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; background: transparent; }
+        header.scrolled { background: var(--glass); padding: 15px 5%; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--white); text-transform: uppercase; letter-spacing: 5px; text-decoration: none; font-weight: 700; }
+        nav a { text-decoration: none; color: var(--white); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; margin-left: 25px; font-weight: 300; transition: 0.3s; }
+        nav a:hover { color: var(--gold); }
 
-        /* HERO */
-        .hero { height: 80vh; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("{% static 'img/placeholder-capa.png' %}") center/cover; display: flex; align-items: center; justify-content: center; }
-        .hero-card { background: var(--glass); border: 1px solid var(--gold); padding: 40px; text-align: center; backdrop-filter: blur(10px); opacity: 0; transform: translateY(20px); transition: 1s ease-out; }
-        .hero-card.show { opacity: 1; transform: translateY(0); }
-
-        /* ✅ GRELHA DE PRODUTOS CORRIGIDA */
-        section { padding: 60px 5%; }
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Garante que os itens não fiquem gigantes */
-            gap: 30px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
-        }
-
-        .product-card { 
-            background: #fff; 
-            border: 1px solid #eee; 
-            padding: 10px; 
-            transition: 0.3s; 
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ✅ TAMANHO PADRONIZADO DA IMAGEM */
+        /* GRID DE PRODUTOS (FIX DE TAMANHO) */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; padding: 140px 5% 60px; }
+        .product-card { background: #fff; border: 1px solid #eee; padding: 20px; text-align: center; display: flex; flex-direction: column; transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); border-color: var(--gold); }
+        
         .product-img-wrapper { 
-            width: 100%; 
-            height: 380px; /* Altura fixa para manter o alinhamento */
+            aspect-ratio: 3/4; 
             overflow: hidden; 
-            background: #f4f4f4; 
+            background: #fdfdfd; 
+            cursor: pointer; 
+            margin-bottom: 20px;
             position: relative;
         }
-        .product-img-wrapper img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
-            object-position: top;
+        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
+        .product-card:hover .product-img-wrapper img { transform: scale(1.05); }
+
+        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 18px; background: transparent; cursor: pointer; letter-spacing: 3px; font-weight: 600; font-size: 0.7rem; transition: 0.3s; margin-top: auto; }
+        .btn-gold-outline:hover { background: var(--gold); color: #000; }
+
+        /* ✅ SEÇÃO CONTATO, WHATSAPP E MAPA */
+        .contact-section { padding: 100px 5%; text-align: center; background: #000; color: #fff; }
+        .btn-whatsapp { display: inline-flex; align-items: center; gap: 10px; background: #25d366; color: white; padding: 20px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; margin-top: 30px; transition: 0.3s; }
+        .btn-whatsapp:hover { transform: scale(1.05); background: #128c7e; }
+        
+        .map-container { margin-top: 60px; height: 450px; border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); }
+
+        /* MODAL DE GALERIA NAVEGÁVEL */
+        .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content-wrapper { display: flex; align-items: center; gap: 30px; width: 90%; justify-content: center; }
+        #modal-main-image { max-height: 80vh; max-width: 70vw; object-fit: contain; border: 1px solid rgba(255,255,255,0.1); }
+        .nav-btn { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold); font-size: 1.5rem; width: 60px; height: 60px; cursor: pointer; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+        .nav-btn:hover { background: var(--gold); color: #000; }
+        .modal-thumbs { display: flex; gap: 15px; margin-top: 30px; padding: 10px; overflow-x: auto; max-width: 80%; }
+        .modal-thumb { width: 70px; height: 90px; object-fit: cover; cursor: pointer; opacity: 0.4; border: 2px solid transparent; transition: 0.3s; }
+        .modal-thumb.active { opacity: 1; border-color: var(--gold); }
+        .close-modal { position: absolute; top: 30px; right: 40px; color: #fff; font-size: 45px; cursor: pointer; z-index: 10002; }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 120px; }
+            .logo-text { font-size: 1.4rem; }
+            .modal-content-wrapper { gap: 10px; }
+            .nav-btn { width: 40px; height: 40px; font-size: 1rem; }
         }
-
-        .product-info { padding: 15px; text-align: center; }
-        .price { color: var(--gold); font-weight: 700; font-size: 1.1rem; margin: 8px 0; }
-        .btn-buy { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 10px; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-buy:hover { background: var(--gold); color: #fff; }
-
-        /* MODAL */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10001; justify-content: center; align-items: center; flex-direction: column; }
-        .modal-content-wrapper { display: flex; align-items: center; gap: 15px; position: relative; }
-        #modal-main-image { max-height: 70vh; max-width: 80vw; object-fit: contain; }
-        .close-modal { position: absolute; top: -50px; right: 0; color: #fff; font-size: 3rem; cursor: pointer; }
-        .nav-btn { background: none; border: none; color: var(--gold); font-size: 2.5rem; cursor: pointer; }
-        .thumb { width: 50px; height: 70px; object-fit: cover; cursor: pointer; border: 2px solid transparent; opacity: 0.5; }
-        .thumb.active { border-color: var(--gold); opacity: 1; }
-
-        /* CONTATO E MAPA */
-        #contato { text-align: center; background: #fafafa; }
-        .map-container { height: 400px; border: 1px solid var(--gold); margin-top: 30px; border-radius: 8px; overflow: hidden; }
     </style>
 </head>
 <body>
     {% csrf_token %}
-
+    
     <div id="splash-screen">
-        <div class="splash-logo-container"><img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo"></div>
-        <h2 style="color:#fff; margin-top:20px; font-family:'Playfair Display'; letter-spacing: 5px;">TAMMY'S STORE</h2>
+        <div class="splash-logo-container">
+            <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo Tammy's">
+        </div>
     </div>
 
     <header id="main-header">
-        <a href="#home" class="logo-text">TAMMY'S STORE</a>
+        <a href="/" class="logo-text">TAMMY'S</a>
         <nav>
-            <ul>
-                <li><a href="#home">Início</a></li>
-                <li><a href="#colecao">Coleção</a></li>
-                <li><a href="#sacola">Carrinho</a></li>
-            </ul>
+            <a href="#colecao">Coleção</a>
+            <a href="#contato">Contato</a>
+            <a href="/pdv/"><i class="fas fa-cash-register"></i></a>
         </nav>
     </header>
 
-    <section class="hero" id="home">
-        <div class="hero-card" id="heroCard">
-            <h1 style="color:var(--gold); font-family:'Playfair Display'; font-size:2.5rem;">Moda com Alma</h1>
-            <p style="color:#fff; margin-top:10px;">Elegância em cada detalhe.</p>
-        </div>
-    </section>
+    <main id="colecao">
+        <div class="grid" id="products-container">
+            </div>
+    </main>
 
-    <section id="colecao">
-        <h2 style="text-align:center; font-family:'Playfair Display'; margin-bottom:40px; font-size: 2.2rem;">Nossa Coleção</h2>
-        <div class="grid" id="products-container"></div>
-    </section>
+    <section class="contact-section" id="contato">
+        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; color: var(--gold);">Atendimento Exclusive</h2>
+        <p>Toque abaixo para falar com Tammy ou Clara e consultar disponibilidade.</p>
+        
+        <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp">
+            <i class="fab fa-whatsapp"></i> CHAMAR NO WHATSAPP
+        </a>
 
-    <section id="contato">
-        <h2 style="font-family:'Playfair Display'; margin-bottom: 20px;">Visite-nos</h2>
-        <p>R. Prof. José Barreto, 1253 - Cotia - SP</p>
-        <div class="map-container">
-            <iframe src="https://www.google.com/maps/embed?pb=..." width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        <div style="margin-top: 80px;">
+            <h3 style="font-family:'Playfair Display'; font-size: 1.8rem; margin-bottom: 20px;">Nossa Boutique</h3>
+            <p style="letter-spacing: 2px; font-weight: 200;">R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
+            
+            <div class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.123456789!2d-46.9242!3d-23.6089!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cf07!2sR.%20Prof.%20Jos%C3%A9%20Barreto%2C%201253!5e0!3m2!1spt-BR!2sbr!4v123456789" 
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
         </div>
     </section>
 
     <div id="image-modal" class="modal">
+        <span class="close-modal" onclick="closeGallery()">×</span>
         <div class="modal-content-wrapper">
-            <span class="close-modal" id="closeModalBtn">&times;</span>
-            <button class="nav-btn" id="prevBtn">❮</button>
+            <button class="nav-btn" onclick="changeImage(-1)">❮</button>
             <img id="modal-main-image" src="">
-            <button class="nav-btn" id="nextBtn">❯</button>
+            <button class="nav-btn" onclick="changeImage(1)">❯</button>
         </div>
-        <div id="modal-thumbnails-container" style="display:flex; gap:10px; margin-top:20px; max-width: 90%; overflow-x: auto; padding: 10px;"></div>
+        <div class="modal-thumbs" id="modal-thumbnails-container"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=17.1"></script>
-    <script>
-        window.onscroll = () => {
-            const h = document.getElementById('main-header');
-            window.scrollY > 50 ? h.classList.add('scrolled') : h.classList.remove('scrolled');
-        };
-    </script>
+    <script src="{% static 'js/script.js' %}?v=2.0"></script>
 </body>
 </html>
