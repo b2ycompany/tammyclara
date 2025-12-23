@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V16 (FULL VERSION)
- * Foco: CRM Total, Pagamentos, Galeria com Zoom e Padronização de Imagens
+ * TAMMY'S STORE - SISTEMA UNIFICADO V17 (FULL & FIX)
+ * Foco: Correção de Fechamento de Modal, Galeria com Zoom e CRM Total
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -12,9 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentGalleryImages = [];
     let currentImageIndex = 0;
 
-    console.log("[SISTEMA] V16 Full Iniciada - Todas as funcionalidades ativas.");
-
-    // --- 🚀 INTERFACE E SPLASH SCREEN ---
+    // --- 🚀 INTERFACE E SPLASH ---
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
     setTimeout(() => {
@@ -33,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- 🎭 MÁSCARAS DE DADOS (CRM) ---
+    // --- 🎭 MÁSCARAS CRM ---
     const maskCPF = (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
     const maskPhone = (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
 
@@ -67,10 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
             }).join('');
-        } catch (e) { console.error("[ERRO] Catálogo offline."); }
+        } catch (e) { console.error("[ERRO] Falha no carregamento."); }
     };
 
-    // --- 🖼️ GALERIA COM NAVEGAÇÃO E ZOOM ---
+    // --- 🖼️ GALERIA COM NAVEGAÇÃO, ZOOM E FIX FECHAMENTO ---
     window.openGallery = (id) => {
         const p = availableProducts[id];
         if (!p) return;
@@ -78,8 +76,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (p.images) p.images.forEach(img => currentGalleryImages.push(buildUrl(img.image)));
         currentImageIndex = 0;
         updateGalleryUI();
-        document.getElementById('image-modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        
+        const modal = document.getElementById('image-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    window.closeGallery = () => {
+        const modal = document.getElementById('image-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Reset do Zoom ao fechar
+            const mainImg = document.getElementById('modal-main-image');
+            if (mainImg) mainImg.style.transform = "scale(1)";
+        }
     };
 
     window.changeImage = (step) => {
@@ -97,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const thumbs = document.getElementById('modal-thumbnails-container');
         if (main) {
             main.src = currentGalleryImages[currentImageIndex];
-            main.style.transform = "scale(1)"; // Reset zoom ao mudar imagem
+            main.style.transform = "scale(1)"; 
         }
         if (thumbs) {
             thumbs.innerHTML = currentGalleryImages.map((src, i) => `
@@ -106,16 +119,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Efeito de Zoom simples ao clicar na imagem do modal
-    const modalMainImg = document.getElementById('modal-main-image');
-    if (modalMainImg) {
-        modalMainImg.onclick = function() {
+    // Zoom ao clicar na imagem
+    const modalImg = document.getElementById('modal-main-image');
+    if (modalImg) {
+        modalImg.onclick = function(e) {
+            e.stopPropagation(); // Impede fechar ao clicar na imagem
             this.style.transform = this.style.transform === "scale(1.5)" ? "scale(1)" : "scale(1.5)";
-            this.style.cursor = "zoom-out";
         };
     }
 
-    // --- 👥 CRM: BUSCA ---
+    // Fechar ao clicar fora ou no botão
+    const modalOverlay = document.getElementById('image-modal');
+    if (modalOverlay) {
+        modalOverlay.onclick = (e) => { if (e.target === modalOverlay) closeGallery(); };
+    }
+    const closeBtn = document.querySelector('.close-modal');
+    if (closeBtn) closeBtn.onclick = closeGallery;
+
+    // --- 👥 CRM BUSCA ---
     window.searchCustomer = async () => {
         const query = document.getElementById('client-search-input')?.value;
         if (!query) return alert("Digite Nome, CPF ou WhatsApp.");
@@ -129,10 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('client-birth').value = data.birth_date || '';
                 alert("Cliente localizado!");
             } else { alert("Cliente não encontrado."); }
-        } catch (e) { alert("Erro na busca CRM."); }
+        } catch (e) { console.error(e); }
     };
 
-    // --- 🏦 PDV: PAGAMENTOS E FINALIZAÇÃO ---
+    // --- 🏦 PDV FINALIZAÇÃO ---
     window.setPayment = (method, btn) => {
         selectedPayment = method;
         document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
@@ -143,12 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!posCart.length) return alert("Carrinho vazio!");
         const cName = document.getElementById('client-name').value;
         const cPhone = document.getElementById('client-phone').value.replace(/\D/g, '');
-        if (!cName || cPhone.length < 10) return alert("Nome e Celular são obrigatórios.");
+        if (!cName || cPhone.length < 10) return alert("Nome e Celular obrigatórios.");
 
         const payload = {
             customer_info: { 
-                first_name: cName, 
-                phone_number: cPhone,
+                first_name: cName, phone_number: cPhone,
                 cpf: document.getElementById('client-cpf').value.replace(/\D/g, ''),
                 birth_date: document.getElementById('client-birth').value || null 
             },
@@ -169,11 +189,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.print();
                 alert("Venda realizada!");
                 posCart = []; updatePOSUI();
-            } else { alert("Erro ao finalizar venda."); }
-        } catch (e) { alert("Erro de conexão."); }
+            }
+        } catch (e) { console.error(e); }
     };
 
-    // --- 🛒 CARRINHO PDV (ADICIONAR/REMOVER) ---
+    // --- 🛒 CARRINHO ---
     window.addToPOS = (id) => {
         const p = allProducts.find(i => i.id === id);
         if (p) {
@@ -182,23 +202,14 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePOSUI();
         }
     };
-
-    window.removeFromPOS = (id) => {
-        posCart = posCart.filter(i => i.id !== id);
-        updatePOSUI();
-    };
-
+    window.removeFromPOS = (id) => { posCart = posCart.filter(i => i.id !== id); updatePOSUI(); };
     window.updatePOSUI = () => {
         const cont = document.getElementById('pos-cart-items');
         if (!cont) return;
         cont.innerHTML = posCart.map(i => `
-            <div class="cart-row">
-                <span>${i.name} (x${i.quantity})</span>
-                <div>
-                    <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
-                    <button onclick="removeFromPOS(${i.id})" class="del-btn"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>`).join('') || '<p>Vazio</p>';
+            <div class="cart-row"><span>${i.name} (x${i.quantity})</span>
+            <div><span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
+            <button onclick="removeFromPOS(${i.id})" class="del-btn"><i class="fas fa-trash"></i></button></div></div>`).join('') || '<p>Vazio</p>';
         const total = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
         document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
     };

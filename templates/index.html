@@ -4,156 +4,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tammy's Store | Sua loja com todo carinho!.</title>
+    <title>Tammy's Store | Moda e Carinho</title>
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-        :root { --gold: #d4af37; --dark: #0b0b0b; --white: #ffffff; --glass: rgba(10, 10, 10, 0.85); }
+        :root { 
+            --gold: #d4af37; 
+            --dark: #0b0b0b; 
+            --white: #ffffff; 
+            --shadow: rgba(0,0,0,0.1);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        body { font-family: 'Montserrat', sans-serif; background-color: #fff; color: var(--dark); overflow-x: hidden; }
-
-        /* ✅ NOVO SPLASH SCREEN: PARADO COM BRILHO DOURADO */
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.8s ease, transform 0.8s ease; }
-        .splash-logo-container { 
-            position: relative; 
-            width: 200px; 
-            height: 200px; 
-            border-radius: 50%; 
-            overflow: hidden;
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            border: 2px solid var(--gold);
-        }
-        .splash-logo-container img { width: 170px; border-radius: 50%; z-index: 2; }
         
-        /* Efeito de brilho metálico passando pelo logo */
-        .splash-logo-container::after {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -150%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent);
-            transform: rotate(30deg);
-            animation: shimmer 2.5s infinite;
-            z-index: 3;
-        }
-        @keyframes shimmer {
-            0% { left: -150%; }
-            100% { left: 150%; }
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: #fff; 
+            color: var(--dark);
+            overflow-x: hidden; 
         }
 
-        /* HEADER */
-        header { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.5s; }
-        header.scrolled { background: var(--dark); padding: 12px 5%; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
-        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--white); text-transform: uppercase; letter-spacing: 3px; text-decoration: none; }
-        nav ul { display: flex; list-style: none; gap: 25px; }
-        nav a { text-decoration: none; color: var(--white); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        /* --- SPLASH SCREEN --- */
+        #splash-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #000; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 10000; 
+            transition: opacity 0.8s ease; 
+        }
+        .splash-logo-container { 
+            width: 180px; height: 180px; border-radius: 50%; 
+            border: 2px solid var(--gold); display: flex; 
+            justify-content: center; align-items: center; 
+            overflow: hidden; position: relative; 
+        }
+        .splash-logo-container img { width: 150px; z-index: 2; }
+        .splash-logo-container::after { 
+            content: ""; position: absolute; top: -50%; left: -150%; 
+            width: 200%; height: 200%; 
+            background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent); 
+            transform: rotate(30deg); animation: shimmer 2s infinite; 
+        }
+        @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+
+        /* --- HEADER --- */
+        header { 
+            position: fixed; top: 0; width: 100%; padding: 20px 5%; 
+            display: flex; justify-content: space-between; align-items: center; 
+            z-index: 1000; transition: 0.5s; background: transparent; 
+        }
+        header.scrolled { 
+            background: var(--dark); padding: 10px 5%; 
+            border-bottom: 1px solid var(--gold); 
+        }
+        .logo-text { 
+            font-family: 'Playfair Display', serif; color: #fff; 
+            text-decoration: none; font-size: 1.4rem; letter-spacing: 2px; 
+        }
+        nav ul { display: flex; list-style: none; gap: 20px; }
+        nav a { 
+            color: #fff; text-decoration: none; font-size: 0.8rem; 
+            letter-spacing: 1px; transition: 0.3s; 
+        }
         nav a:hover { color: var(--gold); }
 
-        /* HERO */
-        .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url("{% static 'img/placeholder-capa.png' %}"); background-size: cover; background-position: top center; display: flex; justify-content: center; align-items: center; }
-        .hero-card { background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.3); padding: 40px; text-align: center; backdrop-filter: blur(15px); width: 90%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 1.2s all ease-out; }
-        .hero-card.show { opacity: 1; transform: translateY(0); }
-        .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold); margin-bottom: 15px; }
-
-        /* GRID */
-        section { padding: 80px 5%; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-        .product-card { background: #fff; border: 1px solid #f0f0f0; padding: 15px; transition: 0.4s; text-align: center; }
-        .product-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-        .product-img-wrapper { height: 450px; overflow: hidden; background: #f9f9f9; cursor: pointer; }
-        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-gold-outline { display: block; width: 100%; border: 1px solid var(--gold); color: var(--gold); padding: 12px; margin-top: 15px; background: transparent; cursor: pointer; font-size: 0.8rem; letter-spacing: 2px; }
-
-        /* WHATSAPP */
-        .btn-whatsapp { display: inline-block; background: #25d366; color: white; padding: 15px 30px; border-radius: 4px; text-decoration: none; font-weight: 600; margin-top: 20px; transition: 0.3s; }
-        .btn-whatsapp:hover { background: #128c7e; transform: scale(1.05); }
-
-        /* MODAL */
-        .modal { display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; flex-direction: column; }
+        /* --- SECTIONS --- */
+        section { padding: 60px 5%; }
         
+        /* HERO */
+        #home { 
+            height: 80vh; 
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                        url('{% static "img/placeholder-capa.png" %}') center/cover; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .hero-content { 
+            background: rgba(0,0,0,0.7); padding: 40px; text-align: center; 
+            border: 1px solid var(--gold); backdrop-filter: blur(5px); 
+        }
+
+        /* GRID PRODUTOS */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 40px; 
+        }
+        .product-card { 
+            background: #fff; transition: 0.3s; 
+            border: 1px solid #eee; cursor: pointer; 
+        }
+        .product-img-wrapper { 
+            width: 100%; height: 420px; overflow: hidden; 
+            background: #f4f4f4; display: flex; align-items: center; 
+            justify-content: center; 
+        }
+        .standard-img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            object-position: top; transition: 0.5s; 
+        }
+        .product-card:hover .standard-img { transform: scale(1.05); }
+        .product-info { padding: 20px; text-align: center; }
+        .price { color: var(--gold); font-weight: 700; margin: 10px 0; font-size: 1.2rem; }
+        .btn-buy { 
+            background: transparent; border: 1px solid var(--gold); 
+            color: var(--gold); padding: 10px 20px; cursor: pointer; 
+            transition: 0.3s; width: 100%; text-transform: uppercase; 
+        }
+        .btn-buy:hover { background: var(--gold); color: #fff; }
+
+        /* --- MODAL GALERIA LUXO --- */
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.95); 
+            z-index: 10001; justify-content: center; align-items: center; 
+            flex-direction: column; 
+        }
+        .modal-content-wrapper { 
+            display: flex; align-items: center; 
+            gap: 20px; position: relative; 
+        }
+        #modal-main-image { 
+            max-height: 70vh; max-width: 85vw; 
+            object-fit: contain; transition: transform 0.3s ease; 
+        }
+        .nav-btn { 
+            background: none; border: none; color: var(--gold); 
+            font-size: 3rem; cursor: pointer; transition: 0.3s; 
+        }
+        .nav-btn:hover { transform: scale(1.2); }
+        .close-modal { 
+            position: absolute; top: -60px; right: 0; 
+            color: #fff; font-size: 3rem; cursor: pointer; 
+        }
+        #modal-thumbnails-container { 
+            display: flex; gap: 10px; margin-top: 20px; 
+            max-width: 90%; overflow-x: auto; padding: 10px;
+        }
+        .thumb { 
+            width: 60px; height: 80px; object-fit: cover; 
+            cursor: pointer; border: 2px solid transparent; 
+            opacity: 0.6; transition: 0.3s; 
+        }
+        .thumb.active { border-color: var(--gold); opacity: 1; }
+
         @media (max-width: 768px) {
-            header { padding: 15px 5%; flex-direction: column; gap: 10px; }
-            .hero h1 { font-size: 2rem; }
+            .nav-btn { font-size: 2rem; }
             .product-img-wrapper { height: 350px; }
         }
     </style>
 </head>
 <body>
+
     {% csrf_token %}
 
     <div id="splash-screen">
         <div class="splash-logo-container">
             <img src="{% static 'img/logo_tammy_clara.png' %}" alt="Logo">
         </div>
-        <h2 style="color:#fff; margin-top:30px; letter-spacing:10px; font-family:'Playfair Display';">TAMMY'S STORE</h2>
+        <h2 style="color:#fff; margin-top:20px; font-family:'Playfair Display'; letter-spacing: 5px;">TAMMY'S STORE</h2>
     </div>
 
     <header id="main-header">
-        <a href="#home" class="logo-text">Tammy's Store</a>
+        <a href="#home" class="logo-text">TAMMY'S STORE</a>
         <nav>
             <ul>
-                <li><a href="#home">Início</a></li>
-                <li><a href="#colecao">Coleção</a></li>
-                <li><a href="#sacola">Carrinho</a></li>
-                <li><a href="#contato">Contato</a></li>
+                <li><a href="#home">INÍCIO</a></li>
+                <li><a href="#colecao">COLEÇÃO</a></li>
+                <li><a href="#sacola">SACOLA</a></li>
             </ul>
         </nav>
     </header>
 
-    <section class="hero" id="home">
-        <div class="hero-card" id="heroCard">
-            <h1>Arte em Vestir</h1>
-            <p style="color:#ddd; margin: 20px 0;">Onde a sofisticação encontra sua melhor versão.</p>
-            <a href="#colecao" class="btn-gold-outline" style="text-decoration:none">CONHECER AGORA</a>
+    <section id="home">
+        <div class="hero-content">
+            <h1 style="color:var(--gold); font-family:'Playfair Display'; font-size:2.5rem;">Moda com Alma</h1>
+            <p style="color:#fff; margin-top:10px; letter-spacing: 1px;">Elegância em cada detalhe.</p>
         </div>
     </section>
 
     <section id="colecao">
-        <h2 style="text-align:center; font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 50px;">Nossa Coleção</h2>
-        <div class="grid" id="products-container"></div>
-    </section>
-
-    <section id="sacola" style="background:#fafafa;">
-        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 40px;">Sua Sacola</h2>
-        <div class="cart-items"></div>
-        <div style="margin-top:40px; text-align:right;">
-            <h3>Total: <span id="cart-total">R$ 0,00</span></h3>
-            <button id="checkout-admin-btn" style="background:var(--gold); color:#000; width:100%; padding:20px; border:none; margin-top:30px; font-weight:600; cursor:pointer; letter-spacing: 2px;">CONFIRMAR PEDIDO (ADMIN)</button>
-        </div>
-    </section>
-
-    <section id="contato" style="text-align:center;">
-        <h2 style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom: 30px;">Atendimento Exclusivo</h2>
-        <p>Clique abaixo para falar diretamente com Tammy.</p>
-        <a href="https://wa.me/5511975932366" target="_blank" class="btn-whatsapp">
-            <i class="fab fa-whatsapp"></i> CHAMAR NO WHATSAPP
-        </a>
-
-        <div style="margin-top: 60px;">
-            <h3 style="font-family:'Playfair Display'; margin-bottom: 20px;">Loja Cotia</h3>
-            <p style="margin-bottom: 30px;">R. Prof. José Barreto, 1253 - Jd. Dinorah, Cotia - SP</p>
-            <div style="height:450px; border-radius:8px; overflow:hidden; border: 2px solid var(--gold);">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3655.8453482352!2d-46.924848!3d-23.609874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDM2JzM1LjUiUyA0NsKwNTUnMjkuNSJX!5e0!3m2!1spt-BR!2sbr!4v1640000000000!5m2!1spt-BR!2sbr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        <h2 style="text-align:center; font-family:'Playfair Display'; margin-bottom:40px; font-size: 2.2rem;">Nossa Coleção</h2>
+        <div class="grid" id="products-container">
             </div>
-        </div>
     </section>
 
     <div id="image-modal" class="modal">
-        <span class="close-modal" style="position:absolute; top:30px; right:30px; color:#fff; font-size:40px; cursor:pointer;">×</span>
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <button class="nav-btn" onclick="changeImage(-1)" style="background:none; border:1px solid var(--gold); color:var(--gold); font-size:2rem; padding:10px; cursor:pointer;">❮</button>
-            <img id="modal-main-image" style="max-height:75vh; max-width:80vw; object-fit: contain;">
-            <button class="nav-btn" onclick="changeImage(1)" style="background:none; border:1px solid var(--gold); color:var(--gold); font-size:2rem; padding:10px; cursor:pointer;">❯</button>
+        <div class="modal-content-wrapper">
+            <span class="close-modal" id="closeModalBtn">&times;</span>
+            <button class="nav-btn" id="prevBtn">❮</button>
+            <img id="modal-main-image" src="" alt="Produto">
+            <button class="nav-btn" id="nextBtn">❯</button>
         </div>
-        <div id="modal-thumbnails-container" style="display:flex; margin-top:20px; gap: 10px; overflow-x: auto; max-width: 90%;"></div>
+        <div id="modal-thumbnails-container"></div>
     </div>
 
-    <script src="{% static 'js/script.js' %}?v=400"></script>
+    <script src="{% static 'js/script.js' %}?v=17.0"></script>
+    <script>
+        // Efeito de Header no Scroll
+        window.onscroll = () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        };
+
+        // Fechar Modal ao clicar no X ou fora da imagem
+        const modal = document.getElementById('image-modal');
+        const closeBtn = document.getElementById('closeModalBtn');
+
+        closeBtn.onclick = () => modal.style.display = "none";
+        
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        // Integração com funções globais do script.js
+        document.getElementById('prevBtn').onclick = () => changeImage(-1);
+        document.getElementById('nextBtn').onclick = () => changeImage(1);
+    </script>
 </body>
 </html>
