@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V13
- * Foco: Padronização de Imagens, Galeria Navegável e Estabilidade CRM
+ * TAMMY'S STORE - SISTEMA UNIFICADO V16 (FULL VERSION)
+ * Foco: CRM Total, Pagamentos, Galeria com Zoom e Padronização de Imagens
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -9,11 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let posCart = []; 
     let selectedPayment = 'PIX';
     
-    // Controle de Galeria
     let currentGalleryImages = [];
     let currentImageIndex = 0;
 
-    // --- 🚀 INTERFACE E SPLASH ---
+    console.log("[SISTEMA] V16 Full Iniciada - Todas as funcionalidades ativas.");
+
+    // --- 🚀 INTERFACE E SPLASH SCREEN ---
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
     setTimeout(() => {
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
     };
 
-    // --- 🎭 MÁSCARAS DE ENTRADA ---
+    // --- 🎭 MÁSCARAS DE DADOS (CRM) ---
     const maskCPF = (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
     const maskPhone = (v) => v.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
 
@@ -41,81 +42,116 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cpfInput) cpfInput.addEventListener('input', (e) => e.target.value = maskCPF(e.target.value));
     if (phoneInput) phoneInput.addEventListener('input', (e) => e.target.value = maskPhone(e.target.value));
 
-    // --- 🛒 CARREGAMENTO DE PRODUTOS ---
+    // --- 🛒 CARREGAMENTO DE CATÁLOGO ---
     window.loadProducts = async () => {
-        const container = document.getElementById('product-results') || document.getElementById('products-container');
+        const pdvContainer = document.getElementById('product-results');
+        const siteContainer = document.getElementById('products-container');
+        const container = pdvContainer || siteContainer;
         if (!container) return;
+
         try {
             const res = await fetch(`${API_BASE_URL}/products/`);
             allProducts = await res.json();
             container.innerHTML = allProducts.map(p => {
                 availableProducts[p.id] = p;
-                const isPDV = !!document.getElementById('product-results');
+                const isPDV = !!pdvContainer;
                 return `
                 <div class="product-card" onclick="${isPDV ? `addToPOS(${p.id})` : `openGallery(${p.id})`}">
                     <div class="product-img-wrapper">
-                        <img src="${buildUrl(p.main_image)}" class="standard-img" onerror="this.src='https://placehold.co/400x600'">
+                        <img src="${buildUrl(p.main_image)}" class="standard-img" loading="lazy">
                     </div>
                     <div class="product-info">
                         <h3>${p.name}</h3>
                         <p class="price">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
+                        ${!isPDV ? `<button class="btn-buy">VER DETALHES</button>` : ''}
                     </div>
                 </div>`;
             }).join('');
-        } catch (e) { console.error("Erro ao carregar catálogo."); }
+        } catch (e) { console.error("[ERRO] Catálogo offline."); }
     };
 
-    // --- 🖼️ LÓGICA DE GALERIA NAVEGÁVEL ---
+    // --- 🖼️ GALERIA COM NAVEGAÇÃO E ZOOM ---
     window.openGallery = (id) => {
         const p = availableProducts[id];
         if (!p) return;
-        
-        // Coleta imagem principal + imagens adicionais
         currentGalleryImages = [buildUrl(p.main_image)];
-        if (p.images) {
-            p.images.forEach(imgObj => currentGalleryImages.push(buildUrl(imgObj.image)));
-        }
-        
+        if (p.images) p.images.forEach(img => currentGalleryImages.push(buildUrl(img.image)));
         currentImageIndex = 0;
-        showGalleryModal();
+        updateGalleryUI();
+        document.getElementById('image-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     };
-
-    function showGalleryModal() {
-        const modal = document.createElement('div');
-        modal.id = 'gallery-modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <span class="close-gallery" onclick="this.parentElement.parentElement.remove()">&times;</span>
-                <button class="nav-btn prev" onclick="changeImage(-1)">&#10094;</button>
-                <img id="modal-img" src="${currentGalleryImages[currentImageIndex]}">
-                <button class="nav-btn next" onclick="changeImage(1)">&#10095;</button>
-                <div class="image-counter">${currentImageIndex + 1} / ${currentGalleryImages.length}</div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
 
     window.changeImage = (step) => {
-        currentImageIndex += step;
-        if (currentImageIndex >= currentGalleryImages.length) currentImageIndex = 0;
-        if (currentImageIndex < 0) currentImageIndex = currentGalleryImages.length - 1;
-        
-        const modalImg = document.getElementById('modal-img');
-        const counter = document.querySelector('.image-counter');
-        if (modalImg) modalImg.src = currentGalleryImages[currentImageIndex];
-        if (counter) counter.innerText = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
+        currentImageIndex = (currentImageIndex + step + currentGalleryImages.length) % currentGalleryImages.length;
+        updateGalleryUI();
     };
 
-    // --- 🏦 FINALIZAÇÃO PDV ---
+    window.jumpToImage = (idx) => {
+        currentImageIndex = idx;
+        updateGalleryUI();
+    };
+
+    function updateGalleryUI() {
+        const main = document.getElementById('modal-main-image');
+        const thumbs = document.getElementById('modal-thumbnails-container');
+        if (main) {
+            main.src = currentGalleryImages[currentImageIndex];
+            main.style.transform = "scale(1)"; // Reset zoom ao mudar imagem
+        }
+        if (thumbs) {
+            thumbs.innerHTML = currentGalleryImages.map((src, i) => `
+                <img src="${src}" class="thumb ${i === currentImageIndex ? 'active' : ''}" onclick="jumpToImage(${i})">
+            `).join('');
+        }
+    }
+
+    // Efeito de Zoom simples ao clicar na imagem do modal
+    const modalMainImg = document.getElementById('modal-main-image');
+    if (modalMainImg) {
+        modalMainImg.onclick = function() {
+            this.style.transform = this.style.transform === "scale(1.5)" ? "scale(1)" : "scale(1.5)";
+            this.style.cursor = "zoom-out";
+        };
+    }
+
+    // --- 👥 CRM: BUSCA ---
+    window.searchCustomer = async () => {
+        const query = document.getElementById('client-search-input')?.value;
+        if (!query) return alert("Digite Nome, CPF ou WhatsApp.");
+        try {
+            const res = await fetch(`${API_BASE_URL}/customer/search/${query}/`);
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('client-name').value = data.first_name || '';
+                document.getElementById('client-phone').value = data.phone_number ? maskPhone(data.phone_number) : '';
+                document.getElementById('client-cpf').value = data.cpf ? maskCPF(data.cpf) : '';
+                document.getElementById('client-birth').value = data.birth_date || '';
+                alert("Cliente localizado!");
+            } else { alert("Cliente não encontrado."); }
+        } catch (e) { alert("Erro na busca CRM."); }
+    };
+
+    // --- 🏦 PDV: PAGAMENTOS E FINALIZAÇÃO ---
+    window.setPayment = (method, btn) => {
+        selectedPayment = method;
+        document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    };
+
     window.finalizePosSale = async () => {
         if (!posCart.length) return alert("Carrinho vazio!");
-        const cName = document.getElementById('client-name').value.trim();
-        const cPhoneRaw = document.getElementById('client-phone').value.replace(/\D/g, '');
-        
-        if (!cName || cPhoneRaw.length < 10) return alert("Nome e WhatsApp são obrigatórios.");
+        const cName = document.getElementById('client-name').value;
+        const cPhone = document.getElementById('client-phone').value.replace(/\D/g, '');
+        if (!cName || cPhone.length < 10) return alert("Nome e Celular são obrigatórios.");
 
         const payload = {
-            customer_info: { first_name: cName, phone_number: cPhoneRaw },
+            customer_info: { 
+                first_name: cName, 
+                phone_number: cPhone,
+                cpf: document.getElementById('client-cpf').value.replace(/\D/g, ''),
+                birth_date: document.getElementById('client-birth').value || null 
+            },
             items: posCart.map(i => ({ id: i.id, quantity: i.quantity })),
             payment_info: { method: selectedPayment },
             origin: 'POS'
@@ -124,23 +160,20 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_BASE_URL}/checkout/`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value 
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
+                document.getElementById('print-client').innerText = cName;
+                document.getElementById('print-total').innerText = document.getElementById('pos-total').innerText;
                 window.print();
-                alert("Venda realizada com sucesso!");
+                alert("Venda realizada!");
                 posCart = []; updatePOSUI();
-            } else {
-                const err = await res.json();
-                alert("Erro: " + (err.error || "Falha no servidor"));
-            }
+            } else { alert("Erro ao finalizar venda."); }
         } catch (e) { alert("Erro de conexão."); }
     };
 
+    // --- 🛒 CARRINHO PDV (ADICIONAR/REMOVER) ---
     window.addToPOS = (id) => {
         const p = allProducts.find(i => i.id === id);
         if (p) {
@@ -151,21 +184,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.removeFromPOS = (id) => {
-        posCart = posCart.filter(item => item.id !== id);
+        posCart = posCart.filter(i => i.id !== id);
         updatePOSUI();
     };
 
     window.updatePOSUI = () => {
         const cont = document.getElementById('pos-cart-items');
-        if (cont) {
-            cont.innerHTML = posCart.map(i => `
-                <div class="cart-item-row">
-                    <span>${i.name} (x${i.quantity})</span>
-                    <button onclick="removeFromPOS(${i.id})"><i class="fas fa-trash"></i></button>
-                </div>`).join('') || '<p>Carrinho vazio</p>';
-            const total = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
-            document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
-        }
+        if (!cont) return;
+        cont.innerHTML = posCart.map(i => `
+            <div class="cart-row">
+                <span>${i.name} (x${i.quantity})</span>
+                <div>
+                    <span>R$ ${(i.price * i.quantity).toFixed(2)}</span>
+                    <button onclick="removeFromPOS(${i.id})" class="del-btn"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`).join('') || '<p>Vazio</p>';
+        const total = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
+        document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
     };
 
     loadProducts();
