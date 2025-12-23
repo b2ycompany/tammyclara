@@ -1,6 +1,6 @@
 /**
- * TAMMY'S STORE - SISTEMA UNIFICADO V12
- * Foco: UX/UI (Remoção de itens), Correção de Erros 400/500 e CRM
+ * TAMMY'S STORE - SISTEMA UNIFICADO V13
+ * Foco: Padronização de Imagens, Galeria Navegável e Estabilidade CRM
  */
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '/api'; 
@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let posCart = []; 
     let selectedPayment = 'PIX';
     
+    // Controle de Galeria
+    let currentGalleryImages = [];
+    let currentImageIndex = 0;
+
     // --- 🚀 INTERFACE E SPLASH ---
     const splash = document.getElementById('splash-screen');
     const heroCard = document.getElementById('heroCard');
@@ -20,6 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (heroCard) heroCard.classList.add('show');
     }, 2500); 
+
+    const buildUrl = (path) => {
+        if (!path) return 'https://placehold.co/400x600?text=Sem+Foto';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        return cleanPath.startsWith('media/') ? '/' + cleanPath : '/media/' + cleanPath;
+    };
 
     // --- 🎭 MÁSCARAS DE ENTRADA ---
     const maskCPF = (v) => v.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1');
@@ -39,56 +50,72 @@ document.addEventListener('DOMContentLoaded', () => {
             allProducts = await res.json();
             container.innerHTML = allProducts.map(p => {
                 availableProducts[p.id] = p;
+                const isPDV = !!document.getElementById('product-results');
                 return `
-                <div class="product-card" onclick="addToPOS(${p.id})">
-                    <img src="${p.main_image ? (p.main_image.startsWith('http') ? p.main_image : '/media/'+p.main_image) : 'https://placehold.co/150x150'}" onerror="this.src='https://placehold.co/150x150'">
-                    <h4>${p.name}</h4>
-                    <p>R$ ${parseFloat(p.price).toFixed(2)}</p>
+                <div class="product-card" onclick="${isPDV ? `addToPOS(${p.id})` : `openGallery(${p.id})`}">
+                    <div class="product-img-wrapper">
+                        <img src="${buildUrl(p.main_image)}" class="standard-img" onerror="this.src='https://placehold.co/400x600'">
+                    </div>
+                    <div class="product-info">
+                        <h3>${p.name}</h3>
+                        <p class="price">R$ ${parseFloat(p.price).toFixed(2).replace('.', ',')}</p>
+                    </div>
                 </div>`;
             }).join('');
         } catch (e) { console.error("Erro ao carregar catálogo."); }
     };
 
-    // --- 👥 CRM E BUSCA ---
-    window.searchCustomer = async () => {
-        const query = document.getElementById('client-search-input')?.value;
-        if (!query) return alert("Digite algo para buscar.");
-        try {
-            const res = await fetch(`${API_BASE_URL}/customer/search/${query}/`);
-            if (res.ok) {
-                const data = await res.json();
-                document.getElementById('client-name').value = data.first_name || '';
-                document.getElementById('client-phone').value = data.phone_number ? maskPhone(data.phone_number) : '';
-                document.getElementById('client-cpf').value = data.cpf ? maskCPF(data.cpf) : '';
-                document.getElementById('client-birth').value = data.birth_date || '';
-                alert("Cliente localizado!");
-            } else { alert("Cliente não encontrado."); }
-        } catch (e) { alert("Erro no CRM."); }
+    // --- 🖼️ LÓGICA DE GALERIA NAVEGÁVEL ---
+    window.openGallery = (id) => {
+        const p = availableProducts[id];
+        if (!p) return;
+        
+        // Coleta imagem principal + imagens adicionais
+        currentGalleryImages = [buildUrl(p.main_image)];
+        if (p.images) {
+            p.images.forEach(imgObj => currentGalleryImages.push(buildUrl(imgObj.image)));
+        }
+        
+        currentImageIndex = 0;
+        showGalleryModal();
     };
 
-    // --- 🏦 FINALIZAÇÃO ---
-    window.setPayment = (method, btn) => {
-        selectedPayment = method;
-        document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    function showGalleryModal() {
+        const modal = document.createElement('div');
+        modal.id = 'gallery-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close-gallery" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                <button class="nav-btn prev" onclick="changeImage(-1)">&#10094;</button>
+                <img id="modal-img" src="${currentGalleryImages[currentImageIndex]}">
+                <button class="nav-btn next" onclick="changeImage(1)">&#10095;</button>
+                <div class="image-counter">${currentImageIndex + 1} / ${currentGalleryImages.length}</div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    window.changeImage = (step) => {
+        currentImageIndex += step;
+        if (currentImageIndex >= currentGalleryImages.length) currentImageIndex = 0;
+        if (currentImageIndex < 0) currentImageIndex = currentGalleryImages.length - 1;
+        
+        const modalImg = document.getElementById('modal-img');
+        const counter = document.querySelector('.image-counter');
+        if (modalImg) modalImg.src = currentGalleryImages[currentImageIndex];
+        if (counter) counter.innerText = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
     };
 
+    // --- 🏦 FINALIZAÇÃO PDV ---
     window.finalizePosSale = async () => {
         if (!posCart.length) return alert("Carrinho vazio!");
-        
         const cName = document.getElementById('client-name').value.trim();
         const cPhoneRaw = document.getElementById('client-phone').value.replace(/\D/g, '');
-        const cCpfRaw = document.getElementById('client-cpf').value.replace(/\D/g, '');
-        const cBirth = document.getElementById('client-birth').value;
-
+        
         if (!cName || cPhoneRaw.length < 10) return alert("Nome e WhatsApp são obrigatórios.");
 
-        const customer_info = { first_name: cName, phone_number: cPhoneRaw };
-        if (cCpfRaw) customer_info.cpf = cCpfRaw;
-        if (cBirth && cBirth !== "") customer_info.birth_date = cBirth;
-
         const payload = {
-            customer_info: customer_info,
+            customer_info: { first_name: cName, phone_number: cPhoneRaw },
             items: posCart.map(i => ({ id: i.id, quantity: i.quantity })),
             payment_info: { method: selectedPayment },
             origin: 'POS'
@@ -103,23 +130,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(payload)
             });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || data.message || "Erro no servidor");
-
-            document.getElementById('print-client').innerText = cName;
-            document.getElementById('print-total').innerText = document.getElementById('pos-total').innerText;
-            window.print();
-            
-            alert("Venda realizada!");
-            posCart = []; updatePOSUI();
-            ['client-name', 'client-phone', 'client-cpf', 'client-birth', 'client-search-input'].forEach(id => {
-                if(document.getElementById(id)) document.getElementById(id).value = '';
-            });
-        } catch (e) { alert("ERRO: " + e.message); }
+            if (res.ok) {
+                window.print();
+                alert("Venda realizada com sucesso!");
+                posCart = []; updatePOSUI();
+            } else {
+                const err = await res.json();
+                alert("Erro: " + (err.error || "Falha no servidor"));
+            }
+        } catch (e) { alert("Erro de conexão."); }
     };
 
-    // --- 🛒 LÓGICA DO CARRINHO (COM REMOÇÃO) ---
     window.addToPOS = (id) => {
         const p = allProducts.find(i => i.id === id);
         if (p) {
@@ -138,19 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const cont = document.getElementById('pos-cart-items');
         if (cont) {
             cont.innerHTML = posCart.map(i => `
-                <div class="cart-item-row" style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee;">
-                    <div style="flex-grow:1;">
-                        <span style="font-weight:600;">${i.name}</span><br>
-                        <small style="color:#666;">${i.quantity}x R$ ${i.price.toFixed(2)}</small>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-weight:700;">R$ ${(i.price * i.quantity).toFixed(2)}</span>
-                        <button onclick="removeFromPOS(${i.id})" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:1.1rem;" title="Remover item">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>`).join('') || '<p style="color:#999; text-align:center;">Carrinho vazio</p>';
-            
+                <div class="cart-item-row">
+                    <span>${i.name} (x${i.quantity})</span>
+                    <button onclick="removeFromPOS(${i.id})"><i class="fas fa-trash"></i></button>
+                </div>`).join('') || '<p>Carrinho vazio</p>';
             const total = posCart.reduce((a, b) => a + (b.price * b.quantity), 0);
             document.getElementById('pos-total').innerText = `R$ ${total.toFixed(2)}`;
         }
